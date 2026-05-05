@@ -1,0 +1,10 @@
+{
+  "name": "lda-root",
+  "private": true,
+  "workspaces": ["lda-web"],
+  "scripts": {
+    "dev": "npm --prefix lda-web run dev",
+    "build": "npm --prefix lda-web run build",
+    "start": "npm --prefix lda-web run start"
+  }
+}
