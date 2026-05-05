@@ -1,0 +1,64 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+
+function authError(message: string) {
+  redirect(`/auth/login?message=${encodeURIComponent(message)}`);
+}
+
+export async function signIn(formData: FormData) {
+  const supabase = await createClient();
+  if (!supabase) {
+    authError("Supabase environment variables are not configured yet.");
+  }
+
+  const email = String(formData.get("email") ?? "");
+  const password = String(formData.get("password") ?? "");
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    authError(error.message);
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
+}
+
+export async function signUp(formData: FormData) {
+  const supabase = await createClient();
+  if (!supabase) {
+    authError("Supabase environment variables are not configured yet.");
+  }
+
+  const email = String(formData.get("email") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const fullName = String(formData.get("fullName") ?? "");
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: fullName }
+    }
+  });
+
+  if (error) {
+    authError(error.message);
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/dashboard?message=Check your email if confirmation is enabled.");
+}
+
+export async function signOut() {
+  const supabase = await createClient();
+  if (supabase) {
+    await supabase.auth.signOut();
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/");
+}
