@@ -15,6 +15,7 @@ import {
   UsersRound
 } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { LiveLessonMap } from "@/components/live-lesson-map";
 import { formatMoney } from "@/lib/money";
 
 const instructors = [
@@ -52,6 +53,7 @@ export default function HomePage() {
           <Brand />
           <nav className="hidden items-center gap-1 md:flex">
             <Link href="#search" className="rounded px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">Find an instructor</Link>
+            <Link href="#tracking" className="rounded px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">Live tracking</Link>
             <Link href="#instructors" className="rounded px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">Become an instructor</Link>
             <Link href="#admin" className="rounded px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">Admin</Link>
           </nav>
@@ -159,6 +161,8 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
+        <LiveLessonMap />
 
         <section id="booking" className="bg-ink py-12 text-white">
           <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:grid-cols-[1fr_1fr] lg:px-8">
