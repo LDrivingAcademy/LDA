@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, BadgePoundSterling, CalendarCheck, FileCheck2, ShieldCheck, Star } from "lucide-react";
 import { Brand } from "@/components/brand";
@@ -15,7 +16,7 @@ const stats = [
   ["Gross lesson value", "£12,840", "Paid bookings"]
 ];
 
-function Panel({ children }: { children: React.ReactNode }) {
+function Panel({ children }: { children: ReactNode }) {
   return <section className="rounded border border-border bg-card p-5">{children}</section>;
 }
 
