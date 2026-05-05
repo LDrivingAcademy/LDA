@@ -1,0 +1,17 @@
+# Local API keys and secrets
+.env.local
+.env
+.env.*.local
+Secrets.plist
+GoogleService-Info.plist
+google-services.json
+
+# Web app
+node_modules/
+.next/
+*.tsbuildinfo
+
+# Xcode
+DerivedData/
+*.xcuserstate
+xcuserdata/
