@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f8f5;
-  --foreground: #15211a;
-  --muted: #66756b;
-  --border: #dbe1d8;
+  --background: #f7f7f7;
+  --foreground: #111111;
+  --muted: #676767;
+  --border: #dedede;
   --card: #ffffff;
-  --brand: #0f5c38;
-  --brand-strong: #0a3d27;
+  --brand: #d71920;
+  --brand-strong: #a90f16;
+  --ink: #090909;
 }
 
 @theme inline {
@@ -18,13 +19,21 @@
   --color-card: var(--card);
   --color-brand: var(--brand);
   --color-brand-strong: var(--brand-strong);
+  --color-ink: var(--ink);
   --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
 }
 
 * { box-sizing: border-box; }
 html { min-width: 320px; background: var(--background); color: var(--foreground); scroll-behavior: smooth; }
-body { margin: 0; font-family: var(--font-sans); background: linear-gradient(180deg, rgba(15, 92, 56, 0.08), transparent 420px), var(--background); color: var(--foreground); }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background:
+    linear-gradient(180deg, rgba(215, 25, 32, 0.08), transparent 360px),
+    var(--background);
+  color: var(--foreground);
+}
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
 .focus-ring { outline: 2px solid transparent; outline-offset: 2px; }
