@@ -2,7 +2,9 @@ import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
-async function countRows(supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>, table: string) {
+type CountableTable = "profiles" | "instructor_profiles" | "bookings" | "payments";
+
+async function countRows(supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>, table: CountableTable) {
   const { count } = await supabase.from(table).select("*", { count: "exact", head: true });
   return count ?? 0;
 }
