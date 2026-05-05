@@ -1,6 +1,3 @@
 {
-  "buildCommand": "npm --prefix lda-web run build",
-  "installCommand": "npm install --prefix lda-web",
-  "outputDirectory": "lda-web/.next",
   "framework": "nextjs"
 }
