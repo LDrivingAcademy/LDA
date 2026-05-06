@@ -74,3 +74,11 @@ export async function signOut() {
   revalidatePath("/", "layout");
   redirect("/");
 }
+
+export async function demoSignIn(formData: FormData) {
+  const role = String(formData.get("demoRole") ?? "learner");
+  const safeRole = ["learner", "instructor", "admin"].includes(role) ? role : "learner";
+
+  revalidatePath("/", "layout");
+  redirect(`/demo/${safeRole}`);
+}
