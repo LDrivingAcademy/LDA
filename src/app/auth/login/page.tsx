@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, CarFront, GraduationCap, LayoutDashboard, ShieldCheck } from "lucide-react";
-import { signIn, signUp } from "../actions";
+import { demoSignIn, signIn, signUp } from "../actions";
 
 export default async function LoginPage({
   searchParams
@@ -91,6 +91,25 @@ export default async function LoginPage({
             <p className="mt-4 text-xs leading-5 text-muted">
               By continuing, users should be shown and asked to accept final terms, privacy, and cancellation wording before live paid bookings are enabled.
             </p>
+
+            <div className="mt-5 border-t border-border pt-5">
+              <div className="text-sm font-black uppercase text-brand">Test logins</div>
+              <p className="mt-1 text-xs leading-5 text-muted">Use these to test each flow immediately without creating real users.</p>
+              <div className="mt-3 grid gap-2">
+                {[
+                  ["learner", "Demo learner"],
+                  ["instructor", "Demo instructor"],
+                  ["admin", "Demo admin"]
+                ].map(([roleValue, label]) => (
+                  <form key={roleValue} action={demoSignIn}>
+                    <input type="hidden" name="demoRole" value={roleValue} />
+                    <button className="w-full rounded border border-border bg-background px-3 py-3 text-left text-sm font-black hover:border-brand">
+                      {label}
+                    </button>
+                  </form>
+                ))}
+              </div>
+            </div>
           </section>
         </div>
       </div>
