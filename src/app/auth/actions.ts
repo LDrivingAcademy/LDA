@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -66,6 +67,9 @@ export async function signUp(formData: FormData) {
 }
 
 export async function signOut() {
+  const cookieStore = await cookies();
+  cookieStore.delete("lda_demo_role");
+
   const supabase = await createClient();
   if (supabase) {
     await supabase.auth.signOut();
