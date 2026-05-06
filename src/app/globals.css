@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f7f7;
-  --foreground: #111111;
-  --muted: #676767;
-  --border: #dedede;
-  --card: #ffffff;
+  --background: #000000;
+  --foreground: #ffffff;
+  --muted: #a1a1aa;
+  --border: #27272a;
+  --card: #09090b;
   --brand: #d71920;
   --brand-strong: #a90f16;
-  --ink: #090909;
+  --ink: #000000;
 }
 
 @theme inline {
@@ -30,7 +30,7 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   background:
-    linear-gradient(180deg, rgba(215, 25, 32, 0.08), transparent 360px),
+    linear-gradient(180deg, rgba(215, 25, 32, 0.12), transparent 420px),
     var(--background);
   color: var(--foreground);
 }
