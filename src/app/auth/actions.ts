@@ -8,6 +8,11 @@ function authError(message: string): never {
   redirect(`/auth/login?message=${encodeURIComponent(message)}`);
 }
 
+function safeNextPath(value: FormDataEntryValue | null) {
+  const nextPath = String(value ?? "/dashboard");
+  return nextPath.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/dashboard";
+}
+
 export async function signIn(formData: FormData) {
   const supabase = await createClient();
   if (!supabase) {
@@ -16,6 +21,7 @@ export async function signIn(formData: FormData) {
 
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+  const nextPath = safeNextPath(formData.get("next"));
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -24,7 +30,7 @@ export async function signIn(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(nextPath);
 }
 
 export async function signUp(formData: FormData) {
@@ -37,6 +43,11 @@ export async function signUp(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("fullName") ?? "");
   const accountIntent = String(formData.get("accountIntent") ?? "learner");
+  const nextPath = safeNextPath(formData.get("next"));
+
+  if (accountIntent === "admin") {
+    authError("Admin accounts must be created manually by the site owner.");
+  }
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -51,7 +62,7 @@ export async function signUp(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard?message=Check your email if confirmation is enabled.");
+  redirect(`${nextPath}?message=Check your email if confirmation is enabled.`);
 }
 
 export async function signOut() {
