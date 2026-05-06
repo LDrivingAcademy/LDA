@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CarFront, GraduationCap, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CarFront, GraduationCap, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { signIn, signUp } from "../actions";
 
 export default async function LoginPage({
@@ -9,6 +9,8 @@ export default async function LoginPage({
 }) {
   const { message, role } = await searchParams;
   const isInstructor = role === "instructor";
+  const isAdmin = role === "admin";
+  const nextPath = isAdmin ? "/admin" : "/dashboard";
 
   return (
     <main className="min-h-screen bg-ink px-4 py-8 text-white">
@@ -22,15 +24,21 @@ export default async function LoginPage({
               <ShieldCheck size={16} /> LDA secure access
             </div>
             <h1 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">
-              {isInstructor ? "Sign in to continue instructor onboarding." : "Sign in to find local instructors and book lessons."}
+              {isAdmin
+                ? "Sign in to open the admin control room."
+                : isInstructor
+                  ? "Sign in to continue instructor onboarding."
+                  : "Sign in to find local instructors and book lessons."}
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-300">
-              {isInstructor
+              {isAdmin
+                ? "Admins get a separate login path for approvals, learners, instructors, bookings, refunds, disputes, payments, payouts, and analytics."
+                : isInstructor
                 ? "Instructor accounts move through verification, profile setup, availability, and admin approval before appearing in learner search."
                 : "Learners go from login to local approved instructors, then compare distance, price, rating, car, availability, and cancellation terms before payment."}
             </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <Link href="/auth/login?role=learner" className={`rounded border p-4 ${!isInstructor ? "border-red-500 bg-red-500/10" : "border-zinc-800 bg-zinc-950"}`}>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <Link href="/auth/login?role=learner" className={`rounded border p-4 ${!isInstructor && !isAdmin ? "border-red-500 bg-red-500/10" : "border-zinc-800 bg-zinc-950"}`}>
                 <GraduationCap className="mb-3 text-brand" />
                 <div className="font-black">Learner</div>
                 <p className="mt-1 text-sm leading-5 text-zinc-400">Search, compare, book, pay, and review.</p>
@@ -40,17 +48,23 @@ export default async function LoginPage({
                 <div className="font-black">Instructor</div>
                 <p className="mt-1 text-sm leading-5 text-zinc-400">Verify, publish availability, manage bookings.</p>
               </Link>
+              <Link href="/auth/login?role=admin&next=/admin" className={`rounded border p-4 ${isAdmin ? "border-red-500 bg-red-500/10" : "border-zinc-800 bg-zinc-950"}`}>
+                <LayoutDashboard className="mb-3 text-brand" />
+                <div className="font-black">Admin</div>
+                <p className="mt-1 text-sm leading-5 text-zinc-400">Analytics, approvals, refunds, disputes.</p>
+              </Link>
             </div>
           </section>
 
           <section className="rounded border border-zinc-800 bg-white p-5 text-foreground shadow-2xl">
             <div className="mb-5">
-              <div className="text-sm font-black uppercase text-brand">{isInstructor ? "Instructor access" : "Learner access"}</div>
+              <div className="text-sm font-black uppercase text-brand">{isAdmin ? "Admin access" : isInstructor ? "Instructor access" : "Learner access"}</div>
               <h2 className="mt-1 text-2xl font-black">Log in or create account</h2>
             </div>
             {message ? <div className="mb-4 rounded bg-red-50 p-3 text-sm font-bold text-brand">{message}</div> : null}
             <form className="grid gap-3">
-              <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
+              <input type="hidden" name="accountIntent" value={isAdmin ? "admin" : isInstructor ? "instructor" : "learner"} />
+              <input type="hidden" name="next" value={nextPath} />
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-muted">Full name for sign up</span>
                 <input name="fullName" className="rounded border border-border px-3 py-3" placeholder="Your name" />
@@ -65,7 +79,13 @@ export default async function LoginPage({
               </label>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
                 <button formAction={signIn} className="rounded bg-ink px-4 py-3 text-sm font-black text-white hover:bg-brand">Sign in</button>
-                <button formAction={signUp} className="rounded bg-brand px-4 py-3 text-sm font-black text-white hover:bg-brand-strong">Create account</button>
+                {isAdmin ? (
+                  <Link href="/contact" className="rounded border border-border px-4 py-3 text-center text-sm font-black text-ink hover:border-brand">
+                    Request admin access
+                  </Link>
+                ) : (
+                  <button formAction={signUp} className="rounded bg-brand px-4 py-3 text-sm font-black text-white hover:bg-brand-strong">Create account</button>
+                )}
               </div>
             </form>
             <p className="mt-4 text-xs leading-5 text-muted">
