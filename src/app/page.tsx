@@ -1,7 +1,22 @@
 import Link from "next/link";
-import { ArrowRight, BadgePoundSterling, BellRing, CalendarCheck, CarFront, CheckCircle2, CreditCard, LayoutDashboard, MapPin, Route, ShieldCheck, SlidersHorizontal, Star, UsersRound } from "lucide-react";
+import {
+  ArrowRight,
+  BellRing,
+  CalendarCheck,
+  CarFront,
+  CheckCircle2,
+  CreditCard,
+  LayoutDashboard,
+  MapPin,
+  Route,
+  ShieldCheck,
+  SlidersHorizontal,
+  Star,
+  UsersRound
+} from "lucide-react";
 import { Brand } from "@/components/brand";
 import { LiveLessonMap } from "@/components/live-lesson-map";
+import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
 import { adminKpis, bookingPipeline, complianceLinks, demoInstructors, instructorJourneyStages, learnerJourneyStages } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
@@ -19,7 +34,7 @@ const roles = [
     href: "/instructor",
     icon: CarFront,
     tone: "bg-white text-ink border-zinc-700",
-    detail: "Sign in separately, verify ADI/PDI status, publish availability, accept jobs, and track payouts."
+    detail: "Verify ADI/PDI status, publish availability, accept lesson jobs, and track payouts."
   },
   {
     title: "Admin",
@@ -28,6 +43,12 @@ const roles = [
     tone: "bg-zinc-950 text-white border-zinc-700",
     detail: "Separate control room for approvals, users, bookings, revenue, payouts, refunds, and disputes."
   }
+];
+
+const trustItems = [
+  ["Admin-approved instructors", "ADI/PDI verification required before search visibility."],
+  ["Full price before checkout", "No hidden booking fees before Stripe payment."],
+  ["Privacy by design", "Only collect what is needed for booking, safety, payment, support, and legal duties."]
 ];
 
 export default function HomePage() {
@@ -42,9 +63,7 @@ export default function HomePage() {
             <Link href="#tracking" className="rounded px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">Live tracking</Link>
             <Link href="/privacy" className="rounded px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">Compliance</Link>
           </nav>
-          <Link href="/auth/login?role=learner" className="inline-flex items-center gap-2 rounded bg-brand px-3 py-2 text-sm font-bold text-white hover:bg-brand-strong">
-            Learner login <ArrowRight size={16} />
-          </Link>
+          <MainMenu />
         </div>
       </header>
 
@@ -57,7 +76,7 @@ export default function HomePage() {
               </div>
               <h1 className="mt-5 max-w-4xl text-4xl font-black tracking-normal sm:text-6xl">Click. Learn. Drive.</h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-300">
-                One professional front page for learners, instructors, and admin. Learners book like an Uber-style journey; instructors manage accepted lesson jobs; admin controls the whole online driving school.
+                One professional web app for learners, instructors, and admin. Learners book like an Uber-style journey; instructors manage lesson jobs; admin controls the online driving school.
               </p>
               <div className="mt-8 grid gap-3 xl:grid-cols-3">
                 {roles.map((role) => {
@@ -84,7 +103,7 @@ export default function HomePage() {
                 <SlidersHorizontal className="text-brand" />
               </div>
               <div className="grid gap-3">
-                {["Pickup: EN5 5XY", "Transmission: Automatic", "Price: £30-£45/hr", "Availability: This week"].map((item) => (
+                {["Pickup: EN5 5XY", "Transmission: Automatic", "Price: GBP30-GBP45/hr", "Availability: This week"].map((item) => (
                   <div key={item} className="rounded border border-border bg-background px-3 py-3 text-sm font-black">{item}</div>
                 ))}
                 <Link href="/auth/login?role=learner" className="mt-2 inline-flex items-center justify-center gap-2 rounded bg-brand px-4 py-3 text-sm font-black text-white hover:bg-brand-strong">
@@ -97,11 +116,7 @@ export default function HomePage() {
 
         <section className="border-y border-border bg-white">
           <div className="mx-auto grid max-w-7xl gap-4 px-4 py-6 sm:grid-cols-3 sm:px-6 lg:px-8">
-            {[
-              ["Admin-approved instructors", "ADI/PDI verification required before search visibility."],
-              ["Full price before checkout", "No hidden booking fees before Stripe payment."],
-              ["Privacy by design", "Only collect what is needed for booking, safety, payment, support, and legal duties."]
-            ].map(([title, detail]) => (
+            {trustItems.map(([title, detail]) => (
               <div key={title} className="rounded border border-border bg-card p-4">
                 <CheckCircle2 className="mb-3 text-brand" size={20} />
                 <div className="font-black">{title}</div>
