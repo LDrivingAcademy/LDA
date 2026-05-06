@@ -1,19 +1,16 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  BadgePoundSterling,
   BellRing,
   CalendarCheck,
   CarFront,
   CheckCircle2,
-  FileCheck2,
   LayoutDashboard,
   MapPin,
   ShieldCheck,
   SlidersHorizontal,
   Star,
-  UsersRound,
-  type LucideIcon
+  UsersRound
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { LiveLessonMap } from "@/components/live-lesson-map";
@@ -22,9 +19,7 @@ import { SiteFooter } from "@/components/site-footer";
 import {
   adminKpis,
   complianceLinks,
-  demoInstructors,
-  instructorSteps,
-  learnerSteps
+  demoInstructors
 } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
 
@@ -41,24 +36,6 @@ const trustItems = [
   ["Verified before visible", "ADI/PDI approval is required before instructors appear in learner search."],
   ["No hidden fees", "Learners see the full lesson price and cancellation terms before payment."],
   ["GPS only when needed", "Location sharing starts only for an accepted lesson when the instructor goes en route."]
-];
-
-const productCards: { icon: LucideIcon; title: string; detail: string }[] = [
-  {
-    icon: CalendarCheck,
-    title: "Learner app",
-    detail: "Search by postcode, compare instructors, confirm licence eligibility, book lessons, pay online, view bookings, and review instructors."
-  },
-  {
-    icon: FileCheck2,
-    title: "Instructor app",
-    detail: "Submit verification, set profile and availability, manage bookings, start tracking, and monitor payouts."
-  },
-  {
-    icon: BadgePoundSterling,
-    title: "Admin dashboard",
-    detail: "Approve instructors, manage refunds, disputes, promo codes, commission, payout status, and KPIs."
-  }
 ];
 
 export default function HomePage() {
@@ -187,24 +164,6 @@ export default function HomePage() {
         </section>
 
         <section className="border-b border-zinc-900 bg-black">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
-            <div>
-              <div className="text-sm font-black uppercase text-brand">Learner flow</div>
-              <h2 className="mt-2 text-3xl font-black tracking-normal">From login to lesson complete.</h2>
-              <p className="mt-3 text-sm leading-6 text-zinc-400">The learner flow is arranged like a ride-booking web app, but adapted for UK lesson compliance and instructor verification.</p>
-            </div>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-              {learnerSteps.map((step, index) => (
-                <article key={step} className="rounded border border-zinc-800 bg-zinc-950 p-4">
-                  <div className="grid h-9 w-9 place-items-center rounded bg-brand text-sm font-black">{index + 1}</div>
-                  <p className="mt-4 text-sm font-black leading-6">{step}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="border-b border-zinc-900 bg-black">
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
             <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
@@ -247,27 +206,6 @@ export default function HomePage() {
 
         <LiveLessonMap />
 
-        <section className="border-y border-zinc-900 bg-black py-12 text-white">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[1fr_1fr] lg:px-8">
-            <div>
-              <div className="text-sm font-black uppercase text-brand">Instructor flow</div>
-              <h2 className="mt-2 text-3xl font-black tracking-normal">A separate driver-style path before login.</h2>
-              <p className="mt-3 max-w-xl text-base leading-7 text-zinc-400">Instructors start with verification, then profile, availability, bookings, en-route tracking, earnings, and payout status.</p>
-              <Link href="/instructor" className="mt-6 inline-flex items-center gap-2 rounded bg-brand px-5 py-3 text-sm font-black text-white hover:bg-brand-strong">
-                Start instructor onboarding <ArrowRight size={16} />
-              </Link>
-            </div>
-            <div className="grid gap-3">
-              {instructorSteps.map((step, index) => (
-                <div key={step} className="flex items-center gap-3 rounded border border-zinc-800 bg-zinc-950 p-4">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded bg-brand text-xs font-black text-white">{index + 1}</span>
-                  <span className="font-semibold text-zinc-100">{step}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="border-b border-zinc-900 bg-black">
           <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
             <div>
@@ -289,18 +227,6 @@ export default function HomePage() {
                 </article>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section className="bg-black">
-          <div className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8">
-            {productCards.map(({ icon: Icon, title, detail }) => (
-              <section key={title} className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-                <Icon className="mb-4 text-brand" />
-                <h3 className="text-xl font-black">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-zinc-400">{detail}</p>
-              </section>
-            ))}
           </div>
         </section>
 
