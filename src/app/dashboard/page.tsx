@@ -22,7 +22,7 @@ export default async function DashboardPage() {
               <h1 className="text-2xl font-black">{isInstructorDemo ? "Demo Instructor" : "Demo Learner"}</h1>
             </div>
             <form action={signOut}>
-              <button className="rounded bg-zinc-950 px-3 py-2 text-sm font-black text-white">Exit demo</button>
+              <button className="lda-pill lda-pill-sm">Exit demo</button>
             </form>
           </div>
         </header>
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
           <p className="mt-3 leading-7 text-zinc-400">
             The learner journey is ready. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in Vercel so login can open real user dashboards.
           </p>
-          <Link href="/auth/login?role=learner" className="mt-5 inline-flex items-center gap-2 rounded bg-brand px-4 py-3 text-sm font-black text-white">
+          <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm mt-5">
             Open login <ArrowRight size={16} />
           </Link>
         </section>
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
         <section className="mx-auto max-w-4xl rounded border border-zinc-800 bg-zinc-950 p-6 shadow-sm">
           <h1 className="text-3xl font-black">Sign in to search approved local instructors</h1>
           <p className="mt-3 leading-7 text-zinc-400">Your next page is the learner search dashboard: local instructors, filters, price selector, availability, and booking checks.</p>
-          <Link href="/auth/login?role=learner" className="mt-5 inline-flex items-center gap-2 rounded bg-brand px-4 py-3 text-sm font-black text-white">
+          <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm mt-5">
             Continue as learner <ArrowRight size={16} />
           </Link>
         </section>
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
             <h1 className="text-2xl font-black">{profile?.full_name || user.email}</h1>
           </div>
           <form action={signOut}>
-            <button className="rounded bg-zinc-950 px-3 py-2 text-sm font-black text-white">Sign out</button>
+            <button className="lda-pill lda-pill-sm">Sign out</button>
           </form>
         </div>
       </header>
@@ -210,7 +210,7 @@ function LearnerSearchDashboard() {
                   <div className="text-xs font-bold uppercase text-zinc-400">Price</div>
                   <div className="text-2xl font-black">{formatMoney(instructor.price)}/hr</div>
                 </div>
-                <button className="rounded bg-ink px-3 py-2 text-sm font-bold text-white">Choose</button>
+                <button className="lda-pill lda-pill-sm">Choose</button>
               </div>
             </article>
           ))}
@@ -239,13 +239,13 @@ function LearnerSearchDashboard() {
               </div>
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <button className="inline-flex items-center justify-center gap-2 rounded bg-brand px-4 py-3 text-sm font-black text-white">
+              <button className="lda-pill lda-pill-sm">
                 <CreditCard size={16} /> Pay with Stripe
               </button>
-              <button className="inline-flex items-center justify-center gap-2 rounded border border-zinc-800 bg-black px-4 py-3 text-sm font-black">
+              <button className="lda-pill lda-pill-sm">
                 Apply promo code
               </button>
-              <button className="inline-flex items-center justify-center gap-2 rounded border border-zinc-800 bg-black px-4 py-3 text-sm font-black">
+              <button className="lda-pill lda-pill-sm">
                 Reschedule
               </button>
             </div>
@@ -291,7 +291,7 @@ function InstructorDashboard() {
           <BadgeCheck className="text-brand" />
           <h2 className="mt-4 text-2xl font-black">Instructor onboarding dashboard</h2>
           <p className="mt-2 max-w-3xl text-zinc-400">Continue verification, upload documents, set price, car, areas covered, and availability. You will not appear in learner search until admin approves your profile.</p>
-          <Link href="/instructor" className="mt-5 inline-flex items-center gap-2 rounded bg-brand px-4 py-3 text-sm font-black text-white">
+          <Link href="/instructor" className="lda-pill lda-pill-sm mt-5">
             Open instructor setup <ArrowRight size={16} />
           </Link>
         </article>
