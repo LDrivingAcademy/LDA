@@ -1,7 +1,5 @@
 import Link from "next/link";
 import {
-  ArrowRight,
-  BadgePoundSterling,
   CalendarCheck,
   CarFront,
   CheckCircle2,
@@ -18,13 +16,12 @@ import {
   UsersRound
 } from "lucide-react";
 import { Brand } from "@/components/brand";
-import { LiveLessonMap } from "@/components/live-lesson-map";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
-import { adminKpis, complianceLinks, demoInstructors } from "@/lib/marketplace-content";
+import { demoInstructors } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
 
-type CardVisualType = "car" | "calendar" | "match" | "instructor" | "track" | "admin";
+type CardVisualType = "car" | "calendar" | "match" | "instructor";
 
 const suggestionCards: {
   title: string;
@@ -55,18 +52,6 @@ const suggestionCards: {
     body: "Apply as an ADI/PDI, upload verification, set availability, and manage paid bookings.",
     href: "/instructor",
     image: "instructor"
-  },
-  {
-    title: "Track",
-    body: "When your instructor is en route, see ETA and distance to your pickup postcode.",
-    href: "#tracking",
-    image: "track"
-  },
-  {
-    title: "Admin",
-    body: "Review instructors, learners, bookings, payments, refunds, disputes, and platform KPIs.",
-    href: "/auth/login?role=admin&next=/admin",
-    image: "admin"
   }
 ];
 
@@ -74,7 +59,7 @@ const safetyItems = [
   "ADI/PDI verification before instructors appear in search",
   "Learners confirm age 17+ and provisional licence before booking",
   "Full lesson price shown before checkout",
-  "Live location only for accepted lessons when instructor starts en route"
+  "Secure payment and booking records for every lesson"
 ];
 
 export default function HomePage() {
@@ -118,7 +103,7 @@ export default function HomePage() {
                 Learn to drive with LDA
               </h1>
               <p className="mt-5 max-w-lg text-lg leading-8 text-zinc-700">
-                Book verified local driving instructors, compare upfront prices, choose a lesson time, pay online, and track your instructor when they are on the way.
+                Book verified local driving instructors, compare upfront prices, choose a lesson time, and pay online in a few clear steps.
               </p>
 
               <section className="mt-8 max-w-[560px]">
@@ -172,7 +157,7 @@ export default function HomePage() {
                     LDA finds the best local instructor for you.
                   </h2>
                   <p className="mt-4 text-sm leading-6 text-zinc-300">
-                    Smart Match compares distance, instructor rating, price, car, transmission, availability, and admin approval status.
+                    Smart Match compares distance, instructor rating, price, car, transmission, availability, and verification status.
                   </p>
                 </div>
                 <div className="absolute bottom-8 left-8 right-8 rounded bg-white p-4 text-black shadow-2xl sm:left-auto sm:w-80">
@@ -226,7 +211,7 @@ export default function HomePage() {
             <div>
               <h2 className="text-4xl font-black tracking-normal">Safety and trust before every lesson</h2>
               <p className="mt-4 max-w-xl text-lg leading-8 text-zinc-700">
-                LDA is structured around UK learner-driver compliance, verified instructors, transparent pricing, and consent-led live tracking.
+                LDA is structured around verified instructors, transparent pricing, secure payments, and clear booking records.
               </p>
             </div>
             <div className="grid gap-3">
@@ -235,49 +220,6 @@ export default function HomePage() {
                   <CheckCircle2 className="mt-0.5 shrink-0 text-brand" />
                   <span className="font-bold leading-7 text-zinc-900">{item}</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <LiveLessonMap />
-
-        <section className="bg-white">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
-            <div>
-              <h2 className="text-4xl font-black tracking-normal">Admin analytics</h2>
-              <p className="mt-4 text-base leading-7 text-zinc-700">
-                A separate owner login tracks the marketplace numbers that matter for an online driving school.
-              </p>
-              <Link href="/auth/login?role=admin&next=/admin" className="lda-pill lda-pill-sm mt-6">
-                Open admin login <ArrowRight size={16} />
-              </Link>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {adminKpis.map((kpi) => (
-                <article key={kpi.label} className="rounded bg-zinc-100 p-5">
-                  <div className="text-sm font-bold text-zinc-600">{kpi.label}</div>
-                  <div className="mt-2 text-3xl font-black">{kpi.value}</div>
-                  <p className="mt-2 text-sm leading-6 text-zinc-700">{kpi.detail}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-white">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
-            <div>
-              <h2 className="text-4xl font-black tracking-normal">Compliance</h2>
-              <p className="mt-4 text-base leading-7 text-zinc-700">
-                Policies stay visible before real payments scale. Solicitor-reviewed wording should replace placeholder text before launch.
-              </p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {complianceLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="rounded bg-zinc-100 p-5 font-black text-black hover:bg-zinc-200">
-                  {link.label} <ArrowRight className="mt-4 text-brand" size={18} />
-                </Link>
               ))}
             </div>
           </div>
@@ -293,9 +235,7 @@ function CardVisual({ type }: { type: CardVisualType }) {
     car: <CarFront size={68} />,
     calendar: <CalendarCheck size={68} />,
     match: <Sparkles size={68} />,
-    instructor: <UsersRound size={68} />,
-    track: <Navigation size={68} />,
-    admin: <BadgePoundSterling size={68} />
+    instructor: <UsersRound size={68} />
   }[type];
 
   return (
