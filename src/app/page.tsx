@@ -6,14 +6,17 @@ import {
   ChevronDown,
   Circle,
   Clock3,
-  Globe2,
   HelpCircle,
+  Mail,
   Navigation,
+  Share2,
   Sparkles,
   Square,
   UsersRound
 } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { LanguageSelector } from "@/components/language-selector";
+import { LiveLessonMap } from "@/components/live-lesson-map";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
 
@@ -76,7 +79,7 @@ export default function HomePage() {
             </nav>
           </div>
           <div className="hidden items-center gap-6 md:flex">
-            <span className="inline-flex items-center gap-2 text-sm font-black"><Globe2 size={17} /> EN</span>
+            <LanguageSelector />
             <Link href="/contact" className="inline-flex items-center gap-2 text-sm font-black hover:text-zinc-300">
               <HelpCircle size={17} /> Help
             </Link>
@@ -140,33 +143,28 @@ export default function HomePage() {
               </section>
             </div>
 
-            <section className="overflow-hidden rounded bg-white text-black shadow-sm">
-              <div className="relative min-h-[430px] p-7 sm:p-10">
+            <section className="overflow-hidden rounded bg-white text-white shadow-sm">
+              <div className="relative flex min-h-[430px] flex-col justify-end p-7 sm:p-10">
                 <img
                   src="https://images.pexels.com/photos/4895404/pexels-photo-4895404.jpeg?auto=compress&cs=tinysrgb&w=1400"
                   alt="Learner driver behind the wheel with an instructor in the passenger seat"
-                  className="absolute inset-0 h-full w-full object-cover opacity-85"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-white/20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="lda-pill lda-pill-sm absolute left-7 top-7 sm:left-auto sm:right-8">
                   LDA Smart Match
                 </div>
-                <div className="relative z-10 grid min-h-[360px] gap-6 pt-20 lg:grid-cols-[1fr_360px] lg:items-end lg:pt-0">
-                  <div className="max-w-sm">
-                    <img src="/lda-logo.jpg" alt="LDA Driving Academy" className="h-24 w-56 rounded object-contain shadow-lg" />
-                    <h2 className="mt-8 text-4xl font-black tracking-normal text-black">
-                      LDA finds the best local instructor for you.
-                    </h2>
-                    <p className="mt-4 text-sm leading-6 text-zinc-800">
-                      Smart Match compares distance, instructor rating, price, car, transmission, availability, and verification status.
-                    </p>
-                  </div>
-                  <div className="rounded bg-white/95 p-4 text-black shadow-2xl backdrop-blur">
-                    <div>
-                      <div className="text-xs font-black uppercase text-zinc-500">LDA top tips to pass</div>
-                      <div className="mt-1 text-xl font-black">Refresh your road skills before lesson day.</div>
-                      <div className="mt-1 text-sm font-bold text-zinc-600">Highway Code updates, hazard practice, and skill-fade videos.</div>
-                    </div>
+                <div className="relative z-10 pt-24">
+                  <h2 className="max-w-4xl text-4xl font-black tracking-normal text-white drop-shadow-lg sm:text-5xl">
+                    LDA finds the best local instructor for you.
+                  </h2>
+                  <p className="mt-4 max-w-4xl text-base font-bold leading-7 text-white drop-shadow">
+                    Smart Match compares distance, instructor rating, price, car, transmission, availability, and verification status across local approved instructors.
+                  </p>
+                  <div className="mt-6 rounded bg-white/95 p-4 text-black shadow-2xl backdrop-blur sm:max-w-2xl">
+                    <div className="text-xs font-black uppercase text-zinc-500">LDA top tips to pass</div>
+                    <div className="mt-1 text-xl font-black">Refresh your road skills before lesson day.</div>
+                    <div className="mt-1 text-sm font-bold text-zinc-600">Highway Code updates, hazard practice, and skill-fade videos.</div>
                     <Link href="/roadworthy" className="lda-pill lda-pill-sm mt-4">
                       Open tips directory
                     </Link>
@@ -194,8 +192,43 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
+            <div className="mt-8 grid gap-5 rounded bg-zinc-100 p-6 md:grid-cols-[1fr_420px] md:items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded bg-white px-3 py-2 text-sm font-black text-brand">
+                  <Share2 size={16} /> LDA socials and offers
+                </div>
+                <h3 className="mt-4 text-3xl font-black tracking-normal">Subscribe for deals, free trials, and learner tips.</h3>
+                <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-700">
+                  Join the LDA email feed, then continue to our social media links page where each profile is clickable.
+                </p>
+              </div>
+              <form action="/social" method="get" className="rounded bg-white p-4 shadow-sm">
+                <input type="hidden" name="subscribed" value="1" />
+                <label className="block text-sm font-black text-zinc-700" htmlFor="social-email">
+                  Email address
+                </label>
+                <div className="mt-2 flex flex-col gap-3 sm:flex-row">
+                  <input
+                    id="social-email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="you@example.com"
+                    className="min-h-12 flex-1 rounded border border-zinc-300 px-4 text-sm font-bold text-black"
+                  />
+                  <button className="lda-pill lda-pill-sm" type="submit">
+                    <Mail size={16} /> Subscribe
+                  </button>
+                </div>
+                <p className="mt-3 text-xs leading-5 text-zinc-500">
+                  TODO: Connect this to Resend/Supabase newsletter consent storage before sending live marketing emails.
+                </p>
+              </form>
+            </div>
           </div>
         </section>
+
+        <LiveLessonMap />
 
         <section id="safety" className="bg-white">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_1fr] lg:px-8 lg:py-14">
