@@ -106,32 +106,32 @@ function FallbackMap({ progress }: { progress: number }) {
   const carY = 70 - progress * 38;
 
   return (
-    <div className="relative h-[360px] overflow-hidden rounded border border-zinc-800 bg-zinc-950">
+    <div className="relative h-[360px] overflow-hidden rounded border border-zinc-200 bg-zinc-100">
       <div className="absolute inset-0 opacity-40">
-        <div className="absolute left-10 top-12 h-72 w-px rotate-45 bg-zinc-700" />
-        <div className="absolute left-40 top-0 h-96 w-px rotate-12 bg-zinc-800" />
-        <div className="absolute left-0 top-44 h-px w-full bg-zinc-800" />
-        <div className="absolute left-0 top-24 h-px w-full -rotate-6 bg-zinc-800" />
-        <div className="absolute left-0 top-72 h-px w-full rotate-3 bg-zinc-800" />
+        <div className="absolute left-10 top-12 h-72 w-px rotate-45 bg-zinc-400" />
+        <div className="absolute left-40 top-0 h-96 w-px rotate-12 bg-zinc-300" />
+        <div className="absolute left-0 top-44 h-px w-full bg-zinc-300" />
+        <div className="absolute left-0 top-24 h-px w-full -rotate-6 bg-zinc-300" />
+        <div className="absolute left-0 top-72 h-px w-full rotate-3 bg-zinc-300" />
       </div>
       <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full">
         <path
           d="M18 70 C30 58, 40 55, 50 47 S66 34, 76 32"
           fill="none"
-          stroke="#d71920"
+          stroke="#e30613"
           strokeDasharray="3 3"
           strokeLinecap="round"
           strokeWidth="2"
         />
         <circle cx="76" cy="32" fill="#ffffff" r="5" />
-        <circle cx="76" cy="32" fill="#d71920" r="3" />
-        <circle cx={carX} cy={carY} fill="#d71920" r="4.5" />
+        <circle cx="76" cy="32" fill="#e30613" r="3" />
+        <circle cx={carX} cy={carY} fill="#e30613" r="4.5" />
         <circle cx={carX} cy={carY} fill="#ffffff" r="1.6" />
       </svg>
-      <div className="absolute left-4 top-4 rounded bg-zinc-950 px-3 py-2 text-sm font-black text-white shadow-sm">
+      <div className="absolute left-4 top-4 rounded bg-white px-3 py-2 text-sm font-black text-black shadow-sm">
         Demo live map
       </div>
-      <div className="absolute bottom-4 left-4 right-4 rounded border border-zinc-800 bg-ink/90 p-3 text-white backdrop-blur">
+      <div className="absolute bottom-4 left-4 right-4 rounded border border-red-200 bg-white/90 p-3 text-black backdrop-blur">
         <div className="flex items-center gap-2 text-sm font-bold">
           <RadioTower size={16} className="text-brand" /> Live location refreshes every second
         </div>
@@ -199,7 +199,7 @@ export function LiveLessonMap() {
           geodesic: true,
           map: mapInstance.current,
           path: [initialInstructorLocation, learnerPickup],
-          strokeColor: "#d71920",
+          strokeColor: "#e30613",
           strokeOpacity: 0.9,
           strokeWeight: 4
         });
@@ -237,61 +237,61 @@ export function LiveLessonMap() {
   }, [instructorLocation]);
 
   return (
-    <section id="tracking" className="border-y border-zinc-800 bg-ink py-12 text-white">
+    <section id="tracking" className="bg-white py-8 text-black">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[420px_1fr] lg:px-8">
         <div>
-          <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
+          <div className="inline-flex items-center gap-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm font-black text-brand">
             <Navigation size={16} /> Live lesson tracking
           </div>
           <h2 className="mt-4 text-3xl font-black tracking-normal sm:text-4xl">
             Show how far the instructor is from the learner.
           </h2>
-          <p className="mt-3 text-base leading-7 text-zinc-300">
+          <p className="mt-3 text-base leading-7 text-zinc-700">
             Learners can see the instructor approach the pickup postcode, estimated arrival time, and distance remaining. In production this connects to instructor GPS, booking status, and consent controls.
           </p>
           <div className="mt-6 grid gap-3">
-            <div className="rounded border border-zinc-800 bg-zinc-950 p-4">
-              <div className="text-sm font-bold text-zinc-400">Instructor distance</div>
+            <div className="rounded border border-zinc-200 bg-zinc-100 p-4">
+              <div className="text-sm font-bold text-zinc-500">Instructor distance</div>
               <div className="mt-1 text-3xl font-black">{milesAway.toFixed(1)} miles</div>
             </div>
-            <div className="rounded border border-zinc-800 bg-zinc-950 p-4">
-              <div className="text-sm font-bold text-zinc-400">Estimated arrival</div>
+            <div className="rounded border border-zinc-200 bg-zinc-100 p-4">
+              <div className="text-sm font-bold text-zinc-500">Estimated arrival</div>
               <div className="mt-1 text-3xl font-black">{etaMinutes} min</div>
             </div>
-            <div className="rounded border border-zinc-800 bg-zinc-950 p-4">
+            <div className="rounded border border-zinc-200 bg-zinc-100 p-4">
               <div className="flex items-start gap-3">
                 <ShieldCheck className="mt-0.5 shrink-0 text-brand" size={20} />
-                <p className="text-sm leading-6 text-zinc-300">
+                <p className="text-sm leading-6 text-zinc-700">
                   Tracking should only be enabled for accepted bookings, near lesson time, and with clear consent. Store only the minimum location data needed for safety and support.
                 </p>
               </div>
             </div>
           </div>
         </div>
-        <div className="rounded border border-zinc-800 bg-zinc-950 p-4 shadow-2xl">
+        <div className="rounded border border-zinc-200 bg-white p-4 shadow-2xl">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-sm font-bold uppercase text-red-200">Current lesson</div>
+              <div className="text-sm font-bold uppercase text-brand">Current lesson</div>
               <div className="text-xl font-black">Amelia to EN5 5XY pickup</div>
             </div>
-            <div className="rounded bg-red-500/10 px-3 py-2 text-sm font-black text-brand">{mapStatus}</div>
+            <div className="rounded bg-red-50 px-3 py-2 text-sm font-black text-brand">{mapStatus}</div>
           </div>
           <div
             ref={mapRef}
-            className={`${useFallback ? "hidden" : "block"} h-[360px] overflow-hidden rounded border border-zinc-800 bg-zinc-900`}
+            className={`${useFallback ? "hidden" : "block"} h-[360px] overflow-hidden rounded border border-zinc-200 bg-zinc-100`}
           />
           {useFallback ? <FallbackMap progress={progress} /> : null}
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <div className="rounded border border-zinc-800 bg-ink p-3">
-              <div className="flex items-center gap-2 text-sm font-bold text-zinc-400"><CarFront size={16} /> Instructor</div>
+            <div className="rounded border border-zinc-200 bg-zinc-100 p-3">
+              <div className="flex items-center gap-2 text-sm font-bold text-zinc-500"><CarFront size={16} /> Instructor</div>
               <div className="mt-1 font-black">Amelia Khan</div>
             </div>
-            <div className="rounded border border-zinc-800 bg-ink p-3">
-              <div className="flex items-center gap-2 text-sm font-bold text-zinc-400"><MapPin size={16} /> Pickup</div>
+            <div className="rounded border border-zinc-200 bg-zinc-100 p-3">
+              <div className="flex items-center gap-2 text-sm font-bold text-zinc-500"><MapPin size={16} /> Pickup</div>
               <div className="mt-1 font-black">Barnet EN5</div>
             </div>
-            <div className="rounded border border-zinc-800 bg-ink p-3">
-              <div className="flex items-center gap-2 text-sm font-bold text-zinc-400"><Clock3 size={16} /> Refresh</div>
+            <div className="rounded border border-zinc-200 bg-zinc-100 p-3">
+              <div className="flex items-center gap-2 text-sm font-bold text-zinc-500"><Clock3 size={16} /> Refresh</div>
               <div className="mt-1 font-black">1 sec</div>
             </div>
           </div>
