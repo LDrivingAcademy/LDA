@@ -140,42 +140,38 @@ export default function HomePage() {
               </section>
             </div>
 
-            <section className="overflow-hidden rounded bg-black text-white">
+            <section className="overflow-hidden rounded bg-white text-black shadow-sm">
               <div className="relative min-h-[430px] p-7 sm:p-10">
                 <img
                   src="https://images.pexels.com/photos/4895404/pexels-photo-4895404.jpeg?auto=compress&cs=tinysrgb&w=1400"
                   alt="Learner driver behind the wheel with an instructor in the passenger seat"
-                  className="absolute inset-0 h-full w-full object-cover opacity-65"
+                  className="absolute inset-0 h-full w-full object-cover opacity-85"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-black/25" />
-                <div className="lda-pill lda-pill-sm absolute right-8 top-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-white/20" />
+                <div className="lda-pill lda-pill-sm absolute left-7 top-7 sm:left-auto sm:right-8">
                   LDA Smart Match
                 </div>
-                <div className="relative z-10 max-w-sm">
-                  <img src="/lda-logo.jpg" alt="LDA Driving Academy" className="h-24 w-56 rounded object-contain" />
-                  <h2 className="mt-8 text-4xl font-black tracking-normal">
-                    LDA finds the best local instructor for you.
-                  </h2>
-                  <p className="mt-4 text-sm leading-6 text-zinc-300">
-                    Smart Match compares distance, instructor rating, price, car, transmission, availability, and verification status.
-                  </p>
-                </div>
-                <div className="absolute bottom-8 left-8 right-8 rounded bg-white p-4 text-black shadow-2xl sm:left-auto sm:w-80">
-                  <div className="flex items-start justify-between gap-4">
+                <div className="relative z-10 grid min-h-[360px] gap-6 pt-20 lg:grid-cols-[1fr_360px] lg:items-end lg:pt-0">
+                  <div className="max-w-sm">
+                    <img src="/lda-logo.jpg" alt="LDA Driving Academy" className="h-24 w-56 rounded object-contain shadow-lg" />
+                    <h2 className="mt-8 text-4xl font-black tracking-normal text-black">
+                      LDA finds the best local instructor for you.
+                    </h2>
+                    <p className="mt-4 text-sm leading-6 text-zinc-800">
+                      Smart Match compares distance, instructor rating, price, car, transmission, availability, and verification status.
+                    </p>
+                  </div>
+                  <div className="rounded bg-white/95 p-4 text-black shadow-2xl backdrop-blur">
                     <div>
                       <div className="text-xs font-black uppercase text-zinc-500">LDA top tips to pass</div>
                       <div className="mt-1 text-xl font-black">Refresh your road skills before lesson day.</div>
                       <div className="mt-1 text-sm font-bold text-zinc-600">Highway Code updates, hazard practice, and skill-fade videos.</div>
                     </div>
+                    <Link href="/roadworthy" className="lda-pill lda-pill-sm mt-4">
+                      Open tips directory
+                    </Link>
                   </div>
-                  <Link href="/roadworthy" className="lda-pill lda-pill-sm mt-4">
-                    Open tips directory
-                  </Link>
                 </div>
-                <div className="absolute right-8 top-24 h-52 w-52 rounded-full border border-red-500/20" />
-                <div className="absolute right-20 top-44 h-72 w-72 rounded-full border border-white/10" />
-                <div className="absolute bottom-28 right-28 h-3 w-24 rotate-[-28deg] rounded-full bg-brand" />
-                <div className="absolute bottom-40 right-16 h-3 w-16 rotate-[-28deg] rounded-full bg-white" />
               </div>
             </section>
           </div>
