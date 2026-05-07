@@ -78,13 +78,13 @@ export default async function LoginPage({
                 <input required name="password" type="password" minLength={8} className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
               </label>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                <button formAction={signIn} className="rounded bg-brand px-4 py-3 text-sm font-black text-white hover:bg-brand-strong">Sign in</button>
+                <button formAction={signIn} className="lda-pill lda-pill-sm">Sign in</button>
                 {isAdmin ? (
-                  <Link href="/contact" className="rounded border border-zinc-800 px-4 py-3 text-center text-sm font-black text-white hover:border-brand">
+                  <Link href="/contact" className="lda-pill lda-pill-sm">
                     Request admin access
                   </Link>
                 ) : (
-                  <button formAction={signUp} className="rounded border border-zinc-800 bg-black px-4 py-3 text-sm font-black text-white hover:border-brand">Create account</button>
+                  <button formAction={signUp} className="lda-pill lda-pill-sm">Create account</button>
                 )}
               </div>
             </form>
@@ -102,7 +102,7 @@ export default async function LoginPage({
                 ].map(([roleValue, label]) => (
                   <form key={roleValue} action={demoSignIn}>
                     <input type="hidden" name="demoRole" value={roleValue} />
-                    <button className="w-full rounded border border-zinc-800 bg-black px-3 py-3 text-left text-sm font-black text-white hover:border-brand">
+                    <button className="lda-pill lda-pill-sm lda-pill-wide">
                       {label}
                     </button>
                   </form>
