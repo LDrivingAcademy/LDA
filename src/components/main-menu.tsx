@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Menu } from "lucide-react";
+import { LanguageSelector } from "@/components/language-selector";
 
 const menuLinks = [
   { href: "/auth/login?role=learner", label: "Learner login" },
@@ -16,6 +17,9 @@ export function MainMenu() {
         <Menu size={24} />
       </summary>
       <div className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded border border-zinc-800 bg-zinc-950 py-2 text-white shadow-2xl">
+        <div className="border-b border-zinc-800 px-4 py-3">
+          <LanguageSelector />
+        </div>
         {menuLinks.map((link) => (
           <Link key={link.href} href={link.href} className="block px-4 py-3 text-sm font-black hover:bg-red-500/10 hover:text-brand">
             {link.label}
