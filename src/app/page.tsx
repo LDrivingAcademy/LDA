@@ -1,14 +1,19 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  BellRing,
+  BadgePoundSterling,
   CalendarCheck,
   CarFront,
   CheckCircle2,
-  LayoutDashboard,
+  ChevronDown,
+  Circle,
+  Clock3,
+  Globe2,
+  HelpCircle,
   MapPin,
-  ShieldCheck,
-  SlidersHorizontal,
+  Navigation,
+  Sparkles,
+  Square,
   Star,
   UsersRound
 } from "lucide-react";
@@ -16,26 +21,60 @@ import { Brand } from "@/components/brand";
 import { LiveLessonMap } from "@/components/live-lesson-map";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
-import {
-  adminKpis,
-  complianceLinks,
-  demoInstructors
-} from "@/lib/marketplace-content";
+import { adminKpis, complianceLinks, demoInstructors } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
 
-const rideSteps = [
-  "Enter pickup",
-  "Set preferences",
-  "Choose instructor",
-  "Pick time",
-  "Pay",
-  "Track arrival"
+type CardVisualType = "car" | "calendar" | "match" | "instructor" | "track" | "admin";
+
+const suggestionCards: {
+  title: string;
+  body: string;
+  href: string;
+  image: CardVisualType;
+}[] = [
+  {
+    title: "Lesson",
+    body: "Find a verified local instructor, choose manual or automatic, and book your next slot.",
+    href: "/auth/login?role=learner",
+    image: "car"
+  },
+  {
+    title: "Reserve",
+    body: "Plan ahead with visible availability, upfront price, pickup postcode, and cancellation terms.",
+    href: "/auth/login?role=learner",
+    image: "calendar"
+  },
+  {
+    title: "Smart Match",
+    body: "Let LDA match you with instructors based on distance, rating, price, car, and next slot.",
+    href: "/auth/login?role=learner",
+    image: "match"
+  },
+  {
+    title: "Instructor",
+    body: "Apply as an ADI/PDI, upload verification, set availability, and manage paid bookings.",
+    href: "/instructor",
+    image: "instructor"
+  },
+  {
+    title: "Track",
+    body: "When your instructor is en route, see ETA and distance to your pickup postcode.",
+    href: "#tracking",
+    image: "track"
+  },
+  {
+    title: "Admin",
+    body: "Review instructors, learners, bookings, payments, refunds, disputes, and platform KPIs.",
+    href: "/auth/login?role=admin&next=/admin",
+    image: "admin"
+  }
 ];
 
-const trustItems = [
-  ["Verified before visible", "ADI/PDI approval is required before instructors appear in learner search."],
-  ["No hidden fees", "Learners see the full lesson price and cancellation terms before payment."],
-  ["GPS only when needed", "Location sharing starts only for an accepted lesson when the instructor goes en route."]
+const safetyItems = [
+  "ADI/PDI verification before instructors appear in search",
+  "Learners confirm age 17+ and provisional licence before booking",
+  "Full lesson price shown before checkout",
+  "Live location only for accepted lessons when instructor starts en route"
 ];
 
 export default function HomePage() {
@@ -43,162 +82,159 @@ export default function HomePage() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-zinc-800 bg-black text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <Brand />
-          <nav className="hidden items-center gap-1 md:flex">
-            <Link href="#book" className="rounded px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">Book</Link>
-            <Link href="#tracking" className="rounded px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">Track</Link>
-            <Link href="/instructor" className="rounded px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">Drive with LDA</Link>
-            <Link href="/privacy" className="rounded px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white">Compliance</Link>
-          </nav>
-          <MainMenu />
+      <header className="sticky top-0 z-30 bg-black text-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-7">
+            <Brand />
+            <nav className="hidden items-center gap-7 lg:flex">
+              <Link href="/auth/login?role=learner" className="text-sm font-black text-white hover:text-zinc-300">Learners</Link>
+              <Link href="/instructor" className="text-sm font-black text-white hover:text-zinc-300">Instructors</Link>
+              <Link href="#discover" className="text-sm font-black text-white hover:text-zinc-300">Services</Link>
+              <Link href="#safety" className="text-sm font-black text-white hover:text-zinc-300">Safety</Link>
+              <Link href="/contact" className="inline-flex items-center gap-1 text-sm font-black text-white hover:text-zinc-300">
+                About <ChevronDown size={15} />
+              </Link>
+            </nav>
+          </div>
+          <div className="hidden items-center gap-6 md:flex">
+            <span className="inline-flex items-center gap-2 text-sm font-black"><Globe2 size={17} /> EN</span>
+            <Link href="/contact" className="inline-flex items-center gap-2 text-sm font-black hover:text-zinc-300">
+              <HelpCircle size={17} /> Help
+            </Link>
+            <Link href="/auth/login?role=learner" className="text-sm font-black hover:text-zinc-300">Log in</Link>
+            <Link href="/auth/login?role=learner" className="rounded-full bg-white px-5 py-3 text-sm font-black text-black hover:bg-zinc-200">Sign up</Link>
+          </div>
+          <div className="md:hidden">
+            <MainMenu />
+          </div>
         </div>
       </header>
 
-      <main className="bg-black text-white">
-        <section id="book" className="border-b border-zinc-900 bg-black">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_460px] lg:px-8 lg:py-12">
-            <div className="flex min-h-[560px] flex-col justify-between">
-              <div>
-                <div className="mb-5 inline-flex items-center gap-2 rounded border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
-                  <ShieldCheck size={16} /> Verified UK driving lessons
-                </div>
-                <h1 className="max-w-4xl text-5xl font-black tracking-normal sm:text-7xl">
-                  Book a local instructor in a few taps.
-                </h1>
-                <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-300">
-                  LDrivingAcademy gives learners an Uber-style lesson journey: enter pickup, compare approved instructors, choose price and time, pay securely, then track the instructor on the way.
-                </p>
-                <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                  <Link href="/auth/login?role=learner" className="group rounded border border-red-500 bg-brand p-5 text-white shadow-xl hover:bg-brand-strong">
-                    <UsersRound className="mb-4" />
-                    <div className="flex items-center justify-between gap-2 text-xl font-black">
-                      Learner <ArrowRight className="transition group-hover:translate-x-1" />
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-red-50">Search, book, pay, track.</p>
-                  </Link>
-                  <Link href="/instructor" className="group rounded border border-zinc-800 bg-zinc-950 p-5 text-white hover:border-red-500">
-                    <CarFront className="mb-4 text-brand" />
-                    <div className="flex items-center justify-between gap-2 text-xl font-black">
-                      Instructor <ArrowRight className="transition group-hover:translate-x-1" />
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-zinc-400">Verify, accept jobs, earn.</p>
-                  </Link>
-                  <Link href="/auth/login?role=admin&next=/admin" className="group rounded border border-zinc-800 bg-zinc-950 p-5 text-white hover:border-red-500">
-                    <LayoutDashboard className="mb-4 text-brand" />
-                    <div className="flex items-center justify-between gap-2 text-xl font-black">
-                      Admin <ArrowRight className="transition group-hover:translate-x-1" />
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-zinc-400">Approvals, revenue, KPIs.</p>
-                  </Link>
-                </div>
-              </div>
+      <main className="bg-white text-black">
+        <section className="bg-white">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-7 sm:px-6 lg:grid-cols-[560px_1fr] lg:px-8 lg:py-10">
+            <div className="py-2 lg:py-8">
+              <h1 className="max-w-xl text-5xl font-black tracking-normal sm:text-6xl">
+                Learn to drive with LDA
+              </h1>
+              <p className="mt-5 max-w-lg text-lg leading-8 text-zinc-700">
+                Book verified local driving instructors, compare upfront prices, choose a lesson time, pay online, and track your instructor when they are on the way.
+              </p>
 
-              <div className="mt-10 grid gap-3 sm:grid-cols-3">
-                {trustItems.map(([title, detail]) => (
-                  <article key={title} className="rounded border border-zinc-800 bg-zinc-950 p-4">
-                    <CheckCircle2 className="mb-3 text-brand" size={20} />
-                    <h2 className="font-black">{title}</h2>
-                    <p className="mt-1 text-sm leading-6 text-zinc-400">{detail}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
+              <section className="mt-8 max-w-[560px]">
+                <button className="inline-flex items-center gap-3 rounded-full bg-zinc-100 px-5 py-4 text-base font-black text-black">
+                  <Clock3 size={22} /> Lesson now <ChevronDown size={20} />
+                </button>
 
-            <section className="rounded border border-zinc-800 bg-zinc-950 p-4 shadow-2xl">
-              <div className="rounded border border-zinc-800 bg-black p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-black uppercase text-brand">Lesson request</div>
-                    <h2 className="mt-1 text-2xl font-black">Where are you learning?</h2>
-                  </div>
-                  <SlidersHorizontal className="text-brand" />
-                </div>
-                <div className="grid gap-3">
-                  <div className="rounded border border-zinc-800 bg-zinc-950 p-4">
-                    <div className="flex items-center gap-3">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-brand"><MapPin size={18} /></span>
+                <div className="mt-7 grid gap-3">
+                  <div className="relative rounded bg-zinc-100 px-5 py-5">
+                    <div className="absolute left-7 top-1/2 h-20 w-px bg-black" />
+                    <div className="flex items-center gap-5">
+                      <Circle className="relative z-10 fill-black text-black" size={18} />
                       <div>
-                        <div className="text-xs font-black uppercase text-zinc-500">Pickup</div>
-                        <div className="font-black">Barnet EN5 5XY</div>
+                        <div className="text-sm font-bold text-zinc-500">Pickup location</div>
+                        <div className="mt-1 text-xl font-black">Enter your postcode</div>
+                      </div>
+                      <Navigation className="ml-auto text-black" size={24} />
+                    </div>
+                  </div>
+
+                  <div className="rounded bg-zinc-100 px-5 py-5">
+                    <div className="flex items-center gap-5">
+                      <Square className="fill-black text-black" size={18} />
+                      <div>
+                        <div className="text-sm font-bold text-zinc-500">Lesson preference</div>
+                        <div className="mt-1 text-xl font-black">Automatic or manual</div>
                       </div>
                     </div>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <DarkSelect label="Transmission" value="Automatic preferred" />
-                    <DarkSelect label="Price selector" value="GBP30-GBP45/hr" />
-                    <DarkSelect label="Availability" value="Today or tomorrow" />
-                    <DarkSelect label="Licence check" value="Age 17+ confirmed" />
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link href="/auth/login?role=learner" className="rounded bg-black px-7 py-4 text-base font-black text-white hover:bg-zinc-800">
+                    See lesson prices
+                  </Link>
+                  <Link href="/instructor" className="rounded bg-brand px-7 py-4 text-base font-black text-white hover:bg-brand-strong">
+                    Become an instructor
+                  </Link>
+                </div>
+              </section>
+            </div>
+
+            <section className="overflow-hidden rounded bg-black text-white">
+              <div className="relative min-h-[430px] p-7 sm:p-10">
+                <div className="absolute right-8 top-8 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-black text-red-100">
+                  LDA Smart Match
+                </div>
+                <div className="relative z-10 max-w-sm">
+                  <img src="/lda-logo.jpg" alt="LDA Driving Academy" className="h-24 w-56 rounded object-contain" />
+                  <h2 className="mt-8 text-4xl font-black tracking-normal">
+                    LDA finds the best local instructor for you.
+                  </h2>
+                  <p className="mt-4 text-sm leading-6 text-zinc-300">
+                    Smart Match compares distance, instructor rating, price, car, transmission, availability, and admin approval status.
+                  </p>
+                </div>
+                <div className="absolute bottom-8 left-8 right-8 rounded bg-white p-4 text-black shadow-2xl sm:left-auto sm:w-80">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="text-xs font-black uppercase text-zinc-500">Best nearby match</div>
+                      <div className="mt-1 text-xl font-black">{featuredInstructor.name}</div>
+                      <div className="mt-1 text-sm font-bold text-zinc-600">{featuredInstructor.car}</div>
+                    </div>
+                    <div className="rounded-full bg-red-500/10 px-3 py-2 text-sm font-black text-brand">
+                      {formatMoney(featuredInstructor.price)}/hr
+                    </div>
+                  </div>
+                  <div className="mt-4 grid gap-2 text-sm font-bold text-zinc-700">
+                    <span className="inline-flex items-center gap-2"><Star size={16} className="text-brand" /> {featuredInstructor.rating} rating</span>
+                    <span className="inline-flex items-center gap-2"><MapPin size={16} className="text-brand" /> {featuredInstructor.distance} from pickup</span>
+                    <span className="inline-flex items-center gap-2"><CalendarCheck size={16} className="text-brand" /> {featuredInstructor.next}</span>
                   </div>
                 </div>
-              </div>
-
-              <div className="mt-4 grid gap-3">
-                {rideSteps.map((step, index) => (
-                  <div key={step} className="flex items-center gap-3 rounded border border-zinc-800 bg-black p-3">
-                    <span className={`grid h-8 w-8 shrink-0 place-items-center rounded text-xs font-black ${index < 3 ? "bg-brand text-white" : "bg-zinc-900 text-zinc-400"}`}>{index + 1}</span>
-                    <span className={index < 3 ? "font-black text-white" : "font-bold text-zinc-400"}>{step}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4 rounded border border-red-500/40 bg-red-500/10 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-xs font-black uppercase text-red-200">Best nearby match</div>
-                    <h3 className="mt-1 text-xl font-black">{featuredInstructor.name}</h3>
-                    <p className="mt-1 text-sm text-zinc-300">{featuredInstructor.car}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-bold text-red-100">Full price</div>
-                    <div className="text-2xl font-black">{formatMoney(featuredInstructor.price)}</div>
-                  </div>
-                </div>
-                <Link href="/auth/login?role=learner" className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded bg-brand px-4 py-3 text-sm font-black text-white hover:bg-brand-strong">
-                  Continue to booking <ArrowRight size={16} />
-                </Link>
+                <div className="absolute right-8 top-24 h-52 w-52 rounded-full border border-red-500/20" />
+                <div className="absolute right-20 top-44 h-72 w-72 rounded-full border border-white/10" />
+                <div className="absolute bottom-28 right-28 h-3 w-24 rotate-[-28deg] rounded-full bg-brand" />
+                <div className="absolute bottom-40 right-16 h-3 w-16 rotate-[-28deg] rounded-full bg-white" />
               </div>
             </section>
           </div>
         </section>
 
-        <section className="border-b border-zinc-900 bg-black">
-          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-            <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <div>
-                <div className="text-sm font-black uppercase text-brand">Nearby instructors</div>
-                <h2 className="mt-2 text-3xl font-black tracking-normal">Compare price, rating, car, distance, and next slot.</h2>
-              </div>
-              <Link href="/auth/login?role=learner" className="inline-flex items-center justify-center gap-2 rounded bg-brand px-4 py-3 text-sm font-black text-white hover:bg-brand-strong">
-                Find an instructor <ArrowRight size={16} />
-              </Link>
+        <section id="discover" className="bg-white">
+          <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+            <h2 className="text-4xl font-black tracking-normal sm:text-5xl">Discover what you can do with LDA</h2>
+            <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {suggestionCards.map((card) => (
+                <Link key={card.title} href={card.href} className="group grid min-h-[210px] grid-cols-[1fr_150px] overflow-hidden rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200">
+                  <div className="flex flex-col items-start">
+                    <h3 className="text-2xl font-black">{card.title}</h3>
+                    <p className="mt-4 max-w-xs text-base leading-7 text-zinc-800">{card.body}</p>
+                    <span className="mt-auto inline-flex rounded-full bg-white px-5 py-3 text-sm font-black text-black group-hover:bg-black group-hover:text-white">
+                      Details
+                    </span>
+                  </div>
+                  <CardVisual type={card.image} />
+                </Link>
+              ))}
             </div>
-            <div className="grid gap-4 xl:grid-cols-3">
-              {demoInstructors.map((instructor) => (
-                <article key={instructor.name} className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="grid h-12 w-12 place-items-center rounded bg-brand text-lg font-black text-white">{instructor.name.slice(0, 1)}</div>
-                      <h3 className="mt-4 text-xl font-black">{instructor.name}</h3>
-                    </div>
-                    <span className="rounded bg-red-500/10 px-2 py-1 text-xs font-black text-red-100">Verified {instructor.type}</span>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-zinc-400">{instructor.bio}</p>
-                  <div className="mt-4 grid gap-2 text-sm text-zinc-300">
-                    <span className="inline-flex items-center gap-2"><Star size={16} className="text-brand" /> {instructor.rating} instructor rating</span>
-                    <span className="inline-flex items-center gap-2"><MapPin size={16} className="text-brand" /> {instructor.distance} away</span>
-                    <span className="inline-flex items-center gap-2"><CarFront size={16} className="text-brand" /> {instructor.car}</span>
-                    <span className="inline-flex items-center gap-2"><CalendarCheck size={16} className="text-brand" /> {instructor.next}</span>
-                  </div>
-                  <div className="mt-5 flex items-center justify-between border-t border-zinc-800 pt-4">
-                    <div>
-                      <div className="text-xs font-bold uppercase text-zinc-500">Price</div>
-                      <div className="text-2xl font-black">{formatMoney(instructor.price)}/hr</div>
-                    </div>
-                    <Link href="/auth/login?role=learner" className="rounded bg-brand px-3 py-2 text-sm font-bold text-white hover:bg-brand-strong">Select</Link>
-                  </div>
-                </article>
+          </div>
+        </section>
+
+        <section id="safety" className="bg-white">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_1fr] lg:px-8 lg:py-14">
+            <div>
+              <h2 className="text-4xl font-black tracking-normal">Safety and trust before every lesson</h2>
+              <p className="mt-4 max-w-xl text-lg leading-8 text-zinc-700">
+                LDA is structured around UK learner-driver compliance, verified instructors, transparent pricing, and consent-led live tracking.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              {safetyItems.map((item) => (
+                <div key={item} className="flex items-start gap-4 rounded bg-zinc-100 p-4">
+                  <CheckCircle2 className="mt-0.5 shrink-0 text-brand" />
+                  <span className="font-bold leading-7 text-zinc-900">{item}</span>
+                </div>
               ))}
             </div>
           </div>
@@ -206,43 +242,41 @@ export default function HomePage() {
 
         <LiveLessonMap />
 
-        <section className="border-b border-zinc-900 bg-black">
-          <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
+        <section className="bg-white">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
             <div>
-              <div className="inline-flex items-center gap-2 rounded bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
-                <BellRing size={16} /> Admin analytics
-              </div>
-              <h2 className="mt-4 text-3xl font-black tracking-normal">Owner dashboard stays separate.</h2>
-              <p className="mt-3 text-sm leading-6 text-zinc-400">KPIs focus on instructors, learners, bookings, revenue, payouts, cancellations, and instructor reviews.</p>
-              <Link href="/auth/login?role=admin&next=/admin" className="mt-5 inline-flex items-center gap-2 rounded bg-brand px-4 py-3 text-sm font-black text-white hover:bg-brand-strong">
+              <h2 className="text-4xl font-black tracking-normal">Admin analytics</h2>
+              <p className="mt-4 text-base leading-7 text-zinc-700">
+                A separate owner login tracks the marketplace numbers that matter for an online driving school.
+              </p>
+              <Link href="/auth/login?role=admin&next=/admin" className="mt-6 inline-flex items-center gap-2 rounded bg-black px-5 py-3 text-sm font-black text-white hover:bg-zinc-800">
                 Open admin login <ArrowRight size={16} />
               </Link>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {adminKpis.map((kpi) => (
-                <article key={kpi.label} className="rounded border border-zinc-800 bg-zinc-950 p-4">
-                  <div className="text-sm font-bold text-zinc-500">{kpi.label}</div>
+                <article key={kpi.label} className="rounded bg-zinc-100 p-5">
+                  <div className="text-sm font-bold text-zinc-600">{kpi.label}</div>
                   <div className="mt-2 text-3xl font-black">{kpi.value}</div>
-                  <p className="mt-1 text-sm leading-6 text-zinc-400">{kpi.detail}</p>
+                  <p className="mt-2 text-sm leading-6 text-zinc-700">{kpi.detail}</p>
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="border-t border-zinc-900 bg-black">
-          <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
+        <section className="bg-white">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
             <div>
-              <div className="inline-flex items-center gap-2 rounded bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
-                <ShieldCheck size={16} /> Compliance first
-              </div>
-              <h2 className="mt-4 text-3xl font-black tracking-normal">Policies before real customers.</h2>
-              <p className="mt-3 text-sm leading-6 text-zinc-400">Privacy, terms, cancellation, cookies, and data requests stay visible before live payments scale.</p>
+              <h2 className="text-4xl font-black tracking-normal">Compliance</h2>
+              <p className="mt-4 text-base leading-7 text-zinc-700">
+                Policies stay visible before real payments scale. Solicitor-reviewed wording should replace placeholder text before launch.
+              </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {complianceLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="rounded border border-zinc-800 bg-zinc-950 p-4 font-black text-white hover:border-red-500">
-                  {link.label} <ArrowRight className="mt-3 text-brand" size={18} />
+                <Link key={link.href} href={link.href} className="rounded bg-zinc-100 p-5 font-black text-black hover:bg-zinc-200">
+                  {link.label} <ArrowRight className="mt-4 text-brand" size={18} />
                 </Link>
               ))}
             </div>
@@ -254,11 +288,21 @@ export default function HomePage() {
   );
 }
 
-function DarkSelect({ label, value }: { label: string; value: string }) {
+function CardVisual({ type }: { type: CardVisualType }) {
+  const visual = {
+    car: <CarFront size={68} />,
+    calendar: <CalendarCheck size={68} />,
+    match: <Sparkles size={68} />,
+    instructor: <UsersRound size={68} />,
+    track: <Navigation size={68} />,
+    admin: <BadgePoundSterling size={68} />
+  }[type];
+
   return (
-    <div className="rounded border border-zinc-800 bg-black px-3 py-3">
-      <div className="text-xs font-bold uppercase text-zinc-500">{label}</div>
-      <div className="mt-1 font-black text-white">{value}</div>
+    <div className="relative grid place-items-center text-black">
+      <div className="absolute h-24 w-24 rounded-full bg-white" />
+      <div className="absolute h-16 w-32 rotate-[-18deg] rounded-full bg-red-500/10" />
+      <div className="relative z-10 text-brand">{visual}</div>
     </div>
   );
 }
