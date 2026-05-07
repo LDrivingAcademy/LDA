@@ -8,18 +8,14 @@ import {
   Clock3,
   Globe2,
   HelpCircle,
-  MapPin,
   Navigation,
   Sparkles,
   Square,
-  Star,
   UsersRound
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
-import { demoInstructors } from "@/lib/marketplace-content";
-import { formatMoney } from "@/lib/money";
 
 type CardVisualType = "car" | "calendar" | "match" | "instructor";
 
@@ -63,8 +59,6 @@ const safetyItems = [
 ];
 
 export default function HomePage() {
-  const featuredInstructor = demoInstructors[0];
-
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
@@ -148,6 +142,12 @@ export default function HomePage() {
 
             <section className="overflow-hidden rounded bg-black text-white">
               <div className="relative min-h-[430px] p-7 sm:p-10">
+                <img
+                  src="https://images.pexels.com/photos/4895404/pexels-photo-4895404.jpeg?auto=compress&cs=tinysrgb&w=1400"
+                  alt="Learner driver behind the wheel with an instructor in the passenger seat"
+                  className="absolute inset-0 h-full w-full object-cover opacity-65"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-black/25" />
                 <div className="lda-pill lda-pill-sm absolute right-8 top-8">
                   LDA Smart Match
                 </div>
@@ -163,19 +163,14 @@ export default function HomePage() {
                 <div className="absolute bottom-8 left-8 right-8 rounded bg-white p-4 text-black shadow-2xl sm:left-auto sm:w-80">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <div className="text-xs font-black uppercase text-zinc-500">Best nearby match</div>
-                      <div className="mt-1 text-xl font-black">{featuredInstructor.name}</div>
-                      <div className="mt-1 text-sm font-bold text-zinc-600">{featuredInstructor.car}</div>
-                    </div>
-                    <div className="rounded-full bg-red-500/10 px-3 py-2 text-sm font-black text-brand">
-                      {formatMoney(featuredInstructor.price)}/hr
+                      <div className="text-xs font-black uppercase text-zinc-500">LDA top tips to pass</div>
+                      <div className="mt-1 text-xl font-black">Refresh your road skills before lesson day.</div>
+                      <div className="mt-1 text-sm font-bold text-zinc-600">Highway Code updates, hazard practice, and skill-fade videos.</div>
                     </div>
                   </div>
-                  <div className="mt-4 grid gap-2 text-sm font-bold text-zinc-700">
-                    <span className="inline-flex items-center gap-2"><Star size={16} className="text-brand" /> {featuredInstructor.rating} rating</span>
-                    <span className="inline-flex items-center gap-2"><MapPin size={16} className="text-brand" /> {featuredInstructor.distance} from pickup</span>
-                    <span className="inline-flex items-center gap-2"><CalendarCheck size={16} className="text-brand" /> {featuredInstructor.next}</span>
-                  </div>
+                  <Link href="/roadworthy" className="lda-pill lda-pill-sm mt-4">
+                    Open tips directory
+                  </Link>
                 </div>
                 <div className="absolute right-8 top-24 h-52 w-52 rounded-full border border-red-500/20" />
                 <div className="absolute right-20 top-44 h-72 w-72 rounded-full border border-white/10" />
