@@ -175,7 +175,7 @@ function AdminDemoDashboard() {
             <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-300">Demo analytics for testing the owner/admin flow.</p>
           </div>
           <form action={signOut}>
-            <button className="rounded bg-zinc-950 px-3 py-2 text-sm font-black text-white">Exit demo</button>
+            <button className="lda-pill lda-pill-sm">Exit demo</button>
           </form>
         </section>
       </header>
@@ -201,7 +201,7 @@ function AdminMessage({ title, body }: { title: string; body: string }) {
         <ShieldAlert className="text-brand" />
         <h1 className="mt-4 text-3xl font-black">{title}</h1>
         <p className="mt-3 leading-7 text-zinc-400">{body}</p>
-        <Link href="/auth/login?role=admin&next=/admin" className="mt-5 inline-flex rounded bg-brand px-4 py-3 text-sm font-black text-white">Go to admin login</Link>
+        <Link href="/auth/login?role=admin&next=/admin" className="lda-pill lda-pill-sm mt-5">Go to admin login</Link>
       </section>
     </main>
   );
