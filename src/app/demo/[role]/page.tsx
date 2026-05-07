@@ -68,7 +68,7 @@ export default async function DemoRolePage({ params }: { params: Promise<{ role:
             <h1 className="mt-4 text-4xl font-black tracking-normal sm:text-5xl">{copy.title}</h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">{copy.body}</p>
           </div>
-          <Link href={copy.href} className="rounded bg-brand px-4 py-3 text-center text-sm font-black text-white hover:bg-brand-strong">
+          <Link href={copy.href} className="lda-pill lda-pill-sm">
             Open live {role} area
           </Link>
         </section>
@@ -143,7 +143,7 @@ function LearnerDemo() {
                   <div className="text-xs font-bold uppercase text-zinc-500">Price</div>
                   <div className="text-2xl font-black">{formatMoney(instructor.price)}/hr</div>
                 </div>
-                <button className="rounded bg-brand px-3 py-2 text-sm font-bold text-white">Choose</button>
+                <button className="lda-pill lda-pill-sm">Choose</button>
               </div>
             </article>
           ))}
@@ -159,7 +159,7 @@ function LearnerDemo() {
               <InfoBox label="Time and pickup" value={selectedInstructor.next} detail="Barnet EN5 5XY" />
               <InfoBox label="Full upfront price" value={formatMoney(selectedInstructor.price)} detail="No hidden booking fee" />
             </div>
-            <button className="mt-5 inline-flex items-center gap-2 rounded bg-brand px-4 py-3 text-sm font-black text-white">
+            <button className="lda-pill lda-pill-sm mt-5">
               <CreditCard size={16} /> Pay with Stripe
             </button>
           </div>
@@ -187,7 +187,7 @@ function InstructorDemo() {
           <p className="mt-2 max-w-3xl text-zinc-400">
             Upload ADI/PDI evidence, ID, licence, insurance, profile photo, areas covered, hourly price, car details, and availability. You stay hidden from learner search until admin approval.
           </p>
-          <Link href="/instructor" className="mt-5 inline-flex rounded bg-brand px-4 py-3 text-sm font-black text-white">Open instructor setup</Link>
+          <Link href="/instructor" className="lda-pill lda-pill-sm mt-5">Open instructor setup</Link>
         </article>
         <div className="grid gap-3 md:grid-cols-3">
           {instructorJourneyStages.map((stage) => (
