@@ -102,7 +102,7 @@ export default function HomePage() {
               <HelpCircle size={17} /> Help
             </Link>
             <Link href="/auth/login?role=learner" className="text-sm font-black hover:text-zinc-300">Log in</Link>
-            <Link href="/auth/login?role=learner" className="rounded-full bg-white px-5 py-3 text-sm font-black text-black hover:bg-zinc-200">Sign up</Link>
+            <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm">Sign up</Link>
           </div>
           <div className="md:hidden">
             <MainMenu />
@@ -122,7 +122,7 @@ export default function HomePage() {
               </p>
 
               <section className="mt-8 max-w-[560px]">
-                <button className="inline-flex items-center gap-3 rounded-full bg-zinc-100 px-5 py-4 text-base font-black text-black">
+                <button className="lda-pill">
                   <Clock3 size={22} /> Lesson now <ChevronDown size={20} />
                 </button>
 
@@ -151,10 +151,10 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <Link href="/auth/login?role=learner" className="rounded bg-black px-7 py-4 text-base font-black text-white hover:bg-zinc-800">
+                  <Link href="/auth/login?role=learner" className="lda-pill">
                     See lesson prices
                   </Link>
-                  <Link href="/instructor" className="rounded bg-brand px-7 py-4 text-base font-black text-white hover:bg-brand-strong">
+                  <Link href="/instructor" className="lda-pill">
                     Become an instructor
                   </Link>
                 </div>
@@ -163,7 +163,7 @@ export default function HomePage() {
 
             <section className="overflow-hidden rounded bg-black text-white">
               <div className="relative min-h-[430px] p-7 sm:p-10">
-                <div className="absolute right-8 top-8 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-black text-red-100">
+                <div className="lda-pill lda-pill-sm absolute right-8 top-8">
                   LDA Smart Match
                 </div>
                 <div className="relative z-10 max-w-sm">
@@ -210,7 +210,7 @@ export default function HomePage() {
                   <div className="flex flex-col items-start">
                     <h3 className="text-2xl font-black">{card.title}</h3>
                     <p className="mt-4 max-w-xs text-base leading-7 text-zinc-800">{card.body}</p>
-                    <span className="mt-auto inline-flex rounded-full bg-white px-5 py-3 text-sm font-black text-black group-hover:bg-black group-hover:text-white">
+                    <span className="lda-pill lda-pill-sm mt-auto">
                       Details
                     </span>
                   </div>
@@ -249,7 +249,7 @@ export default function HomePage() {
               <p className="mt-4 text-base leading-7 text-zinc-700">
                 A separate owner login tracks the marketplace numbers that matter for an online driving school.
               </p>
-              <Link href="/auth/login?role=admin&next=/admin" className="mt-6 inline-flex items-center gap-2 rounded bg-black px-5 py-3 text-sm font-black text-white hover:bg-zinc-800">
+              <Link href="/auth/login?role=admin&next=/admin" className="lda-pill lda-pill-sm mt-6">
                 Open admin login <ArrowRight size={16} />
               </Link>
             </div>
