@@ -23,8 +23,8 @@ const supportRoutes = [
     title: "Learner support",
     body: "Bookings, pickup postcode, lesson time, payment confirmation, refunds, and live tracking queries.",
     icon: BookOpenCheck,
-    href: "/lesson-now",
-    cta: "Book or check lessons"
+    href: "/auth/login?role=learner",
+    cta: "Learner login"
   },
   {
     title: "Instructor support",
@@ -68,6 +68,7 @@ export default function ContactPage() {
               <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructors</Link>
               <Link href="/#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
               <Link href="/#safety" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
+              <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">About</Link>
             </nav>
           </div>
           <div className="hidden items-center gap-6 md:flex">
@@ -104,8 +105,8 @@ export default function ContactPage() {
                 <a href="mailto:info@ldrivingacademy.co.uk" className="lda-pill">
                   <Mail size={20} /> Email support
                 </a>
-                <Link href="/lesson-now" className="lda-pill">
-                  <Clock3 size={20} /> Lesson now
+                <Link href="/auth/login?role=learner" className="lda-pill">
+                  <BookOpenCheck size={20} /> Learner login
                 </Link>
               </div>
             </div>
@@ -167,8 +168,8 @@ export default function ContactPage() {
                 <a href="mailto:info@ldrivingacademy.co.uk?subject=LDA%20support%20request" className="lda-pill">
                   Start email
                 </a>
-                <Link href="/owner-dashboard" className="lda-pill">
-                  Owner dashboard
+                <Link href="/cancellation-policy" className="lda-pill">
+                  View policies
                 </Link>
               </div>
             </div>
