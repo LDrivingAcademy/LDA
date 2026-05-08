@@ -14,6 +14,7 @@ type TranslatorWindow = Window & {
 
 const sourceLanguage = "en";
 const translatorScriptId = "google-page-translate";
+const reloadMarker = "lda-language-reload-target";
 
 function getStoredLanguage() {
   if (typeof window === "undefined") {
@@ -30,8 +31,36 @@ function setTranslateCookie(targetLanguage: string) {
   const value = targetLanguage === sourceLanguage ? "" : `/en/${targetLanguage}`;
   const expires = targetLanguage === sourceLanguage ? "Thu, 01 Jan 1970 00:00:00 GMT" : "Fri, 31 Dec 9999 23:59:59 GMT";
 
-  document.cookie = `googtrans=${value}; expires=${expires}; path=/`;
-  document.cookie = `googtrans=${value}; expires=${expires}; path=/; domain=${window.location.hostname}`;
+  const domains = [
+    "",
+    window.location.hostname,
+    `.${window.location.hostname}`,
+    window.location.hostname.split(".").slice(-2).join("."),
+    `.${window.location.hostname.split(".").slice(-2).join(".")}`
+  ];
+
+  domains.forEach((domain) => {
+    const domainPart = domain ? `; domain=${domain}` : "";
+    document.cookie = `googtrans=${value}; expires=${expires}; path=/${domainPart}`;
+  });
+}
+
+function hasTranslateCookie() {
+  return document.cookie.split(";").some((cookie) => cookie.trim().startsWith("googtrans="));
+}
+
+function hasTranslatedDom() {
+  return document.documentElement.className.includes("translated") || document.body.className.includes("translated");
+}
+
+function reloadOnce(targetLanguage: string) {
+  if (window.sessionStorage.getItem(reloadMarker) === targetLanguage) {
+    window.sessionStorage.removeItem(reloadMarker);
+    return;
+  }
+
+  window.sessionStorage.setItem(reloadMarker, targetLanguage);
+  window.location.reload();
 }
 
 export function PageTranslator() {
@@ -42,9 +71,29 @@ export function PageTranslator() {
     const { selected, custom } = getStoredLanguage();
     const targetLanguage = googleCodeForLanguage(selected, custom) || sourceLanguage;
     const htmlLanguage = selected === "custom" && custom ? custom : selected;
+    const previousTranslateCookie = hasTranslateCookie();
 
     document.documentElement.lang = htmlLanguage;
     document.documentElement.dir = isRtlLanguage(selected, custom) ? "rtl" : "ltr";
+
+    if (targetLanguage === sourceLanguage) {
+      lastApplied.current = sourceLanguage;
+      setTranslateCookie(sourceLanguage);
+
+      const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+      if (combo) {
+        combo.value = "";
+        combo.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
+      if (previousTranslateCookie || hasTranslatedDom()) {
+        window.setTimeout(() => reloadOnce(sourceLanguage), 100);
+      } else {
+        window.sessionStorage.removeItem(reloadMarker);
+      }
+
+      return;
+    }
 
     if (!targetLanguage || lastApplied.current === targetLanguage) {
       return;
@@ -58,7 +107,7 @@ export function PageTranslator() {
       return;
     }
 
-    combo.value = targetLanguage === sourceLanguage ? "" : targetLanguage;
+    combo.value = targetLanguage;
     combo.dispatchEvent(new Event("change", { bubbles: true }));
   }, []);
 
