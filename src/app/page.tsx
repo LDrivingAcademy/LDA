@@ -67,7 +67,7 @@ const suggestionCards: {
     body: "Follow LDA, subscribe for learner tips, deals, free trials, and platform updates.",
     href: "/social",
     image: "social",
-    cta: "Open socials"
+    cta: "Subscribe"
   }
 ];
 
@@ -97,11 +97,11 @@ export default function HomePage() {
           </div>
           <div className="hidden items-center gap-6 md:flex">
             <LanguageSelector />
-            <Link href="/contact" className="inline-flex items-center gap-2 text-sm font-black hover:text-zinc-300">
+            <Link href="/contact" className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-black hover:text-zinc-300">
               <HelpCircle size={17} /> Help
             </Link>
-            <Link href="/auth/login?role=learner" className="text-sm font-black hover:text-zinc-300">Log in</Link>
-            <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm">Sign up</Link>
+            <Link href="/auth/login?role=learner" className="whitespace-nowrap text-sm font-black hover:text-zinc-300">Log in</Link>
+            <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
           </div>
           <div className="md:hidden">
             <MainMenu />
