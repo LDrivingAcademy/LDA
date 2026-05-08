@@ -36,6 +36,17 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
+#google_translate_element,
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+.goog-te-gadget,
+.goog-te-menu-frame,
+iframe.skiptranslate {
+  display: none !important;
+}
+body {
+  top: 0 !important;
+}
 .focus-ring { outline: 2px solid transparent; outline-offset: 2px; }
 .focus-ring:focus-visible { outline-color: var(--brand); }
 .lda-pill {
