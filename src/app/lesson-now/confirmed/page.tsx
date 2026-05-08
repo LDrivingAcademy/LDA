@@ -64,7 +64,7 @@ export default async function InstantLessonConfirmedPage({
             ) : null}
           </div>
 
-          <Link href="/dashboard#tracking" className="lda-pill mt-8">
+          <Link href="/tracking" className="lda-pill mt-8">
             Open live tracking preview
           </Link>
         </div>
