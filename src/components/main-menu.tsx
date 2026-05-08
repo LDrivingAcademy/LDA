@@ -6,6 +6,7 @@ const menuLinks = [
   { href: "/auth/login?role=learner", label: "Learner login" },
   { href: "/auth/login?role=instructor", label: "Instructor login" },
   { href: "/instructor", label: "Become an instructor" },
+  { href: "/about", label: "About" },
   { href: "/contact", label: "Support" }
 ];
 
