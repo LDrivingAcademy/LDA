@@ -8,15 +8,21 @@ export function LanguageSelector() {
   const [selected, setSelected] = useState("en-GB");
   const [customLanguage, setCustomLanguage] = useState("");
   const [open, setOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("lda-language");
     setSelected(stored || "en-GB");
     setCustomLanguage(window.localStorage.getItem("lda-custom-language") || "");
+    setLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!loaded) {
+      return;
+    }
+
     const activeLanguage = selected === "custom" ? customLanguage : selected;
     if (!activeLanguage) {
       return;
@@ -29,7 +35,7 @@ export function LanguageSelector() {
       window.localStorage.setItem("lda-custom-language", customLanguage);
     }
     window.dispatchEvent(new CustomEvent("lda-language-change", { detail: { selected, customLanguage } }));
-  }, [customLanguage, selected]);
+  }, [customLanguage, loaded, selected]);
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
