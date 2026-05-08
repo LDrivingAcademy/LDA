@@ -3,16 +3,14 @@
 import { useCallback, useEffect, useRef } from "react";
 import { googleCodeForLanguage, isRtlLanguage } from "@/lib/languages";
 
-declare global {
-  interface Window {
-    google?: {
-      translate?: {
-        TranslateElement: new (options: Record<string, unknown>, element: string) => object;
-      };
+type TranslatorWindow = Window & {
+  google?: {
+    translate?: {
+      TranslateElement: new (options: Record<string, unknown>, element: string) => object;
     };
-    googleTranslateElementInit?: () => void;
-  }
-}
+  };
+  googleTranslateElementInit?: () => void;
+};
 
 const sourceLanguage = "en";
 const translatorScriptId = "google-page-translate";
@@ -65,12 +63,14 @@ export function PageTranslator() {
   }, []);
 
   useEffect(() => {
-    window.googleTranslateElementInit = () => {
-      if (!window.google?.translate?.TranslateElement) {
+    const translatorWindow = window as TranslatorWindow;
+
+    translatorWindow.googleTranslateElementInit = () => {
+      if (!translatorWindow.google?.translate?.TranslateElement) {
         return;
       }
 
-      new window.google.translate.TranslateElement(
+      new translatorWindow.google.translate.TranslateElement(
         { pageLanguage: sourceLanguage, autoDisplay: false, multilanguagePage: true },
         "google_translate_element"
       );
