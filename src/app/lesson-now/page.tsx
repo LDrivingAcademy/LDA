@@ -43,7 +43,7 @@ export default function LessonNowPage() {
                     <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-700">{closestInstructor.bio}</p>
                   </div>
                 </div>
-                <Link href="/dashboard#tracking" className="lda-pill lda-pill-sm">Track after booking</Link>
+                <Link href="/tracking" className="lda-pill lda-pill-sm">Track after booking</Link>
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
