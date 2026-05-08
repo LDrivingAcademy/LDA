@@ -6,6 +6,14 @@ type BookingEmailInput = {
   manageUrl: string;
 };
 
+type InstantBookingEmailInput = {
+  reference: string;
+  learnerEmail: string;
+  learnerName: string;
+  instructorName: string;
+  lessonSummary: string;
+};
+
 async function sendResendEmail(to: string, subject: string, html: string) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL ?? "info@ldrivingacademy.co.uk";
@@ -35,6 +43,15 @@ async function sendResendEmail(to: string, subject: string, html: string) {
   return response.json();
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 export async function sendBookingConfirmationEmails(input: BookingEmailInput) {
   const learnerHtml = `
     <h1>Thank you for booking ${input.instructorName}</h1>
@@ -60,4 +77,31 @@ export async function sendBookingConfirmationEmails(input: BookingEmailInput) {
   }
 
   return Promise.all(tasks);
+}
+
+export async function sendInstantBookingConfirmationEmail(input: InstantBookingEmailInput) {
+  const learnerName = escapeHtml(input.learnerName);
+  const instructorName = escapeHtml(input.instructorName);
+  const lessonSummary = escapeHtml(input.lessonSummary);
+  const reference = escapeHtml(input.reference);
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
+      <h1>Thank you for booking with L Driving Academy</h1>
+      <p>Hello ${learnerName},</p>
+      <p>Your instant driving lesson booking has been received for <strong>${instructorName}</strong>.</p>
+      <p>${lessonSummary}</p>
+      <div style="margin: 24px 0; padding: 18px; background: #f4f4f5; border-radius: 8px;">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #52525b;">Your confirmation number</div>
+        <div style="font-size: 28px; font-weight: 900; letter-spacing: 1px;">${reference}</div>
+      </div>
+      <p>Please keep this confirmation number ready so your instructor can confirm the booking belongs to you.</p>
+      <p>Thank you for choosing L Driving Academy.</p>
+    </div>
+  `;
+
+  return sendResendEmail(
+    input.learnerEmail,
+    `L Driving Academy booking confirmation ${input.reference}`,
+    html
+  );
 }
