@@ -16,6 +16,37 @@ type VerifyState =
   | { status: "valid"; message: string; mode: string }
   | { status: "invalid"; message: string };
 
+type PaymentMethod = "apple_pay" | "visa" | "mastercard" | "maestro" | "paypal";
+
+const paymentMethods: Array<{
+  id: PaymentMethod;
+  label: string;
+  detail: string;
+  icon: "apple" | "card" | "paypal";
+}> = [
+  { id: "apple_pay", label: "Apple Pay", detail: "Available on supported Apple devices through Stripe.", icon: "apple" },
+  { id: "visa", label: "Visa", detail: "Pay securely by card through Stripe Checkout.", icon: "card" },
+  { id: "mastercard", label: "Mastercard", detail: "Pay securely by card through Stripe Checkout.", icon: "card" },
+  { id: "maestro", label: "Maestro", detail: "Card support depends on the live Stripe account.", icon: "card" },
+  { id: "paypal", label: "PayPal", detail: "Available when PayPal is enabled on the Stripe account.", icon: "paypal" }
+];
+
+function paymentLabel(method: PaymentMethod) {
+  return paymentMethods.find((paymentMethod) => paymentMethod.id === method)?.label ?? "payment";
+}
+
+function PaymentIcon({ icon }: { icon: "apple" | "card" | "paypal" }) {
+  if (icon === "apple") {
+    return <Apple size={16} />;
+  }
+
+  if (icon === "paypal") {
+    return <BadgeCheck size={16} />;
+  }
+
+  return <CreditCard size={16} />;
+}
+
 function cleanLicenceNumber(value: string) {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
@@ -30,6 +61,7 @@ export function InstantLessonBooking({
   const [email, setEmail] = useState("");
   const [licenceNumber, setLicenceNumber] = useState("");
   const [permission, setPermission] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>("apple_pay");
   const [verifyState, setVerifyState] = useState<VerifyState>({
     status: "idle",
     message: "Enter the 16-character provisional licence number, then run the DVLA check."
@@ -86,7 +118,8 @@ export function InstantLessonBooking({
         instructorName,
         instructorEmail,
         lessonSummary,
-        amountPence
+        amountPence,
+        preferredPaymentMethod: selectedPaymentMethod
       })
     });
     const result = await response.json();
@@ -177,20 +210,39 @@ export function InstantLessonBooking({
 
       <div className="mt-6 rounded bg-zinc-100 p-4">
         <div className="text-sm font-black text-zinc-600">Payment methods</div>
-        <div className="mt-3 flex flex-wrap gap-2 text-xs font-black text-zinc-700">
-          <span className="inline-flex items-center gap-1 rounded bg-white px-3 py-2"><Apple size={14} /> Apple Pay</span>
-          <span className="inline-flex items-center gap-1 rounded bg-white px-3 py-2"><CreditCard size={14} /> Visa</span>
-          <span className="inline-flex items-center gap-1 rounded bg-white px-3 py-2"><CreditCard size={14} /> Mastercard</span>
-          <span className="inline-flex items-center gap-1 rounded bg-white px-3 py-2"><CreditCard size={14} /> Maestro</span>
-          <span className="inline-flex items-center gap-1 rounded bg-white px-3 py-2"><BadgeCheck size={14} /> PayPal</span>
+        <div className="mt-3 grid gap-2">
+          {paymentMethods.map((method) => (
+            <label
+              key={method.id}
+              className={`flex cursor-pointer items-start gap-3 rounded border px-3 py-3 text-sm font-bold ${
+                selectedPaymentMethod === method.id
+                  ? "border-brand bg-white text-black shadow-sm"
+                  : "border-transparent bg-white text-zinc-700"
+              }`}
+            >
+              <input
+                type="radio"
+                name="preferredPaymentMethod"
+                value={method.id}
+                checked={selectedPaymentMethod === method.id}
+                onChange={() => setSelectedPaymentMethod(method.id)}
+                className="mt-1"
+              />
+              <span className="mt-0.5 text-brand"><PaymentIcon icon={method.icon} /></span>
+              <span>
+                <span className="block font-black">{method.label}</span>
+                <span className="mt-1 block text-xs leading-5 text-zinc-500">{method.detail}</span>
+              </span>
+            </label>
+          ))}
         </div>
         <p className="mt-3 text-xs leading-5 text-zinc-500">
-          Stripe Checkout handles cards and eligible wallets securely. Apple Pay requires the live Stripe account and domain verification; PayPal depends on Stripe account eligibility.
+          Stripe Checkout handles cards and eligible wallets securely. The next screen will show the live methods enabled on the Stripe account.
         </p>
       </div>
 
       <button disabled={!canPay || checkoutState === "loading"} className="lda-pill mt-6 w-full" type="submit">
-        <Mail size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : "Pay and reserve lesson now"}
+        <Mail size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : `Pay with ${paymentLabel(selectedPaymentMethod)}`}
       </button>
       {checkoutState === "error" ? (
         <p className="mt-3 text-sm font-bold text-brand">Payment could not start. Please try again or contact support.</p>
