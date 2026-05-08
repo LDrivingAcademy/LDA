@@ -5,7 +5,6 @@ import { LanguageSelector } from "@/components/language-selector";
 const menuLinks = [
   { href: "/auth/login?role=learner", label: "Learner login" },
   { href: "/auth/login?role=instructor", label: "Instructor login" },
-  { href: "/auth/login?role=admin&next=/admin", label: "Admin login" },
   { href: "/instructor", label: "Become an instructor" },
   { href: "/contact", label: "Support" }
 ];

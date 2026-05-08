@@ -68,6 +68,22 @@ export default async function SocialPage({
               ? `You're on the LDA updates list${email ? ` as ${email}` : ""}.`
               : "Join the LDA updates list from the homepage, then use these links to follow the academy online."}
           </p>
+          <form action="/social" method="get" className="mt-6 flex max-w-2xl flex-col gap-3 sm:flex-row">
+            <input type="hidden" name="subscribed" value="1" />
+            <input
+              name="email"
+              type="email"
+              required
+              placeholder="you@example.com"
+              className="min-h-12 flex-1 rounded border border-zinc-300 bg-white px-4 text-sm font-bold text-black"
+            />
+            <button className="lda-pill lda-pill-sm" type="submit">
+              Subscribe
+            </button>
+          </form>
+          <p className="mt-3 text-xs leading-5 text-zinc-500">
+            TODO: Connect this to Supabase consent storage and Resend before live marketing emails are sent.
+          </p>
         </div>
 
         <section className="mt-8 grid gap-4 md:grid-cols-2">
