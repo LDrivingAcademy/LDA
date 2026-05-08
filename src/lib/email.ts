@@ -14,6 +14,17 @@ type InstantBookingEmailInput = {
   lessonSummary: string;
 };
 
+type SupportEscalationInput = {
+  role: "learner" | "instructor" | "admin";
+  name?: string;
+  email?: string;
+  bookingReference?: string;
+  subject: string;
+  message: string;
+  assistantSummary?: string;
+  urgent?: boolean;
+};
+
 async function sendResendEmail(to: string, subject: string, html: string) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL ?? "info@ldrivingacademy.co.uk";
@@ -104,4 +115,33 @@ export async function sendInstantBookingConfirmationEmail(input: InstantBookingE
     `L Driving Academy booking confirmation ${input.reference}`,
     html
   );
+}
+
+export async function sendSupportEscalationEmail(input: SupportEscalationInput) {
+  const supportEmail = process.env.LDA_SUPPORT_ESCALATION_EMAIL ?? process.env.APP_SUPPORT_EMAIL ?? "info@ldrivingacademy.co.uk";
+  const role = escapeHtml(input.role);
+  const name = escapeHtml(input.name || "Not provided");
+  const email = escapeHtml(input.email || "Not provided");
+  const bookingReference = escapeHtml(input.bookingReference || "Not provided");
+  const subject = escapeHtml(input.subject);
+  const message = escapeHtml(input.message);
+  const assistantSummary = escapeHtml(input.assistantSummary || "No assistant summary available.");
+  const priority = input.urgent ? "Urgent" : "Standard";
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
+      <h1>LDA support escalation</h1>
+      <p><strong>Priority:</strong> ${priority}</p>
+      <p><strong>Role:</strong> ${role}</p>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Booking reference:</strong> ${bookingReference}</p>
+      <h2>Issue</h2>
+      <p>${message}</p>
+      <h2>Assistant summary</h2>
+      <p>${assistantSummary}</p>
+    </div>
+  `;
+
+  return sendResendEmail(supportEmail, `${priority} LDA support: ${subject}`, html);
 }
