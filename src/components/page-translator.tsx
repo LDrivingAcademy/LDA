@@ -1,17 +1,13 @@
 "use client";
 
-import Script from "next/script";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { googleCodeForLanguage, isRtlLanguage } from "@/lib/languages";
 
 declare global {
   interface Window {
     google?: {
       translate?: {
-        TranslateElement: new (
-          options: { pageLanguage: string; autoDisplay: boolean; multilanguagePage: boolean },
-          element: string
-        ) => object;
+        TranslateElement: new (options: Record<string, unknown>, element: string) => object;
       };
     };
     googleTranslateElementInit?: () => void;
@@ -19,6 +15,7 @@ declare global {
 }
 
 const sourceLanguage = "en";
+const translatorScriptId = "google-page-translate";
 
 function getStoredLanguage() {
   if (typeof window === "undefined") {
@@ -40,7 +37,7 @@ function setTranslateCookie(targetLanguage: string) {
 }
 
 export function PageTranslator() {
-  const [ready, setReady] = useState(false);
+  const ready = useRef(false);
   const lastApplied = useRef("");
 
   const applyLanguage = useCallback(() => {
@@ -77,13 +74,21 @@ export function PageTranslator() {
         { pageLanguage: sourceLanguage, autoDisplay: false, multilanguagePage: true },
         "google_translate_element"
       );
-      setReady(true);
+      ready.current = true;
       window.setTimeout(applyLanguage, 400);
     };
 
+    if (!document.getElementById(translatorScriptId)) {
+      const script = document.createElement("script");
+      script.id = translatorScriptId;
+      script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+
     const onLanguageChange = () => {
       lastApplied.current = "";
-      window.setTimeout(applyLanguage, ready ? 150 : 500);
+      window.setTimeout(applyLanguage, ready.current ? 150 : 500);
     };
 
     window.addEventListener("lda-language-change", onLanguageChange);
@@ -94,22 +99,7 @@ export function PageTranslator() {
       window.removeEventListener("lda-language-change", onLanguageChange);
       window.removeEventListener("storage", onLanguageChange);
     };
-  }, [applyLanguage, ready]);
+  }, [applyLanguage]);
 
-  useEffect(() => {
-    if (ready) {
-      applyLanguage();
-    }
-  }, [applyLanguage, ready]);
-
-  return (
-    <>
-      <div id="google_translate_element" className="notranslate" aria-hidden="true" />
-      <Script
-        id="google-page-translate"
-        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-        strategy="afterInteractive"
-      />
-    </>
-  );
+  return <div id="google_translate_element" className="notranslate" aria-hidden="true" />;
 }
