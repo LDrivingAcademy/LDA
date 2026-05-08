@@ -8,6 +8,7 @@ type InstantCheckoutRequest = {
   instructorEmail?: string;
   lessonSummary?: string;
   amountPence?: number;
+  preferredPaymentMethod?: "apple_pay" | "visa" | "mastercard" | "maestro" | "paypal";
 };
 
 function createReference() {
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
   const amountPence = body.amountPence ?? 6500;
   const instructorName = body.instructorName ?? "your LDA instructor";
   const lessonSummary = body.lessonSummary ?? `Instant LDA lesson with ${instructorName}`;
+  const preferredPaymentMethod = body.preferredPaymentMethod ?? "apple_pay";
   const reference = createReference();
   const successParams = new URLSearchParams({
     reference,
@@ -48,10 +50,14 @@ export async function POST(request: Request) {
     return NextResponse.json({
       mode: "demo",
       reference,
-      message: "Stripe is not configured yet. Add STRIPE_SECRET_KEY for live payment collection.",
+      message: `Stripe is not configured yet. Demo confirmation created for ${preferredPaymentMethod}. Add STRIPE_SECRET_KEY for live payment collection.`,
       checkoutUrl: successUrl
     });
   }
+
+  const paymentMethodTypes = preferredPaymentMethod === "paypal" && process.env.STRIPE_ENABLE_PAYPAL === "true"
+    ? ["paypal", "card"]
+    : ["card"];
 
   const params = new URLSearchParams({
     mode: "payment",
@@ -60,18 +66,18 @@ export async function POST(request: Request) {
     "metadata[booking_reference]": reference,
     "metadata[learner_email]": body.learnerEmail ?? "",
     "metadata[instructor_name]": instructorName,
+    "metadata[preferred_payment_method]": preferredPaymentMethod,
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": currency,
     "line_items[0][price_data][unit_amount]": String(amountPence),
     "line_items[0][price_data][product_data][name]": `Instant LDA driving lesson with ${instructorName}`,
     "line_items[0][price_data][product_data][description]": lessonSummary,
-    "customer_email": body.learnerEmail ?? "",
-    "payment_method_types[0]": "card"
+    "customer_email": body.learnerEmail ?? ""
   });
 
-  if (process.env.STRIPE_ENABLE_PAYPAL === "true") {
-    params.set("payment_method_types[1]", "paypal");
-  }
+  paymentMethodTypes.forEach((method, index) => {
+    params.set(`payment_method_types[${index}]`, method);
+  });
 
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
