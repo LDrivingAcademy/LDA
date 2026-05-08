@@ -23,14 +23,14 @@ const supportRoutes = [
     title: "Learner support",
     body: "Bookings, pickup postcode, lesson time, payment confirmation, refunds, and live tracking queries.",
     icon: BookOpenCheck,
-    href: "/auth/login?role=learner",
-    cta: "Learner login"
+    href: "/support/learner",
+    cta: "Learner help"
   },
   {
     title: "Instructor support",
     body: "ADI/PDI onboarding, verification documents, profile setup, calendar availability, bookings, and payouts.",
     icon: BadgeCheck,
-    href: "/instructor",
+    href: "/support/instructor",
     cta: "Instructor help"
   },
   {
@@ -194,19 +194,19 @@ export default function ContactPage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="grid gap-8 rounded bg-black p-6 text-white sm:p-8 lg:grid-cols-[1fr_420px]">
+          <div className="grid gap-8 rounded bg-brand p-6 text-white shadow-2xl sm:p-8 lg:grid-cols-[1fr_420px]">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-red-500/60 bg-red-500/15 px-4 py-2 text-sm font-black text-red-100">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/50 bg-black/20 px-4 py-2 text-sm font-black text-white">
                 <UsersRound size={17} /> Policies and trust
               </div>
               <h2 className="mt-5 text-4xl font-black tracking-normal">Clear rules before every booking.</h2>
-              <p className="mt-4 max-w-2xl text-lg font-semibold leading-8 text-zinc-300">
+              <p className="mt-4 max-w-2xl text-lg font-semibold leading-8 text-white/90">
                 LDA keeps learner and instructor journeys anchored around verified instructors, upfront pricing, secure payments, and clear cancellation rules.
               </p>
             </div>
             <div className="grid gap-3">
               {policyLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="flex items-center justify-between rounded bg-white px-4 py-4 font-black text-black hover:bg-zinc-200">
+                <Link key={link.href} href={link.href} className="flex items-center justify-between rounded bg-white px-4 py-4 font-black text-black hover:bg-zinc-100">
                   {link.label}
                   <ArrowLeft className="rotate-180 text-brand" size={18} />
                 </Link>
