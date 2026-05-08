@@ -11,7 +11,7 @@ declare global {
         TranslateElement: new (
           options: { pageLanguage: string; autoDisplay: boolean; multilanguagePage: boolean },
           element: string
-        ) => void;
+        ) => object;
       };
     };
     googleTranslateElementInit?: () => void;
