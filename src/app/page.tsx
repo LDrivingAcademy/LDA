@@ -104,9 +104,9 @@ export default function HomePage() {
               </p>
 
               <section className="mt-8 max-w-[560px]">
-                <button className="lda-pill">
-                  <Clock3 size={22} /> Lesson now <ChevronDown size={20} />
-                </button>
+                <Link href="/lesson-now" className="lda-pill">
+                  <Clock3 size={22} /> Lesson now
+                </Link>
 
                 <div className="mt-7 grid gap-3">
                   <div className="relative rounded bg-zinc-100 px-5 py-5">
