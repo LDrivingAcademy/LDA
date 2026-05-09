@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, CarFront, GraduationCap, ShieldCheck } from "lucide-react";
+import { Brand } from "@/components/brand";
 import { demoSignIn, signIn, signUp } from "../actions";
 
 export default async function LoginPage({
@@ -14,9 +15,12 @@ export default async function LoginPage({
   return (
     <main className="min-h-screen bg-ink px-4 py-8 text-white">
       <div className="mx-auto max-w-6xl">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-zinc-300 hover:text-white">
-          <ArrowLeft size={16} /> Back to homepage
-        </Link>
+        <div className="flex items-center justify-between gap-4">
+          <Brand />
+          <Link href="/" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-zinc-300 hover:text-white hover:ring-2 hover:ring-brand">
+            <ArrowLeft size={16} /> Back to homepage
+          </Link>
+        </div>
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_460px]">
           <section>
             <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
@@ -77,7 +81,11 @@ export default async function LoginPage({
             </p>
             <div className="mt-5 border-t border-zinc-800 pt-5">
               <div className="text-sm font-black uppercase text-brand">Test logins</div>
-              <p className="mt-1 text-xs leading-5 text-zinc-500">Use these to test each flow immediately without creating real users.</p>
+              <p className="mt-1 text-xs leading-5 text-zinc-500">Use these visible demo credentials while you are shaping the learner and instructor pages. The quick buttons below open the demo dashboards without needing Supabase users.</p>
+              <div className="mt-3 grid gap-2 rounded bg-black p-3 text-xs font-bold leading-5 text-zinc-300">
+                <div><span className="text-white">Learner:</span> learner@ldrivingacademy.co.uk / LDAlearner123!</div>
+                <div><span className="text-white">Instructor:</span> instructor@ldrivingacademy.co.uk / LDAinstructor123!</div>
+              </div>
               <div className="mt-3 grid gap-2">
                 {[
                   ["learner", "Demo learner"],
