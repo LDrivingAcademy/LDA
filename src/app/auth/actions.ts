@@ -15,14 +15,24 @@ function safeNextPath(value: FormDataEntryValue | null) {
 }
 
 export async function signIn(formData: FormData) {
+  const email = String(formData.get("email") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const nextPath = safeNextPath(formData.get("next"));
+
+  const demoCredentials: Record<string, { password: string; role: "learner" | "instructor" }> = {
+    "learner@ldrivingacademy.co.uk": { password: "LDAlearner123!", role: "learner" },
+    "instructor@ldrivingacademy.co.uk": { password: "LDAinstructor123!", role: "instructor" }
+  };
+  const demoAccount = demoCredentials[email.toLowerCase()];
+
+  if (demoAccount && demoAccount.password === password) {
+    redirect(`/demo/${demoAccount.role}`);
+  }
+
   const supabase = await createClient();
   if (!supabase) {
     authError("Supabase environment variables are not configured yet.");
   }
-
-  const email = String(formData.get("email") ?? "");
-  const password = String(formData.get("password") ?? "");
-  const nextPath = safeNextPath(formData.get("next"));
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
