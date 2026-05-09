@@ -4,6 +4,7 @@ import {
   CarFront,
   CheckCircle2,
   Circle,
+  ClipboardCheck,
   Clock3,
   HelpCircle,
   Navigation,
@@ -18,7 +19,7 @@ import { LanguageSelector } from "@/components/language-selector";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
 
-type CardVisualType = "car" | "calendar" | "match" | "instructor" | "tracking" | "social";
+type CardVisualType = "car" | "calendar" | "match" | "instructor" | "tracking" | "social" | "progress";
 
 const suggestionCards: {
   title: string;
@@ -61,6 +62,13 @@ const suggestionCards: {
     href: "/tracking",
     image: "tracking",
     cta: "Open tracking"
+  },
+  {
+    title: "Progress tracker",
+    body: "Instructors can send lesson feedback, update completed skills, and share videos before the next lesson.",
+    href: "/progress-tracker",
+    image: "progress",
+    cta: "Open tracker"
   },
   {
     title: "Subscribe & socials",
@@ -243,7 +251,8 @@ function CardVisual({ type }: { type: CardVisualType }) {
     match: <Sparkles size={68} />,
     instructor: <UsersRound size={68} />,
     tracking: <RadioTower size={68} />,
-    social: <Share2 size={68} />
+    social: <Share2 size={68} />,
+    progress: <ClipboardCheck size={68} />
   }[type];
 
   return (
