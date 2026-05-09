@@ -25,6 +25,17 @@ type SupportEscalationInput = {
   urgent?: boolean;
 };
 
+type ProgressFeedbackEmailInput = {
+  learnerName: string;
+  learnerEmail: string;
+  instructorName: string;
+  lessonReference?: string;
+  completedSkills: string[];
+  instructorNotes: string;
+  nextLessonFocus: string;
+  recommendedVideos: string;
+};
+
 async function sendResendEmail(to: string, subject: string, html: string) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL ?? "info@ldrivingacademy.co.uk";
@@ -144,4 +155,36 @@ export async function sendSupportEscalationEmail(input: SupportEscalationInput) 
   `;
 
   return sendResendEmail(supportEmail, `${priority} LDA support: ${subject}`, html);
+}
+
+export async function sendProgressFeedbackEmail(input: ProgressFeedbackEmailInput) {
+  const learnerName = escapeHtml(input.learnerName);
+  const instructorName = escapeHtml(input.instructorName);
+  const lessonReference = escapeHtml(input.lessonReference || "Not provided");
+  const instructorNotes = escapeHtml(input.instructorNotes);
+  const nextLessonFocus = escapeHtml(input.nextLessonFocus);
+  const recommendedVideos = escapeHtml(input.recommendedVideos || "No videos added.");
+  const completedSkills = input.completedSkills.length
+    ? input.completedSkills.map((skill) => `<li>${escapeHtml(skill)}</li>`).join("")
+    : "<li>No skills marked complete yet.</li>";
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
+      <h1>Your LDA lesson progress update</h1>
+      <p>Hello ${learnerName},</p>
+      <p>${instructorName} has sent feedback after your lesson.</p>
+      <p><strong>Lesson reference:</strong> ${lessonReference}</p>
+      <h2>Completed skills</h2>
+      <ul>${completedSkills}</ul>
+      <h2>Instructor notes</h2>
+      <p>${instructorNotes}</p>
+      <h2>Before your next lesson</h2>
+      <p>${nextLessonFocus}</p>
+      <h2>Recommended videos or links</h2>
+      <p>${recommendedVideos.replace(/\n/g, "<br />")}</p>
+      <p>Keeping this progress record helps avoid repeating covered topics and keeps the next lesson focused.</p>
+    </div>
+  `;
+
+  return sendResendEmail(input.learnerEmail, `LDA lesson progress update from ${input.instructorName}`, html);
 }
