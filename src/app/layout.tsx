@@ -10,7 +10,10 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: "LDA | L Driving Academy",
-  description: "A UK learner-driver marketplace for verified driving instructors, transparent pricing, booking, and online payments."
+  description: "A UK learner-driver marketplace for verified driving instructors, transparent pricing, booking, and online payments.",
+  other: {
+    google: "notranslate"
+  }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
