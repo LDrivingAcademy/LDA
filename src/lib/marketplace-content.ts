@@ -136,10 +136,9 @@ export const bookingPipeline = [
 ];
 
 export const complianceLinks = [
-  { href: "/privacy", label: "Privacy" },
-  { href: "/terms", label: "Terms" },
-  { href: "/cancellation-policy", label: "Cancellation" },
-  { href: "/cookies", label: "Cookies" },
-  { href: "/data-requests", label: "Data requests" },
-  { href: "/contact", label: "Support" }
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms of use" },
+  { href: "/accessibility", label: "Accessibility" },
+  { href: "/cookies", label: "Cookie Policy" },
+  { href: "/sitemap", label: "Sitemap" }
 ];
