@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { CookieConsent } from "@/components/cookie-consent";
 import { PageTranslator } from "@/components/page-translator";
 import "./globals.css";
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         {children}
         <CookieConsent />
         <PageTranslator />
+        <Analytics />
       </body>
     </html>
   );
