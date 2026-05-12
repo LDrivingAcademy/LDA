@@ -15,6 +15,19 @@ type TranslatorWindow = Window & {
 const sourceLanguage = "en";
 const translatorScriptId = "google-page-translate";
 const reloadMarker = "lda-language-reload-target";
+const googleUiSelectors = [
+  ".goog-te-banner-frame",
+  ".goog-te-balloon-frame",
+  ".goog-te-menu-frame",
+  ".goog-te-ftab-frame",
+  ".goog-tooltip",
+  ".goog-tooltip:hover",
+  ".VIpgJd-ZVi9od-ORHb-OEVmcd",
+  ".VIpgJd-ZVi9od-aZ2wEe-wOHMyf",
+  ".VIpgJd-ZVi9od-xl07Ob-OEVmcd",
+  ".VIpgJd-yAWNEb-L7lbkb",
+  "iframe.skiptranslate"
+];
 
 function getStoredLanguage() {
   if (typeof window === "undefined") {
@@ -63,6 +76,23 @@ function reloadOnce(targetLanguage: string) {
   window.location.reload();
 }
 
+function suppressGoogleTranslateUi() {
+  googleUiSelectors.forEach((selector) => {
+    document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
+      element.style.setProperty("display", "none", "important");
+      element.style.setProperty("visibility", "hidden", "important");
+      element.style.setProperty("pointer-events", "none", "important");
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>(".goog-text-highlight").forEach((element) => {
+    element.style.setProperty("background", "transparent", "important");
+    element.style.setProperty("box-shadow", "none", "important");
+  });
+
+  document.body.style.setProperty("top", "0", "important");
+}
+
 export function PageTranslator() {
   const ready = useRef(false);
   const lastApplied = useRef("");
@@ -107,7 +137,7 @@ export function PageTranslator() {
       return;
     }
 
-    combo.value = targetLanguage;
+    combo.value = targetLanguage === sourceLanguage ? "" : targetLanguage;
     combo.dispatchEvent(new Event("change", { bubbles: true }));
   }, []);
 
@@ -124,6 +154,7 @@ export function PageTranslator() {
         "google_translate_element"
       );
       ready.current = true;
+      suppressGoogleTranslateUi();
       window.setTimeout(applyLanguage, 400);
     };
 
@@ -142,11 +173,15 @@ export function PageTranslator() {
 
     window.addEventListener("lda-language-change", onLanguageChange);
     window.addEventListener("storage", onLanguageChange);
+    const observer = new MutationObserver(suppressGoogleTranslateUi);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    suppressGoogleTranslateUi();
     applyLanguage();
 
     return () => {
       window.removeEventListener("lda-language-change", onLanguageChange);
       window.removeEventListener("storage", onLanguageChange);
+      observer.disconnect();
     };
   }, [applyLanguage]);
 
