@@ -53,8 +53,8 @@ export default function AboutPage() {
           <div className="flex items-center gap-7">
             <Brand />
             <nav className="hidden items-center gap-7 lg:flex">
-              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learners</Link>
-              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructors</Link>
+              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
+              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="/#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
               <Link href="/#safety" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
               <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white ring-2 ring-brand">About</Link>
@@ -65,7 +65,7 @@ export default function AboutPage() {
             <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
               <CircleHelp size={17} /> Help
             </Link>
-            <Link href="/auth/login?role=learner" className="text-sm font-black hover:text-zinc-300">Log in</Link>
+            <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
             <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm">Sign up</Link>
           </div>
           <div className="md:hidden">
