@@ -3,7 +3,7 @@ import { complianceLinks } from "@/lib/marketplace-content";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border bg-ink text-white">
+    <footer className="border-t border-zinc-800 bg-ink text-white">
       <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
@@ -19,7 +19,7 @@ export function SiteFooter() {
           </nav>
         </div>
         <p className="max-w-4xl text-xs leading-6 text-zinc-500">
-          LDA is being prepared as a UK learner-driver marketplace. Legal, privacy, cancellation, and verification wording is placeholder operational guidance until reviewed by a qualified solicitor.
+          © 2026 LDA / L Driving Academy. All rights reserved.
         </p>
       </div>
     </footer>
