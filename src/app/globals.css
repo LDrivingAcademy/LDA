@@ -41,11 +41,23 @@ button, input, select, textarea { font: inherit; }
 .goog-te-balloon-frame,
 .goog-te-gadget,
 .goog-te-menu-frame,
+.goog-te-ftab-frame,
+.goog-tooltip,
+.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+.VIpgJd-ZVi9od-xl07Ob-OEVmcd,
+.VIpgJd-yAWNEb-L7lbkb,
 iframe.skiptranslate {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 body {
   top: 0 !important;
+}
+.goog-text-highlight {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 .focus-ring { outline: 2px solid transparent; outline-offset: 2px; }
 .focus-ring:focus-visible { outline-color: var(--brand); }
