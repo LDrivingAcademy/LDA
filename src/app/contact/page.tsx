@@ -34,27 +34,26 @@ const supportRoutes = [
     cta: "Instructor help"
   },
   {
-    title: "Data and privacy",
-    body: "Request account deletion, data access, correction, or privacy support before launch policies are solicitor-reviewed.",
+    title: "Account and data",
+    body: "Login issues, privacy questions, account deletion requests, marketing preferences, and data access.",
     icon: ShieldCheck,
     href: "/data-requests",
-    cta: "Data request"
+    cta: "Data requests"
   }
 ];
 
-const contactTopics = [
+const helpTopics = [
   { icon: Clock3, title: "Lesson changes", body: "Use your booking reference, instructor name, lesson date, and pickup postcode." },
   { icon: CreditCard, title: "Payments", body: "Include your payment email and confirmation number. Stripe handles card data securely." },
-  { icon: UserRoundCheck, title: "Instructor verification", body: "Include ADI/PDI number, document type, and the email used for onboarding." },
+  { icon: UserRoundCheck, title: "Verification", body: "Instructors should include account email, ADI/PDI status, and relevant document reference." },
   { icon: FileText, title: "Policies", body: "Cancellation, refund, privacy, cookie, and terms pages are available before booking." }
 ];
 
 const policyLinks = [
-  { label: "Terms", href: "/terms" },
-  { label: "Privacy", href: "/privacy" },
-  { label: "Cancellation", href: "/cancellation-policy" },
-  { label: "Cookies", href: "/cookies" },
-  { label: "Data requests", href: "/data-requests" }
+  { href: "/cancellation-policy", label: "Cancellation policy" },
+  { href: "/privacy", label: "Privacy policy" },
+  { href: "/terms", label: "Terms" },
+  { href: "/cookies", label: "Cookies" }
 ];
 
 export default function ContactPage() {
@@ -65,9 +64,10 @@ export default function ContactPage() {
           <div className="flex items-center gap-7">
             <Brand />
             <nav className="hidden items-center gap-7 lg:flex">
-              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learners</Link>
-              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructors</Link>
+              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
+              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="/#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
+              <Link href="/#safety" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
               <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">About</Link>
             </nav>
           </div>
@@ -76,6 +76,7 @@ export default function ContactPage() {
             <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white ring-2 ring-brand">
               <CircleHelp size={17} /> Help
             </Link>
+            <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
             <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm">Sign up</Link>
           </div>
           <div className="md:hidden">
@@ -86,10 +87,10 @@ export default function ContactPage() {
 
       <main className="bg-white text-black">
         <section className="bg-black text-white">
-          <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_420px] lg:px-8 lg:py-16">
+          <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_430px] lg:px-8 lg:py-16">
             <div>
               <Link href="/" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-zinc-300 hover:text-white hover:ring-2 hover:ring-brand">
-                <ArrowLeft size={17} /> Back to homepage
+                <ArrowLeft size={17} /> Back home
               </Link>
               <div className="mt-10 inline-flex items-center gap-2 rounded-full border border-red-500/60 bg-red-500/15 px-4 py-2 text-sm font-black text-red-100">
                 <MessageSquare size={17} /> LDA support
@@ -105,18 +106,31 @@ export default function ContactPage() {
                   <Mail size={20} /> Email support
                 </a>
                 <Link href="/auth/login?role=learner" className="lda-pill">
-                  Book a lesson
+                  <BookOpenCheck size={20} /> Learner login
                 </Link>
               </div>
             </div>
 
-            <aside className="rounded bg-white p-6 text-black shadow-2xl">
-              <div className="text-sm font-black uppercase text-zinc-500">Support inbox</div>
-              <h2 className="mt-2 text-3xl font-black tracking-normal">info@ldrivingacademy.co.uk</h2>
-              <div className="mt-5 grid gap-3 text-sm font-bold leading-6 text-zinc-700">
+            <aside className="rounded border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+              <div className="flex items-center gap-3">
+                <div className="grid h-12 w-12 place-items-center rounded bg-red-500/15 text-brand">
+                  <Mail size={24} />
+                </div>
+                <div>
+                  <div className="text-sm font-black uppercase text-zinc-500">Support email</div>
+                  <a href="mailto:info@ldrivingacademy.co.uk" className="mt-1 block text-xl font-black text-white hover:text-brand">
+                    info@ldrivingacademy.co.uk
+                  </a>
+                </div>
+              </div>
+              <div className="mt-6 grid gap-3 text-sm font-semibold leading-6 text-zinc-300">
                 <p>For faster support, include your booking reference, account email, instructor name, lesson date/time, and pickup postcode.</p>
-                <p>Do not send full payment card numbers, driving licence images, or sensitive documents by normal email unless LDA gives you a secure upload route.</p>
-                <p className="rounded bg-red-50 p-3 text-brand">
+                <p>For instructor support, include your ADI/PDI status, verification stage, and payout or booking reference if relevant.</p>
+              </div>
+              <div className="mt-6 rounded bg-white p-4 text-black">
+                <div className="text-xs font-black uppercase text-zinc-500">Response target</div>
+                <div className="mt-1 text-2xl font-black">1 business day</div>
+                <p className="mt-2 text-sm font-semibold leading-6 text-zinc-700">
                   Emergency lesson-day issues should include the word urgent in the email subject.
                 </p>
               </div>
@@ -125,12 +139,12 @@ export default function ContactPage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-black tracking-normal">Choose the right support route</h2>
+          <h2 className="text-4xl font-black tracking-normal">What do you need help with?</h2>
           <div className="mt-8 grid gap-5 lg:grid-cols-3">
             {supportRoutes.map((route) => {
               const Icon = route.icon;
               return (
-                <Link key={route.title} href={route.href} className="group flex min-h-[260px] flex-col rounded bg-zinc-100 p-6 hover:bg-zinc-200">
+                <Link key={route.title} href={route.href} className="group flex min-h-[260px] flex-col rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200">
                   <div className="grid h-14 w-14 place-items-center rounded bg-white text-brand shadow-sm">
                     <Icon size={28} />
                   </div>
@@ -144,10 +158,24 @@ export default function ContactPage() {
         </section>
 
         <section className="bg-zinc-100">
-          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-            <h2 className="text-4xl font-black tracking-normal">What to include</h2>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {contactTopics.map((topic) => {
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[420px_1fr] lg:px-8">
+            <div>
+              <h2 className="text-4xl font-black tracking-normal">Send the right details first time.</h2>
+              <p className="mt-4 text-lg font-semibold leading-8 text-zinc-700">
+                The quickest answers come when support can see exactly which booking, account, or payment you mean.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <a href="mailto:info@ldrivingacademy.co.uk?subject=LDA%20support%20request" className="lda-pill">
+                  Start email
+                </a>
+                <Link href="/cancellation-policy" className="lda-pill">
+                  View policies
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {helpTopics.map((topic) => {
                 const Icon = topic.icon;
                 return (
                   <article key={topic.title} className="rounded bg-white p-5 shadow-sm">
