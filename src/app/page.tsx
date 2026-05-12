@@ -57,21 +57,21 @@ const suggestionCards: {
     cta: "Details"
   },
   {
-    title: "Live tracking",
+    title: "Live Tracking",
     body: "Preview how learners see distance, ETA, and instructor arrival once a lesson is accepted.",
     href: "/tracking",
     image: "tracking",
     cta: "Open tracking"
   },
   {
-    title: "Progress tracker",
+    title: "Progress Tracker",
     body: "Instructors can send lesson feedback, update completed skills, and share videos before the next lesson.",
     href: "/progress-tracker",
     image: "progress",
     cta: "Open tracker"
   },
   {
-    title: "Subscribe & socials",
+    title: "Subscribe & Socials",
     body: "Follow LDA, subscribe for learner tips, deals, free trials, and platform updates.",
     href: "/social",
     image: "social",
@@ -94,8 +94,8 @@ export default function HomePage() {
           <div className="flex items-center gap-7">
             <Brand />
             <nav className="hidden items-center gap-7 lg:flex">
-              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learners</Link>
-              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructors</Link>
+              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
+              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
               <Link href="#safety" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
               <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
@@ -105,10 +105,10 @@ export default function HomePage() {
           </div>
           <div className="hidden items-center gap-6 md:flex">
             <LanguageSelector />
-            <Link href="/contact" className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-black hover:text-zinc-300">
+            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
               <HelpCircle size={17} /> Help
             </Link>
-            <Link href="/auth/login?role=learner" className="whitespace-nowrap text-sm font-black hover:text-zinc-300">Log in</Link>
+            <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
             <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
           </div>
           <div className="md:hidden">
@@ -119,7 +119,7 @@ export default function HomePage() {
 
       <main className="bg-white text-black">
         <section className="bg-white">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-7 sm:px-6 lg:grid-cols-[560px_1fr] lg:px-8 lg:py-10">
+          <div className="mx-auto grid max-w-7xl items-stretch gap-8 px-4 pb-0 pt-7 sm:px-6 lg:grid-cols-[560px_1fr] lg:px-8 lg:pb-0 lg:pt-10">
             <div className="py-2 lg:py-8">
               <h1 className="max-w-xl text-5xl font-black tracking-normal sm:text-6xl">
                 Learn to drive with LDA
@@ -132,6 +132,9 @@ export default function HomePage() {
                 <Link href="/lesson-now" className="lda-pill">
                   <Clock3 size={22} /> Lesson now
                 </Link>
+                <p className="mt-3 max-w-lg rounded bg-red-50 px-4 py-3 text-sm font-bold leading-6 text-zinc-800">
+                  Lesson Now is for short-notice bookings: enter your pickup details, verify your provisional licence, pay securely, then receive a booking reference and tracking link.
+                </p>
 
                 <div className="mt-7 grid gap-3">
                   <div className="relative rounded bg-zinc-100 px-5 py-5">
@@ -168,8 +171,8 @@ export default function HomePage() {
               </section>
             </div>
 
-            <section className="overflow-hidden rounded bg-white text-white shadow-sm lg:mt-8">
-              <div className="relative flex min-h-[430px] flex-col justify-end p-7 sm:p-10">
+            <section className="h-full overflow-hidden rounded bg-white text-white shadow-sm lg:mt-8">
+              <div className="relative flex h-full min-h-[430px] flex-col justify-end p-7 sm:p-10">
                 <img
                   src="https://images.pexels.com/photos/4895404/pexels-photo-4895404.jpeg?auto=compress&cs=tinysrgb&w=1400"
                   alt="Learner driver behind the wheel with an instructor in the passenger seat"
@@ -204,10 +207,13 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-black tracking-normal sm:text-5xl">Discover what you can do with LDA</h2>
             <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {suggestionCards.map((card) => (
-                <Link key={card.title} href={card.href} className="group grid min-h-[210px] grid-cols-[1fr_150px] overflow-hidden rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200">
+              {suggestionCards.map((card) => {
+                const stretchTitle = card.title === "Progress Tracker" || card.title === "Subscribe & Socials";
+                return (
+                <Link key={card.title} href={card.href} className={`group grid min-h-[210px] grid-cols-[1fr_150px] overflow-hidden rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200 ${card.title === "Subscribe & Socials" ? "xl:col-start-2" : ""}`}>
+                  {stretchTitle ? <h3 className="col-span-2 text-2xl font-black">{card.title}</h3> : null}
                   <div className="flex flex-col items-start">
-                    <h3 className="text-2xl font-black">{card.title}</h3>
+                    {!stretchTitle ? <h3 className="text-2xl font-black">{card.title}</h3> : null}
                     <p className="mt-4 max-w-xs text-base leading-7 text-zinc-800">{card.body}</p>
                     <span className="lda-pill lda-pill-sm mt-auto">
                       {card.cta}
@@ -215,7 +221,7 @@ export default function HomePage() {
                   </div>
                   <CardVisual type={card.image} />
                 </Link>
-              ))}
+              );})}
             </div>
           </div>
         </section>
