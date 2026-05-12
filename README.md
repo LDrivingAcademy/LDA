@@ -38,6 +38,17 @@ DATABASE_URL=
 
 The schema enables RLS for marketplace tables and creates the private instructor document bucket. Admin access is controlled by rows in `account_roles`; do not store roles in user-editable metadata.
 
+Supabase Auth should be configured for email-link login:
+
+```txt
+Site URL: https://ldrivingacademy.co.uk
+Redirect URLs:
+https://ldrivingacademy.co.uk/auth/callback
+http://localhost:3000/auth/callback
+```
+
+Learners and instructors enter an email address, receive a secure Supabase magic link, return to `/auth/verify`, complete verification details, and then continue to the dashboard/booking flow. Keep `SUPABASE_SERVICE_ROLE_KEY` server-only; it is used only by server actions to finish role/profile registration after the email session is confirmed.
+
 To make a user an admin after they sign up:
 
 ```sql
