@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft, CarFront, GraduationCap, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CarFront, GraduationCap, MailCheck, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
-import { demoSignIn, signIn, signUp } from "../actions";
+import { demoSignIn, sendMagicLink } from "../actions";
 
 export default async function LoginPage({
   searchParams
@@ -53,31 +53,26 @@ export default async function LoginPage({
           <section className="rounded border border-zinc-800 bg-zinc-950 p-5 text-white shadow-2xl">
             <div className="mb-5">
               <div className="text-sm font-black uppercase text-brand">{isInstructor ? "Instructor access" : "Learner access"}</div>
-              <h2 className="mt-1 text-2xl font-black">Log in or create account</h2>
+              <h2 className="mt-1 text-2xl font-black">Email link login</h2>
             </div>
             {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-100">{message}</div> : null}
-            <form className="grid gap-3">
+            <form action={sendMagicLink} className="grid gap-3">
               <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
               <input type="hidden" name="next" value={nextPath} />
               <label className="grid gap-1">
-                <span className="text-sm font-bold text-zinc-400">Full name for sign up</span>
+                <span className="text-sm font-bold text-zinc-400">Full name</span>
                 <input name="fullName" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Your name" />
               </label>
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-400">Email</span>
                 <input required name="email" type="email" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="you@example.com" />
               </label>
-              <label className="grid gap-1">
-                <span className="text-sm font-bold text-zinc-400">Password</span>
-                <input required name="password" type="password" minLength={8} className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
-              </label>
-              <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                <button formAction={signIn} className="lda-pill lda-pill-sm">Sign in</button>
-                <button formAction={signUp} className="lda-pill lda-pill-sm">Create account</button>
-              </div>
+              <button className="lda-pill mt-2">
+                <MailCheck size={18} /> Send secure email link
+              </button>
             </form>
             <p className="mt-4 text-xs leading-5 text-zinc-500">
-              By continuing, users should be shown and asked to accept final terms, privacy, and cancellation wording before live paid bookings are enabled.
+              No password is needed. Click the link in your email to return to LDA, complete verification, and continue into booking or instructor onboarding.
             </p>
             <div className="mt-5 border-t border-zinc-800 pt-5">
               <div className="text-sm font-black uppercase text-brand">Test logins</div>
