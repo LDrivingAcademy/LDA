@@ -27,8 +27,8 @@ export default function LearnerSupportPage() {
           <div className="flex items-center gap-7">
             <Brand />
             <nav className="hidden items-center gap-7 lg:flex">
-              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white ring-2 ring-brand">Learners</Link>
-              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructors</Link>
+              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white ring-2 ring-brand">Learner</Link>
+              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="/#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
               <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">About</Link>
             </nav>
