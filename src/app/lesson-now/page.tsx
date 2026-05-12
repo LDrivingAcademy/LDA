@@ -31,6 +31,23 @@ export default function LessonNowPage() {
               No LDA account needed. Because this is a demand-based instant booking, the price is higher than the standard listed hourly rate.
             </p>
 
+            <div className="mt-6 rounded bg-red-50 p-5 text-black ring-1 ring-red-100">
+              <h2 className="text-2xl font-black">How Lesson Now works</h2>
+              <div className="mt-4 grid gap-3 md:grid-cols-4">
+                {[
+                  "Enter your name, email, pickup details, and provisional licence number.",
+                  "LDA checks the booking details and shows the closest available instructor.",
+                  "Choose a payment option and continue to secure Stripe Checkout.",
+                  "After payment, you get a unique confirmation number and tracking access."
+                ].map((step, index) => (
+                  <div key={step} className="rounded bg-white p-4 text-sm font-bold leading-6 text-zinc-800">
+                    <div className="mb-2 text-xl font-black text-brand">{index + 1}</div>
+                    {step}
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <article className="mt-8 rounded bg-zinc-100 p-5">
               <div className="flex flex-wrap items-start justify-between gap-5">
                 <div className="flex items-start gap-4">
@@ -43,7 +60,7 @@ export default function LessonNowPage() {
                     <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-700">{closestInstructor.bio}</p>
                   </div>
                 </div>
-                <Link href="/tracking" className="lda-pill lda-pill-sm">Track after booking</Link>
+                <Link href="/dashboard#tracking" className="lda-pill lda-pill-sm">Track after booking</Link>
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
