@@ -1,4 +1,5 @@
 type BookingEmailInput = {
+  bookingReference: string;
   learnerEmail?: string;
   instructorEmail?: string;
   instructorName: string;
@@ -117,15 +118,25 @@ function escapeHtml(value: string) {
 }
 
 export async function sendBookingConfirmationEmails(input: BookingEmailInput) {
+  const bookingReference = escapeHtml(input.bookingReference);
+  const instructorName = escapeHtml(input.instructorName);
+  const lessonSummary = escapeHtml(input.lessonSummary);
   const learnerHtml = `
-    <h1>Thank you for booking ${input.instructorName}</h1>
-    <p>${input.lessonSummary}</p>
+    <h1>Thank you for confirming your LDA lesson</h1>
+    <p>Thank you for booking <strong>${instructorName}</strong>. Your lesson is now confirmed.</p>
+    <p>${lessonSummary}</p>
+    <div style="margin: 24px 0; padding: 18px; background: #f4f4f5; border-radius: 8px;">
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #52525b;">Your booking reference</div>
+      <div style="font-size: 28px; font-weight: 900; letter-spacing: 1px;">${bookingReference}</div>
+    </div>
+    <p>Please do not share this reference with anyone except your driving instructor when they arrive to confirm the lesson belongs to you.</p>
     <p>You can manage your lesson, cancellation policy, and live tracking from your LDA dashboard.</p>
     <p><a href="${input.manageUrl}">Open booking</a></p>
   `;
   const instructorHtml = `
     <h1>New paid LDA booking</h1>
-    <p>${input.lessonSummary}</p>
+    <p>${lessonSummary}</p>
+    <p><strong>Booking reference:</strong> ${bookingReference}</p>
     <p>The learner has booked you for this lesson. Please open your dashboard to accept, prepare, or start en route tracking near pickup time.</p>
     <p><a href="${input.manageUrl}">Open instructor dashboard</a></p>
   `;
@@ -133,7 +144,7 @@ export async function sendBookingConfirmationEmails(input: BookingEmailInput) {
   const tasks = [];
 
   if (input.learnerEmail) {
-    tasks.push(sendResendEmail(input.learnerEmail, `Thank you for booking ${input.instructorName}`, learnerHtml));
+    tasks.push(sendResendEmail(input.learnerEmail, `LDA booking confirmed ${input.bookingReference}`, learnerHtml));
   }
 
   if (input.instructorEmail) {
@@ -241,7 +252,7 @@ export async function sendAuthMagicLinkEmail(input: AuthMagicLinkEmailInput) {
     `Use this secure link to confirm your email and continue your ${roleLabel} setup with L Driving Academy:`,
     input.confirmUrl,
     "",
-    "You can open this link on your phone, laptop, or tablet. It does not need to be opened on the same device that requested it.",
+    "You can open this link on your phone, laptop, or tablet. The device that opens it will continue, and the original LDA page that requested it will also continue automatically if it is still open.",
     "",
     "If you did not request this email, you can ignore it."
   ].join("\n");
@@ -255,7 +266,7 @@ export async function sendAuthMagicLinkEmail(input: AuthMagicLinkEmailInput) {
           Continue to LDA
         </a>
       </p>
-      <p>This link can be opened on your phone, laptop, or tablet. It does not need to be opened on the same device that requested it.</p>
+      <p>This link can be opened on your phone, laptop, or tablet. The device that opens it will continue, and the original LDA page that requested it will also continue automatically if it is still open.</p>
       <p>If the button does not work, copy and paste this link into your browser:</p>
       <p><a href="${confirmUrl}">${confirmUrl}</a></p>
       <p>If you did not request this email, you can safely ignore it.</p>

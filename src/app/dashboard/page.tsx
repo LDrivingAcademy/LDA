@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, CarFront, CreditCard, FileCheck2, MapPin, Navigation, Route, ShieldCheck, SlidersHorizontal, Star } from "lucide-react";
+import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, ShieldCheck } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
+import { LearnerBookingDashboard } from "@/components/learner-booking-dashboard";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
-import { bookingPipeline, demoInstructors, instructorJourneyStages, learnerJourneyStages, learnerSteps } from "@/lib/marketplace-content";
-import { formatMoney } from "@/lib/money";
+import { instructorJourneyStages } from "@/lib/marketplace-content";
 
 export default async function DashboardPage() {
   const demoRole = (await cookies()).get("lda_demo_role")?.value;
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
           </article>
         </section>
 
-        {isInstructorDemo ? <InstructorDashboard /> : <LearnerSearchDashboard />}
+        {isInstructorDemo ? <InstructorDashboard /> : <LearnerBookingDashboard learnerEmail="learner@ldrivingacademy.co.uk" />}
       </main>
     );
   }
@@ -136,157 +136,8 @@ export default async function DashboardPage() {
         </article>
       </section>
 
-      {isInstructor ? <InstructorDashboard /> : <LearnerSearchDashboard />}
+      {isInstructor ? <InstructorDashboard /> : <LearnerBookingDashboard learnerEmail={profile?.email ?? user.email} />}
     </main>
-  );
-}
-
-function LearnerSearchDashboard() {
-  const selectedInstructor = demoInstructors[0];
-
-  return (
-    <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-10 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
-      <aside className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-        <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-          <SlidersHorizontal size={16} /> Search filters
-        </div>
-        <div className="mt-5 grid gap-4">
-          {[
-            ["Pickup postcode", "EN5 5XY"],
-            ["Distance", "Within 5 miles"],
-            ["Transmission", "Automatic preferred"],
-            ["Price selector", "£30-£45 per hour"],
-            ["Availability", "This week"]
-          ].map(([label, value]) => (
-            <label key={label} className="grid gap-1">
-              <span className="text-xs font-black uppercase text-zinc-400">{label}</span>
-              <div className="rounded border border-zinc-800 bg-black px-3 py-3 text-sm font-bold">{value}</div>
-            </label>
-          ))}
-        </div>
-        <div className="mt-5 rounded border border-red-500/30 bg-red-500/10 p-4 text-sm leading-6 text-brand">
-          Before payment: confirm age 17+, valid provisional licence, pickup postcode, lesson time, cancellation window, and full price.
-        </div>
-        <div className="mt-5 rounded border border-zinc-800 bg-ink p-4 text-white">
-          <div className="flex items-center gap-2 text-sm font-black uppercase text-red-200">
-            <Route size={16} /> Booking status
-          </div>
-          <div className="mt-3 grid gap-2">
-            {bookingPipeline.map((step, index) => (
-              <div key={step} className="flex items-center gap-3 text-sm">
-                <span className={`h-2.5 w-2.5 rounded-full ${index < 4 ? "bg-brand" : "bg-zinc-700"}`} />
-                <span className={index < 4 ? "font-black text-white" : "font-bold text-zinc-400"}>{step}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </aside>
-
-      <div className="grid gap-5">
-        <div className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-          <h2 className="text-2xl font-black">Approved instructors near you</h2>
-          <p className="mt-2 text-sm leading-6 text-zinc-400">The learner lands here after login: preference selector first, then instructor choice, then slot, payment, confirmation, tracking, completion.</p>
-          <div className="mt-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-            {learnerSteps.map((step, index) => (
-              <div key={step} className="rounded border border-zinc-800 bg-black p-3">
-                <div className="text-xs font-black text-brand">Step {index + 1}</div>
-                <div className="mt-1 text-xs font-bold leading-5">{step}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid gap-4 xl:grid-cols-3">
-          {demoInstructors.map((instructor) => (
-            <article key={instructor.name} className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="grid h-12 w-12 place-items-center rounded bg-ink text-lg font-black text-white">{instructor.name.slice(0, 1)}</div>
-                  <h3 className="mt-4 text-xl font-black">{instructor.name}</h3>
-                </div>
-                <span className="rounded bg-red-500/10 px-2 py-1 text-xs font-black text-brand">Verified {instructor.type}</span>
-              </div>
-              <p className="mt-2 text-sm leading-6 text-zinc-400">{instructor.bio}</p>
-              <div className="mt-4 grid gap-2 text-sm text-zinc-400">
-                <span className="inline-flex items-center gap-2"><Star size={16} className="text-brand" /> {instructor.rating} rating</span>
-                <span className="inline-flex items-center gap-2"><MapPin size={16} className="text-brand" /> {instructor.distance} away</span>
-                <span className="inline-flex items-center gap-2"><CarFront size={16} className="text-brand" /> {instructor.car}</span>
-              </div>
-              <div className="mt-5 flex items-center justify-between border-t border-zinc-800 pt-4">
-                <div>
-                  <div className="text-xs font-bold uppercase text-zinc-400">Price</div>
-                  <div className="text-2xl font-black">{formatMoney(instructor.price)}/hr</div>
-                </div>
-                <button className="lda-pill lda-pill-sm">Choose</button>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
-          <section className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-              <CalendarCheck size={16} /> Selected lesson
-            </div>
-            <div className="mt-4 grid gap-4 md:grid-cols-3">
-              <div className="rounded border border-zinc-800 bg-black p-4">
-                <div className="text-xs font-black uppercase text-zinc-400">Instructor</div>
-                <div className="mt-2 text-xl font-blakk">{selectedInstructor.name}</div>
-                <div className="mt-1 text-sm text-zinc-400">{selectedInstructor.car}</div>
-              </div>
-              <div className="rounded border border-zinc-800 bg-black p-4">
-                <div className="text-xs font-black uppercase text-zinc-400">Time and pickup</div>
-                <div className="mt-2 text-xl font-blakk">{selectedInstructor.next}</div>
-                <div className="mt-1 text-sm text-zinc-400">Barnet EN5 5XY</div>
-              </div>
-              <div className="rounded border border-zinc-800 bg-black p-4">
-                <div className="text-xs font-black uppercase text-zinc-400">Full upfront price</div>
-                <div className="mt-2 text-xl font-black">{formatMoney(selectedInstructor.price)}</div>
-                <div className="mt-1 text-sm text-zinc-400">No hidden booking fee</div>
-              </div>
-            </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <button className="lda-pill lda-pill-sm">
-                <CreditCard size={16} /> Pay with Stripe
-              </button>
-              <button className="lda-pill lda-pill-sm">
-                Apply promo code
-              </button>
-              <button className="lda-pill lda-pill-sm">
-                Reschedule
-              </button>
-            </div>
-          </section>
-
-          <section className="rounded border border-zinc-800 bg-ink p-5 text-white shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-black uppercase text-red-200">
-              <BellRing size={16} /> Confirmation
-            </div>
-            <h3 className="mt-3 text-2xl font-blakk">Email and app notifications</h3>
-            <p className="mt-3 text-sm leading-6 text-zinc-300">
-              After Stripe checkout succeeds, the backend sends the learner a thank-you email with the instructor name and creates an instructor notification in-app.
-            </p>
-            <div className="mt-4 rounded border border-zinc-800 bg-zinc-950 p-3 text-sm leading-6">
-              Thank you for booking {selectedInstructor.name}. Your lesson is confirmed once payment succeeds.
-            </div>
-          </section>
-        </div>
-
-        <section className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm font-blakk uppercase text-brand">
-            <Navigation size={16} /> En route tracking
-          </div>
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            {learnerJourneyStages.slice(3).map((stage) => (
-              <div key={stage.title} className="rounded border border-zinc-800 bg-black p-4">
-                <div className="font-blakk">{stage.title}</div>
-                <p className="mt-2 text-sm leading-6 text-zinc-400">{stage.detail}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-    </section>
   );
 }
 
@@ -296,7 +147,7 @@ function InstructorDashboard() {
       <div className="grid gap-5">
         <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
           <BadgeCheck className="text-brand" />
-          <h2 className="mt-4 text-2xl font-blakk">Instructor onboarding dashboard</h2>
+          <h2 className="mt-4 text-2xl font-black">Instructor onboarding dashboard</h2>
           <p className="mt-2 max-w-3xl text-zinc-400">Continue verification, upload documents, set price, car, areas covered, and availability. You will not appear in learner search until admin approves your profile.</p>
           <Link href="/instructor" className="lda-pill lda-pill-sm mt-5">
             Open instructor setup <ArrowRight size={16} />
@@ -312,7 +163,7 @@ function InstructorDashboard() {
         </div>
       </div>
       <aside className="rounded border border-zinc-800 bg-ink p-5 text-white shadow-sm">
-        <div className="flex items-center gap-2 text-sm font-blakk uppercase text-red-200">
+        <div className="flex items-center gap-2 text-sm font-black uppercase text-red-200">
           <BellRing size={16} /> Notifications
         </div>
         <div className="mt-4 grid gap-3">

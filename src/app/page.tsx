@@ -108,8 +108,8 @@ export default function HomePage() {
             <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
               <HelpCircle size={17} /> Help
             </Link>
-            <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
-            <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
+              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
+            <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
           </div>
           <div className="md:hidden">
             <MainMenu />
@@ -161,7 +161,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <Link href="/auth/login?role=learner" className="lda-pill">
+                  <Link href="/auth/sign-up?role=learner" className="lda-pill">
                     See lesson prices
                   </Link>
                   <Link href="/instructor" className="lda-pill">

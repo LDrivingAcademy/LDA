@@ -28,15 +28,16 @@ export default async function LoginPage({
               <ShieldCheck size={16} /> LDA secure access
             </div>
             <h1 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">
-              {isInstructor
-                ? "Sign in to continue instructor onboarding."
-                : "Sign in to find local instructors and book lessons."}
+              {isInstructor ? "Log in to your instructor account." : "Log in to your learner account."}
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-300">
               {isInstructor
-                ? "Instructor accounts move through verification, profile setup, availability, and admin approval before appearing in learner search."
-                : "Learners go from login to local approved instructors, then compare distance, price, rating, car, availability, and cancellation terms before payment."}
+                ? "Use the email or mobile number you used when you signed up, then continue managing onboarding, availability, and bookings."
+                : "Use the email or mobile number you used when you signed up, then continue booking, tracking, and lesson progress."}
             </p>
+            <Link href={`/auth/sign-up?role=${isInstructor ? "instructor" : "learner"}`} className="lda-pill lda-pill-sm mt-5">
+              New to LDA? Sign up
+            </Link>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <Link href="/auth/login?role=learner" className={`rounded border p-4 ${!isInstructor ? "border-red-500 bg-red-500/10" : "border-zinc-800 bg-zinc-950"}`}>
                 <GraduationCap className="mb-3 text-brand" />
@@ -54,16 +55,12 @@ export default async function LoginPage({
           <section className="rounded border border-zinc-800 bg-zinc-950 p-5 text-white shadow-2xl">
             <div className="mb-5">
               <div className="text-sm font-black uppercase text-brand">{isInstructor ? "Instructor access" : "Learner access"}</div>
-              <h2 className="mt-1 text-2xl font-black">Email link login</h2>
+              <h2 className="mt-1 text-2xl font-black">Returning account login</h2>
             </div>
             {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-100">{message}</div> : null}
             <form action={sendMagicLink} className="grid gap-3">
               <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
               <input type="hidden" name="next" value={nextPath} />
-              <label className="grid gap-1">
-                <span className="text-sm font-bold text-zinc-400">Full name</span>
-                <input name="fullName" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Your name" />
-              </label>
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-400">Email</span>
                 <input required name="email" type="email" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="you@example.com" />
@@ -86,10 +83,6 @@ export default async function LoginPage({
               <form action={sendPhoneOtp} className="grid gap-3">
                 <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
                 <input type="hidden" name="next" value={nextPath} />
-                <label className="grid gap-1">
-                  <span className="text-sm font-bold text-zinc-400">Full name</span>
-                  <input name="fullName" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Your name" />
-                </label>
                 <label className="grid gap-1">
                   <span className="text-sm font-bold text-zinc-400">Mobile number</span>
                   <input required name="phone" type="tel" autoComplete="tel" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="07123 456789" />

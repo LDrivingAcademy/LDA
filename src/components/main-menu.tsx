@@ -3,8 +3,10 @@ import { Menu } from "lucide-react";
 import { LanguageSelector } from "@/components/language-selector";
 
 const menuLinks = [
-  { href: "/auth/login?role=learner", label: "Learner login" },
-  { href: "/auth/login?role=instructor", label: "Instructor login" },
+  { href: "/auth/login?role=learner", label: "Learner log in" },
+  { href: "/auth/sign-up?role=learner", label: "Learner sign up" },
+  { href: "/auth/login?role=instructor", label: "Instructor log in" },
+  { href: "/auth/sign-up?role=instructor", label: "Instructor sign up" },
   { href: "/instructor", label: "Become an Instructor" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Help" }

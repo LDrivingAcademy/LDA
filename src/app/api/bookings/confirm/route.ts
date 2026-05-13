@@ -17,6 +17,7 @@ export async function POST(request: Request) {
   const manageUrl = `${process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk"}/dashboard`;
 
   await sendBookingConfirmationEmails({
+    bookingReference: input.bookingId,
     learnerEmail: input.learnerEmail,
     instructorEmail: input.instructorEmail,
     instructorName: input.instructorName,

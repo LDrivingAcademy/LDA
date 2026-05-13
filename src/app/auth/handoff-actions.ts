@@ -16,6 +16,13 @@ function safeRole(value: FormDataEntryValue | null) {
   return role === "instructor" ? "instructor" : "learner";
 }
 
+function getSubmittedFullName(formData: FormData) {
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
+  return fullName || [firstName, lastName].filter(Boolean).join(" ").trim();
+}
+
 function normalizePhone(value: FormDataEntryValue | null) {
   const phone = String(value ?? "").trim().replace(/\s+/g, "");
 
@@ -37,7 +44,7 @@ async function getAppOrigin() {
 
 export async function sendMagicLink(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const fullName = String(formData.get("fullName") ?? "").trim();
+  const fullName = getSubmittedFullName(formData);
   const role = safeRole(formData.get("accountIntent"));
   const nextPath = `/auth/verify?role=${role}`;
 
@@ -128,7 +135,7 @@ export async function sendMagicLink(formData: FormData) {
 
 export async function sendPhoneOtp(formData: FormData) {
   const phone = normalizePhone(formData.get("phone"));
-  const fullName = String(formData.get("fullName") ?? "").trim();
+  const fullName = getSubmittedFullName(formData);
   const role = safeRole(formData.get("accountIntent"));
   const supabase = await createClient();
 

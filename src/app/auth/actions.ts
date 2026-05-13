@@ -24,6 +24,13 @@ function safeRole(value: FormDataEntryValue | null) {
   return role === "instructor" ? "instructor" : "learner";
 }
 
+function getSubmittedFullName(formData: FormData) {
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
+  return fullName || [firstName, lastName].filter(Boolean).join(" ").trim();
+}
+
 async function getAppOrigin() {
   if (process.env.APP_WEBSITE_URL) {
     return process.env.APP_WEBSITE_URL;
@@ -39,7 +46,7 @@ function verifyRedirect(role: "learner" | "instructor", message: string): never 
 
 export async function sendMagicLink(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const fullName = String(formData.get("fullName") ?? "").trim();
+  const fullName = getSubmittedFullName(formData);
   const role = safeRole(formData.get("accountIntent"));
   const nextPath = `/auth/verify?role=${role}`;
 
@@ -143,7 +150,7 @@ export async function completeVerification(formData: FormData) {
   }
 
   const role = safeRole(formData.get("accountIntent"));
-  const fullName = String(formData.get("fullName") ?? "").trim();
+  const fullName = getSubmittedFullName(formData);
   const phone = String(formData.get("phone") ?? "").trim();
   const marketingOptIn = formData.get("marketingOptIn") === "on";
   const termsAccepted = formData.get("termsAccepted") === "on";
@@ -263,7 +270,7 @@ export async function signUp(formData: FormData) {
 
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
-  const fullName = String(formData.get("fullName") ?? "");
+  const fullName = getSubmittedFullName(formData);
   const accountIntent = String(formData.get("accountIntent") ?? "learner");
   const nextPath = safeNextPath(formData.get("next"));
 

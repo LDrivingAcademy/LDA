@@ -8,14 +8,10 @@ type CheckoutRequest = {
   stripeConnectedAccountId?: string;
 };
 
-function getAppUrl() {
-  return (process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk").trim().replace(/\/$/, "");
-}
-
 export async function POST(request: Request) {
   const body = (await request.json()) as CheckoutRequest;
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-  const appUrl = getAppUrl();
+  const appUrl = process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk";
   const currency = process.env.STRIPE_DEFAULT_CURRENCY ?? "gbp";
   const amountPence = body.amountPence ?? 4200;
   const instructorName = body.instructorName ?? "your driving instructor";
@@ -36,6 +32,7 @@ export async function POST(request: Request) {
     success_url: `${appUrl}/dashboard?payment=success&booking=${encodeURIComponent(bookingId)}`,
     cancel_url: `${appUrl}/dashboard?payment=cancelled&booking=${encodeURIComponent(bookingId)}`,
     "metadata[booking_id]": bookingId,
+    "automatic_payment_methods[enabled]": "true",
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": currency,
     "line_items[0][price_data][unit_amount]": String(amountPence),

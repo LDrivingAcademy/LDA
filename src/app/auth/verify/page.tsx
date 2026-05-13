@@ -19,6 +19,9 @@ export default async function VerifyAccountPage({
   const {
     data: { user }
   } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+  const savedName = String(user?.user_metadata?.full_name ?? "").trim();
+  const [savedFirstName = "", ...savedLastNameParts] = savedName.split(" ");
+  const savedLastName = savedLastNameParts.join(" ");
 
   return (
     <main className="min-h-screen bg-black px-4 py-8 text-white">
@@ -80,10 +83,16 @@ export default async function VerifyAccountPage({
                 {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-100">{message}</div> : null}
                 <form action={completeVerification} className="grid gap-3">
                   <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
-                  <label className="grid gap-1">
-                    <span className="text-sm font-bold text-zinc-400">Full name</span>
-                    <input required name="fullName" defaultValue={String(user.user_metadata?.full_name ?? "")} className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Your full name" />
-                  </label>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="grid gap-1">
+                      <span className="text-sm font-bold text-zinc-400">First name</span>
+                      <input required name="firstName" defaultValue={savedFirstName} autoComplete="given-name" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="First name" />
+                    </label>
+                    <label className="grid gap-1">
+                      <span className="text-sm font-bold text-zinc-400">Last name</span>
+                      <input required name="lastName" defaultValue={savedLastName} autoComplete="family-name" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Last name" />
+                    </label>
+                  </div>
                   <label className="grid gap-1">
                     <span className="text-sm font-bold text-zinc-400">Email</span>
                     <input disabled value={user.email ?? ""} className="rounded border border-zinc-800 bg-zinc-900 px-3 py-3 text-zinc-400" />
