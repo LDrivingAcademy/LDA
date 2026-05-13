@@ -36,6 +36,17 @@ type ProgressFeedbackEmailInput = {
   recommendedVideos: string;
 };
 
+type AuthMagicLinkEmailInput = {
+  to: string;
+  fullName?: string;
+  role: "learner" | "instructor";
+  confirmUrl: string;
+};
+
+export function canSendTransactionalEmail() {
+  return Boolean(process.env.RESEND_API_KEY);
+}
+
 async function sendResendEmail(to: string, subject: string, html: string) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL ?? "info@ldrivingacademy.co.uk";
@@ -187,4 +198,28 @@ export async function sendProgressFeedbackEmail(input: ProgressFeedbackEmailInpu
   `;
 
   return sendResendEmail(input.learnerEmail, `LDA lesson progress update from ${input.instructorName}`, html);
+}
+
+export async function sendAuthMagicLinkEmail(input: AuthMagicLinkEmailInput) {
+  const name = escapeHtml(input.fullName || "there");
+  const roleLabel = input.role === "instructor" ? "instructor" : "learner";
+  const confirmUrl = escapeHtml(input.confirmUrl);
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
+      <h1>Your secure LDA login link</h1>
+      <p>Hello ${name},</p>
+      <p>Click the button below to confirm your email and continue your ${roleLabel} setup with L Driving Academy.</p>
+      <p style="margin: 28px 0;">
+        <a href="${confirmUrl}" style="display:inline-block;background:#ed1b24;color:#fff;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:999px;">
+          Continue to LDA
+        </a>
+      </p>
+      <p>This link can be opened on your phone, laptop, or tablet. It does not need to be opened on the same device that requested it.</p>
+      <p>If the button does not work, copy and paste this link into your browser:</p>
+      <p><a href="${confirmUrl}">${confirmUrl}</a></p>
+      <p>If you did not request this email, you can safely ignore it.</p>
+    </div>
+  `;
+
+  return sendResendEmail(input.to, "Your secure LDA login link", html);
 }
