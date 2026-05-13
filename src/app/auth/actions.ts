@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { canSendTransactionalEmail, sendAuthMagicLinkEmail } from "@/lib/email";
+import { createHandoffSecret, hashHandoffSecret, setHandoffCookie } from "@/lib/auth-handoff";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,6 +30,28 @@ async function getAppOrigin() {
 
   const requestOrigin = (await headers()).get("origin");
   return requestOrigin || "https://ldrivingacademy.co.uk";
+}
+
+function verifyRedirect(role: "learner" | "instructor", message: string): never {
+  redirect(`/auth/verify?role=${role}&message=${encodeURIComponent(message)}`);
+}
+
+function isAtLeast17(dateValue: string) {
+  const [year, month, day] = dateValue.split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return false;
+  }
+
+  const today = new Date();
+  let age = today.getUTCFullYear() - year;
+  const monthDelta = today.getUTCMonth() + 1 - month;
+
+  if (monthDelta < 0 || (monthDelta === 0 && today.getUTCDate() < day)) {
+    age -= 1;
+  }
+
+  return age >= 17;
 }
 
 export async function sendMagicLink(formData: FormData) {
@@ -64,6 +87,24 @@ export async function sendMagicLink(formData: FormData) {
     authError("Cross-device email login is not fully configured. Add SUPABASE_SERVICE_ROLE_KEY in Vercel, then redeploy.");
   }
 
+  const handoffId = crypto.randomUUID();
+  const handoffSecret = createHandoffSecret();
+  const secretHash = await hashHandoffSecret(handoffSecret);
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+  const { error: handoffError } = await adminClient.from("auth_handoff_requests").insert({
+    id: handoffId,
+    email,
+    full_name: fullName || null,
+    role,
+    next_path: nextPath,
+    secret_hash: secretHash,
+    expires_at: expiresAt
+  });
+
+  if (handoffError) {
+    authError(`LDA could not start cross-device login. Run the latest Supabase migration, then try again. ${handoffError.message}`);
+  }
+
   const { data, error } = await adminClient.auth.admin.generateLink({
     type: "magiclink",
     email,
@@ -85,6 +126,8 @@ export async function sendMagicLink(formData: FormData) {
   confirmUrl.searchParams.set("type", data.properties.verification_type || "magiclink");
   confirmUrl.searchParams.set("redirect_to", data.properties.redirect_to || redirectTo.toString());
   confirmUrl.searchParams.set("role", role);
+  confirmUrl.searchParams.set("handoff", handoffId);
+  confirmUrl.searchParams.set("handoff_secret", handoffSecret);
 
   try {
     await sendAuthMagicLinkEmail({
@@ -97,7 +140,8 @@ export async function sendMagicLink(formData: FormData) {
     authError(sendError instanceof Error ? sendError.message : "LDA could not send the secure email link. Check the Resend API key and domain verification.");
   }
 
-  redirect(`/auth/check-email?email=${encodeURIComponent(email)}&role=${role}`);
+  await setHandoffCookie(handoffId, handoffSecret);
+  redirect(`/auth/check-email?email=${encodeURIComponent(email)}&role=${role}&request=${handoffId}`);
 }
 
 export async function completeVerification(formData: FormData) {
@@ -123,7 +167,25 @@ export async function completeVerification(formData: FormData) {
   const writeClient = createAdminClient() ?? supabase;
 
   if (!termsAccepted) {
-    redirect(`/auth/verify?role=${role}&message=${encodeURIComponent("Accept the platform terms and privacy notices before continuing.")}`);
+    verifyRedirect(role, "Accept the platform terms and privacy notices before continuing.");
+  }
+
+  if (role === "learner") {
+    const dateOfBirth = String(formData.get("dateOfBirth") ?? "").trim();
+    const ageConfirmed = formData.get("ageConfirmed") === "on";
+    const provisionalConfirmed = formData.get("provisionalLicenceConfirmed") === "on";
+
+    if (!dateOfBirth || !isAtLeast17(dateOfBirth)) {
+      verifyRedirect("learner", "Enter a valid date of birth showing you are 17 or over before booking.");
+    }
+
+    if (!ageConfirmed) {
+      verifyRedirect("learner", "Confirm that you are 17 or over before continuing to booking.");
+    }
+
+    if (!provisionalConfirmed) {
+      verifyRedirect("learner", "Confirm that you hold a valid provisional licence before booking.");
+    }
   }
 
   await writeClient.from("profiles").upsert({
@@ -167,14 +229,11 @@ export async function completeVerification(formData: FormData) {
     redirect("/dashboard?verification=pending");
   }
 
-  const provisionalConfirmed = formData.get("provisionalLicenceConfirmed") === "on";
-  if (!provisionalConfirmed) {
-    redirect(`/auth/verify?role=learner&message=${encodeURIComponent("Confirm that you hold a valid provisional licence before booking.")}`);
-  }
+  const dateOfBirth = String(formData.get("dateOfBirth") ?? "").trim();
 
   await writeClient.from("learner_profiles").upsert({
     user_id: user.id,
-    date_of_birth: String(formData.get("dateOfBirth") ?? "") || null,
+    date_of_birth: dateOfBirth,
     provisional_licence_confirmed_at: new Date().toISOString(),
     terms_accepted_at: new Date().toISOString()
   });
