@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, BadgeCheck, BookOpenCheck, CarFront, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { DateOfBirthField } from "@/components/auth/date-of-birth-field";
 import { completeVerification } from "@/app/auth/actions";
 import { latestEligibleDateOfBirth } from "@/lib/learner-eligibility";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
@@ -122,11 +123,7 @@ function LearnerFields() {
 
   return (
     <>
-      <label className="grid gap-1">
-        <span className="text-sm font-bold text-zinc-400">Date of birth</span>
-        <input required name="dateOfBirth" type="date" max={latestDob} className="rounded border border-zinc-800 bg-black px-3 py-3 text-white" />
-        <span className="text-xs leading-5 text-zinc-500">Open the calendar picker or type the date in manually. Learners must be 17 or over before booking.</span>
-      </label>
+      <DateOfBirthField latestEligibleDate={latestDob} />
       <label className="flex items-start gap-3 rounded border border-zinc-800 bg-black p-3 text-sm leading-6 text-zinc-300">
         <input required name="ageConfirmed" type="checkbox" className="mt-1" />
         <span>I confirm I am 17 or over and my date of birth is correct.</span>
