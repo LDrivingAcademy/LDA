@@ -1,5 +1,7 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
+import { hashHandoffSecret } from "@/lib/auth-handoff";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +56,8 @@ export async function GET(request: NextRequest) {
   const tokenHash = request.nextUrl.searchParams.get("token_hash");
   const type = request.nextUrl.searchParams.get("type") || "magiclink";
   const redirectTo = request.nextUrl.searchParams.get("redirect_to");
+  const handoffId = request.nextUrl.searchParams.get("handoff");
+  const handoffSecret = request.nextUrl.searchParams.get("handoff_secret");
 
   if (!tokenHash) {
     return loginRedirect(request, role, "The email login link was missing its verification token. Please request a fresh link.");
@@ -65,13 +69,33 @@ export async function GET(request: NextRequest) {
     return loginRedirect(request, role, "Supabase environment variables are not configured yet.");
   }
 
-  const { error } = await supabase.auth.verifyOtp({
+  const { data, error } = await supabase.auth.verifyOtp({
     token_hash: tokenHash,
     type: type as EmailOtpType
   });
 
   if (error) {
     return loginRedirect(request, role, error.message);
+  }
+
+  if (handoffId && handoffSecret) {
+    const adminClient = createAdminClient();
+    const userId = data.user?.id ?? data.session?.user.id ?? null;
+
+    if (adminClient && userId) {
+      const secretHash = await hashHandoffSecret(handoffSecret);
+      await adminClient
+        .from("auth_handoff_requests")
+        .update({
+          status: "approved",
+          verified_user_id: userId,
+          approved_at: new Date().toISOString()
+        })
+        .eq("id", handoffId)
+        .eq("secret_hash", secretHash)
+        .eq("status", "pending")
+        .gt("expires_at", new Date().toISOString());
+    }
   }
 
   return NextResponse.redirect(getVerifiedRedirect(request, redirectTo, role));
