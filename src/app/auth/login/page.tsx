@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft, CarFront, GraduationCap, MailCheck, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
-import { demoSignIn, sendMagicLink } from "../actions";
+import { demoSignIn } from "../actions";
+import { sendMagicLink } from "../handoff-actions";
 
 export default async function LoginPage({
   searchParams
