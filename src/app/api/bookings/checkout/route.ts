@@ -57,7 +57,6 @@ export async function POST(request: Request) {
     success_url: `${appUrl}/dashboard?payment=success&booking=${encodeURIComponent(bookingId)}`,
     cancel_url: `${appUrl}/dashboard?payment=cancelled&booking=${encodeURIComponent(bookingId)}`,
     "metadata[booking_id]": bookingId,
-    "automatic_payment_methods[enabled]": "true",
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": currency,
     "line_items[0][price_data][unit_amount]": String(amountPence),
