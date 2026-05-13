@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { type EmailOtpType } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, MailCheck } from "lucide-react";
@@ -38,6 +39,9 @@ export function EmailCallbackClient() {
     const supabaseClient = supabase;
 
     async function finishCallback() {
+      const code = searchParams.get("code");
+      const tokenHash = searchParams.get("token_hash");
+      const otpType = searchParams.get("type");
       const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
       const accessToken = hashParams.get("access_token");
       const refreshToken = hashParams.get("refresh_token");
@@ -48,7 +52,24 @@ export function EmailCallbackClient() {
         return;
       }
 
-      if (accessToken && refreshToken) {
+      if (code) {
+        const { error: codeError } = await supabaseClient.auth.exchangeCodeForSession(code);
+
+        if (codeError) {
+          setError(codeError.message);
+          return;
+        }
+      } else if (tokenHash && otpType) {
+        const { error: otpError } = await supabaseClient.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: otpType as EmailOtpType
+        });
+
+        if (otpError) {
+          setError(otpError.message);
+          return;
+        }
+      } else if (accessToken && refreshToken) {
         const { error: sessionError } = await supabaseClient.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken
