@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { ArrowLeft, MailCheck } from "lucide-react";
+import { AuthHandoffPoller } from "@/components/auth/auth-handoff-poller";
 import { Brand } from "@/components/brand";
 
 export default async function CheckEmailPage({
   searchParams
 }: {
-  searchParams: Promise<{ email?: string; role?: string }>;
+  searchParams: Promise<{ email?: string; role?: string; request?: string }>;
 }) {
-  const { email, role } = await searchParams;
+  const { email, role, request } = await searchParams;
   const safeRole = role === "instructor" ? "instructor" : "learner";
 
   return (
@@ -29,8 +30,9 @@ export default async function CheckEmailPage({
             We sent a secure LDA sign-in link to <span className="font-black text-white">{email || "your email address"}</span>. Click that link and you will come back here to complete {safeRole === "instructor" ? "instructor verification" : "learner verification"}.
           </p>
           <div className="mt-6 rounded border border-zinc-800 bg-black p-4 text-sm leading-6 text-zinc-400">
-            The link can be opened on your phone, laptop, or tablet. It registers your account in Supabase Auth and connects it to the LDA database. Once verification is complete, learners continue to booking and instructors continue to onboarding.
+            The link can be opened on your phone, laptop, or tablet. The device that opens the email will continue, and this original tab will also continue automatically once approval is complete.
           </div>
+          <AuthHandoffPoller requestId={request} role={safeRole} />
         </section>
       </div>
     </main>
