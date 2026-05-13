@@ -1,11 +1,9 @@
-import { type EmailOtpType } from "@supabase/supabase-js";
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { EmailCallbackClient } from "@/components/auth/email-callback-client";
 import { Brand } from "@/components/brand";
-import { createClient } from "@/lib/supabase/server";
 
 function safeRole(value: string | undefined) {
   return value === "instructor" ? "instructor" : "learner";
@@ -27,34 +25,9 @@ export default async function AuthCallbackPage({
 }) {
   const params = await searchParams;
   const role = safeRole(params.role);
-  const nextPath = safeNextPath(params.next, role);
 
   if (params.error_description || params.error) {
     redirect(`/auth/login?role=${role}&message=${encodeURIComponent(params.error_description || params.error || "The email link could not be confirmed.")}`);
-  }
-
-  const supabase = await createClient();
-
-  if (supabase && params.code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(params.code);
-    if (error) {
-      redirect(`/auth/login?role=${role}&message=${encodeURIComponent(error.message)}`);
-    }
-
-    redirect(nextPath);
-  }
-
-  if (supabase && params.token_hash && params.type) {
-    const { error } = await supabase.auth.verifyOtp({
-      token_hash: params.token_hash,
-      type: params.type as EmailOtpType
-    });
-
-    if (error) {
-      redirect(`/auth/login?role=${role}&message=${encodeURIComponent(error.message)}`);
-    }
-
-    redirect(nextPath);
   }
 
   return (
