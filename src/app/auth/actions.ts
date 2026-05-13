@@ -22,8 +22,12 @@ function safeRole(value: FormDataEntryValue | null) {
 }
 
 async function getAppOrigin() {
+  if (process.env.APP_WEBSITE_URL) {
+    return process.env.APP_WEBSITE_URL;
+  }
+
   const requestOrigin = (await headers()).get("origin");
-  return requestOrigin || process.env.APP_WEBSITE_URL || "http://localhost:3000";
+  return requestOrigin || "https://ldrivingacademy.co.uk";
 }
 
 export async function sendMagicLink(formData: FormData) {
