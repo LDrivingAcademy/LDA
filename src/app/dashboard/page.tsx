@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, CarFront, CreditCard, FileCheck2, MapPin, Navigation, Route, ShieldCheck, SlidersHorizontal, Star } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 import { bookingPipeline, demoInstructors, instructorJourneyStages, learnerJourneyStages, learnerSteps } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
 
@@ -86,14 +88,19 @@ export default async function DashboardPage() {
     );
   }
 
-  const [{ data: profile }, { data: roles }, { data: instructorProfile }] = await Promise.all([
+  const [{ data: profile }, { data: roles }, { data: instructorProfile }, { data: learnerProfile }] = await Promise.all([
     supabase.from("profiles").select("full_name,email").eq("id", user.id).maybeSingle(),
     supabase.from("account_roles").select("role").eq("user_id", user.id),
-    supabase.from("instructor_profiles").select("verification_status,hourly_rate_pence,areas_covered").eq("user_id", user.id).maybeSingle()
+    supabase.from("instructor_profiles").select("verification_status,hourly_rate_pence,areas_covered").eq("user_id", user.id).maybeSingle(),
+    supabase.from("learner_profiles").select("date_of_birth,provisional_licence_confirmed_at,terms_accepted_at").eq("user_id", user.id).maybeSingle()
   ]);
 
   const roleLabels = roles?.map((role) => role.role).join(", ") || "learner";
   const isInstructor = roleLabels.includes("instructor");
+
+  if (!isInstructor && !hasCompletedLearnerEligibility(learnerProfile)) {
+    redirect("/auth/verify?role=learner&message=Complete learner eligibility before booking. Your date of birth must show you are 17 or over, and you must accept the terms and provisional licence checks.");
+  }
 
   return (
     <main className="min-h-screen bg-black">
@@ -224,12 +231,12 @@ function LearnerSearchDashboard() {
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <div className="rounded border border-zinc-800 bg-black p-4">
                 <div className="text-xs font-black uppercase text-zinc-400">Instructor</div>
-                <div className="mt-2 text-xl font-black">{selectedInstructor.name}</div>
+                <div className="mt-2 text-xl font-blakk">{selectedInstructor.name}</div>
                 <div className="mt-1 text-sm text-zinc-400">{selectedInstructor.car}</div>
               </div>
               <div className="rounded border border-zinc-800 bg-black p-4">
                 <div className="text-xs font-black uppercase text-zinc-400">Time and pickup</div>
-                <div className="mt-2 text-xl font-black">{selectedInstructor.next}</div>
+                <div className="mt-2 text-xl font-blakk">{selectedInstructor.next}</div>
                 <div className="mt-1 text-sm text-zinc-400">Barnet EN5 5XY</div>
               </div>
               <div className="rounded border border-zinc-800 bg-black p-4">
@@ -255,7 +262,7 @@ function LearnerSearchDashboard() {
             <div className="flex items-center gap-2 text-sm font-black uppercase text-red-200">
               <BellRing size={16} /> Confirmation
             </div>
-            <h3 className="mt-3 text-2xl font-black">Email and app notifications</h3>
+            <h3 className="mt-3 text-2xl font-blakk">Email and app notifications</h3>
             <p className="mt-3 text-sm leading-6 text-zinc-300">
               After Stripe checkout succeeds, the backend sends the learner a thank-you email with the instructor name and creates an instructor notification in-app.
             </p>
@@ -266,13 +273,13 @@ function LearnerSearchDashboard() {
         </div>
 
         <section className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
+          <div className="flex items-center gap-2 text-sm font-blakk uppercase text-brand">
             <Navigation size={16} /> En route tracking
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {learnerJourneyStages.slice(3).map((stage) => (
               <div key={stage.title} className="rounded border border-zinc-800 bg-black p-4">
-                <div className="font-black">{stage.title}</div>
+                <div className="font-blakk">{stage.title}</div>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">{stage.detail}</p>
               </div>
             ))}
@@ -289,7 +296,7 @@ function InstructorDashboard() {
       <div className="grid gap-5">
         <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
           <BadgeCheck className="text-brand" />
-          <h2 className="mt-4 text-2xl font-black">Instructor onboarding dashboard</h2>
+          <h2 className="mt-4 text-2xl font-blakk">Instructor onboarding dashboard</h2>
           <p className="mt-2 max-w-3xl text-zinc-400">Continue verification, upload documents, set price, car, areas covered, and availability. You will not appear in learner search until admin approves your profile.</p>
           <Link href="/instructor" className="lda-pill lda-pill-sm mt-5">
             Open instructor setup <ArrowRight size={16} />
@@ -305,7 +312,7 @@ function InstructorDashboard() {
         </div>
       </div>
       <aside className="rounded border border-zinc-800 bg-ink p-5 text-white shadow-sm">
-        <div className="flex items-center gap-2 text-sm font-black uppercase text-red-200">
+        <div className="flex items-center gap-2 text-sm font-blakk uppercase text-red-200">
           <BellRing size={16} /> Notifications
         </div>
         <div className="mt-4 grid gap-3">

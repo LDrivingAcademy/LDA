@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { canSendTransactionalEmail, sendAuthMagicLinkEmail } from "@/lib/email";
 import { createHandoffSecret, hashHandoffSecret, setHandoffCookie } from "@/lib/auth-handoff";
+import { isAtLeast17 } from "@/lib/learner-eligibility";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -34,24 +35,6 @@ async function getAppOrigin() {
 
 function verifyRedirect(role: "learner" | "instructor", message: string): never {
   redirect(`/auth/verify?role=${role}&message=${encodeURIComponent(message)}`);
-}
-
-function isAtLeast17(dateValue: string) {
-  const [year, month, day] = dateValue.split("-").map(Number);
-
-  if (!year || !month || !day) {
-    return false;
-  }
-
-  const today = new Date();
-  let age = today.getUTCFullYear() - year;
-  const monthDelta = today.getUTCMonth() + 1 - month;
-
-  if (monthDelta < 0 || (monthDelta === 0 && today.getUTCDate() < day)) {
-    age -= 1;
-  }
-
-  return age >= 17;
 }
 
 export async function sendMagicLink(formData: FormData) {
