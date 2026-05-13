@@ -32,11 +32,6 @@ async function getAppOrigin() {
 }
 
 export async function sendMagicLink(formData: FormData) {
-  const supabase = await createClient();
-  if (!supabase) {
-    authError("Supabase environment variables are not configured yet.");
-  }
-
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const fullName = String(formData.get("fullName") ?? "").trim();
   const role = safeRole(formData.get("accountIntent"));
@@ -51,45 +46,29 @@ export async function sendMagicLink(formData: FormData) {
   redirectTo.searchParams.set("next", nextPath);
 
   const adminClient = createAdminClient();
+  const missingConfig = [];
 
-  if (adminClient && canSendTransactionalEmail()) {
-    const { data, error } = await adminClient.auth.admin.generateLink({
-      type: "magiclink",
-      email,
-      options: {
-        redirectTo: redirectTo.toString(),
-        data: {
-          account_intent: role,
-          full_name: fullName
-        }
-      }
-    });
-
-    if (error) {
-      authError(error.message);
-    }
-
-    const confirmUrl = new URL("/auth/confirm", await getAppOrigin());
-    confirmUrl.searchParams.set("token_hash", data.properties.hashed_token);
-    confirmUrl.searchParams.set("type", data.properties.verification_type || "magiclink");
-    confirmUrl.searchParams.set("redirect_to", data.properties.redirect_to || redirectTo.toString());
-    confirmUrl.searchParams.set("role", role);
-
-    await sendAuthMagicLinkEmail({
-      to: email,
-      fullName,
-      role,
-      confirmUrl: confirmUrl.toString()
-    });
-
-    redirect(`/auth/check-email?email=${encodeURIComponent(email)}&role=${role}`);
+  if (!adminClient) {
+    missingConfig.push("SUPABASE_SERVICE_ROLE_KEY");
   }
 
-  const { error } = await supabase.auth.signInWithOtp({
+  if (!canSendTransactionalEmail()) {
+    missingConfig.push("RESEND_API_KEY");
+  }
+
+  if (missingConfig.length) {
+    authError(`Cross-device email login is not fully configured. Add ${missingConfig.join(" and ")} in Vercel, then redeploy. LDA has stopped sending the old same-device magic link.`);
+  }
+
+  if (!adminClient) {
+    authError("Cross-device email login is not fully configured. Add SUPABASE_SERVICE_ROLE_KEY in Vercel, then redeploy.");
+  }
+
+  const { data, error } = await adminClient.auth.admin.generateLink({
+    type: "magiclink",
     email,
     options: {
-      shouldCreateUser: true,
-      emailRedirectTo: redirectTo.toString(),
+      redirectTo: redirectTo.toString(),
       data: {
         account_intent: role,
         full_name: fullName
@@ -99,6 +78,23 @@ export async function sendMagicLink(formData: FormData) {
 
   if (error) {
     authError(error.message);
+  }
+
+  const confirmUrl = new URL("/auth/confirm", await getAppOrigin());
+  confirmUrl.searchParams.set("token_hash", data.properties.hashed_token);
+  confirmUrl.searchParams.set("type", data.properties.verification_type || "magiclink");
+  confirmUrl.searchParams.set("redirect_to", data.properties.redirect_to || redirectTo.toString());
+  confirmUrl.searchParams.set("role", role);
+
+  try {
+    await sendAuthMagicLinkEmail({
+      to: email,
+      fullName,
+      role,
+      confirmUrl: confirmUrl.toString()
+    });
+  } catch (sendError) {
+    authError(sendError instanceof Error ? sendError.message : "LDA could not send the secure email link. Check the Resend API key and domain verification.");
   }
 
   redirect(`/auth/check-email?email=${encodeURIComponent(email)}&role=${role}`);
