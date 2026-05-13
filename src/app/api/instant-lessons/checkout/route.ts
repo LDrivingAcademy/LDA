@@ -21,6 +21,10 @@ function required(value?: string) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function getAppUrl() {
+  return (process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk").trim().replace(/\/$/, "");
+}
+
 export async function POST(request: Request) {
   const body = (await request.json()) as InstantCheckoutRequest;
 
@@ -29,7 +33,7 @@ export async function POST(request: Request) {
   }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-  const appUrl = process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk";
+  const appUrl = getAppUrl();
   const currency = process.env.STRIPE_DEFAULT_CURRENCY ?? "gbp";
   const amountPence = body.amountPence ?? 6500;
   const instructorName = body.instructorName ?? "your LDA instructor";
