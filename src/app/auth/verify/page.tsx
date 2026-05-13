@@ -87,8 +87,9 @@ export default async function VerifyAccountPage({
                     <input disabled value={user.email ?? ""} className="rounded border border-zinc-800 bg-zinc-900 px-3 py-3 text-zinc-400" />
                   </label>
                   <label className="grid gap-1">
-                    <span className="text-sm font-bold text-zinc-400">Phone number</span>
-                    <input name="phone" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Used for booking updates" />
+                    <span className="text-sm font-bold text-zinc-400">Phone number <span className="font-medium text-zinc-500">(optional)</span></span>
+                    <input name="phone" type="tel" autoComplete="tel" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Used for real-time lesson updates" />
+                    <span className="text-xs leading-5 text-zinc-500">Add this if you want text updates for lesson changes, cancellations, and instructor arrival alerts. You can continue without it.</span>
                   </label>
 
                   {isInstructor ? <InstructorFields /> : <LearnerFields />}
@@ -123,8 +124,12 @@ function LearnerFields() {
         <input required name="dateOfBirth" type="date" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white" />
       </label>
       <label className="flex items-start gap-3 rounded border border-zinc-800 bg-black p-3 text-sm leading-6 text-zinc-300">
+        <input required name="ageConfirmed" type="checkbox" className="mt-1" />
+        <span>I confirm I am 17 or over and my date of birth is correct.</span>
+      </label>
+      <label className="flex items-start gap-3 rounded border border-zinc-800 bg-black p-3 text-sm leading-6 text-zinc-300">
         <input required name="provisionalLicenceConfirmed" type="checkbox" className="mt-1" />
-        <span>I confirm I am 17+ and hold a valid UK provisional licence before booking a paid lesson.</span>
+        <span>I confirm I hold a valid UK provisional licence before booking a paid lesson.</span>
       </label>
     </>
   );
