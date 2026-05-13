@@ -62,7 +62,7 @@ export default async function VerifyAccountPage({
                 {isInstructor ? <CarFront size={16} /> : <BookOpenCheck size={16} />}
                 {isInstructor ? "Instructor details" : "Learner details"}
               </div>
-              <h2 className="mt-1 text-2xl font-black">Finish account setup</h2>
+              <h2 className="mt-1 text-2xl font-black">{isInstructor ? "Finish account setup" : "Verify, then start booking"}</h2>
             </div>
 
             {!hasSupabaseConfig() ? (
@@ -103,7 +103,7 @@ export default async function VerifyAccountPage({
                   </label>
 
                   <button className="lda-pill mt-2">
-                    <BadgeCheck size={18} /> {isInstructor ? "Submit for verification" : "Continue to booking"}
+                    <BadgeCheck size={18} /> {isInstructor ? "Submit for verification" : "Continue to learner booking"}
                   </button>
                 </form>
               </>
