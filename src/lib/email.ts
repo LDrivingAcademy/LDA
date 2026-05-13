@@ -47,9 +47,38 @@ export function canSendTransactionalEmail() {
   return Boolean(process.env.RESEND_API_KEY);
 }
 
-async function sendResendEmail(to: string, subject: string, html: string) {
-  const apiKey = process.env.RESEND_API_KEY;
+function getSenderAddress() {
   const from = process.env.RESEND_FROM_EMAIL ?? "info@ldrivingacademy.co.uk";
+  if (from.includes("<") && from.includes(">")) {
+    return from;
+  }
+
+  return `L Driving Academy <${from}>`;
+}
+
+function htmlToText(html: string) {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<\/h[1-6]>/gi, "\n\n")
+    .replace(/<li>/gi, "- ")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, "\"")
+    .replace(/&#039;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+async function sendResendEmail(to: string, subject: string, html: string, text = htmlToText(html)) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const replyTo = process.env.RESEND_REPLY_TO_EMAIL ?? process.env.APP_SUPPORT_EMAIL ?? "info@ldrivingacademy.co.uk";
 
   if (!apiKey) {
     return { skipped: true };
@@ -62,10 +91,12 @@ async function sendResendEmail(to: string, subject: string, html: string) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      from,
+      from: getSenderAddress(),
       to,
       subject,
-      html
+      html,
+      text,
+      reply_to: replyTo
     })
   });
 
@@ -204,6 +235,16 @@ export async function sendAuthMagicLinkEmail(input: AuthMagicLinkEmailInput) {
   const name = escapeHtml(input.fullName || "there");
   const roleLabel = input.role === "instructor" ? "instructor" : "learner";
   const confirmUrl = escapeHtml(input.confirmUrl);
+  const text = [
+    `Hello ${input.fullName || "there"},`,
+    "",
+    `Use this secure link to confirm your email and continue your ${roleLabel} setup with L Driving Academy:`,
+    input.confirmUrl,
+    "",
+    "You can open this link on your phone, laptop, or tablet. It does not need to be opened on the same device that requested it.",
+    "",
+    "If you did not request this email, you can ignore it."
+  ].join("\n");
   const html = `
     <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
       <h1>Your secure LDA login link</h1>
@@ -221,5 +262,5 @@ export async function sendAuthMagicLinkEmail(input: AuthMagicLinkEmailInput) {
     </div>
   `;
 
-  return sendResendEmail(input.to, "Your secure LDA login link", html);
+  return sendResendEmail(input.to, "Your L Driving Academy login link", html, text);
 }
