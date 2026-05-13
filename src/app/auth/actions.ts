@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { canSendTransactionalEmail, sendAuthMagicLinkEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -48,6 +49,41 @@ export async function sendMagicLink(formData: FormData) {
   const redirectTo = new URL("/auth/callback", await getAppOrigin());
   redirectTo.searchParams.set("role", role);
   redirectTo.searchParams.set("next", nextPath);
+
+  const adminClient = createAdminClient();
+
+  if (adminClient && canSendTransactionalEmail()) {
+    const { data, error } = await adminClient.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+      options: {
+        redirectTo: redirectTo.toString(),
+        data: {
+          account_intent: role,
+          full_name: fullName
+        }
+      }
+    });
+
+    if (error) {
+      authError(error.message);
+    }
+
+    const confirmUrl = new URL("/auth/confirm", await getAppOrigin());
+    confirmUrl.searchParams.set("token_hash", data.properties.hashed_token);
+    confirmUrl.searchParams.set("type", data.properties.verification_type || "magiclink");
+    confirmUrl.searchParams.set("redirect_to", data.properties.redirect_to || redirectTo.toString());
+    confirmUrl.searchParams.set("role", role);
+
+    await sendAuthMagicLinkEmail({
+      to: email,
+      fullName,
+      role,
+      confirmUrl: confirmUrl.toString()
+    });
+
+    redirect(`/auth/check-email?email=${encodeURIComponent(email)}&role=${role}`);
+  }
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
