@@ -2,7 +2,22 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { BadgeCheck, CalendarCheck, CarFront, CreditCard, MailCheck, MapPin, Navigation, SlidersHorizontal, Star } from "lucide-react";
+import {
+  BadgeCheck,
+  BellRing,
+  CalendarCheck,
+  CarFront,
+  Clock3,
+  CreditCard,
+  History,
+  MailCheck,
+  MessageSquareText,
+  MapPin,
+  Navigation,
+  SlidersHorizontal,
+  Star,
+  XCircle
+} from "lucide-react";
 import { demoInstructors } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
 
@@ -11,6 +26,21 @@ type Instructor = (typeof demoInstructors)[number] & {
   distanceMiles: number;
   slots: Record<string, string[]>;
   stripeConnectedAccountId?: string;
+};
+
+type BookingRecord = {
+  id: string;
+  instructorName: string;
+  instructorId: string;
+  lessonSummary: string;
+  date: string;
+  time: string;
+  pickup: string;
+  pricePence: number;
+  car: string;
+  status: "pending" | "upcoming" | "completed" | "cancelled";
+  rating?: number;
+  review?: string;
 };
 
 const instructors: Instructor[] = [
@@ -46,6 +76,33 @@ const instructors: Instructor[] = [
   }
 ];
 
+const demoBookingRecords: BookingRecord[] = [
+  {
+    id: "LDA-AME-UPCOMING",
+    instructorName: "Amelia Khan",
+    instructorId: "amelia-khan",
+    lessonSummary: "2026-05-16 at 10:00 from EN5 5XY. Toyota Yaris Hybrid, automatic.",
+    date: "2026-05-16",
+    time: "10:00",
+    pickup: "EN5 5XY",
+    pricePence: 4200,
+    car: "Toyota Yaris Hybrid",
+    status: "upcoming"
+  },
+  {
+    id: "LDA-MAR-COMPLETE",
+    instructorName: "Marcus Reed",
+    instructorId: "marcus-reed",
+    lessonSummary: "2026-05-08 at 15:00 from EN5 5XY. Ford Fiesta, manual.",
+    date: "2026-05-08",
+    time: "15:00",
+    pickup: "EN5 5XY",
+    pricePence: 3900,
+    car: "Ford Fiesta",
+    status: "completed"
+  }
+];
+
 function distanceLimit(value: string) {
   if (value === "local") return 5;
   if (value === "preferred") return 15;
@@ -73,6 +130,11 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const [checkoutState, setCheckoutState] = useState<"idle" | "loading" | "error" | "confirmed">("idle");
   const [checkoutError, setCheckoutError] = useState("");
   const [confirmationRef, setConfirmationRef] = useState("");
+  const [bookingRecords, setBookingRecords] = useState<BookingRecord[]>([]);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("unsupported");
+  const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationStatus, setLocationStatus] = useState("Use your location to show nearby instructors on the map.");
+  const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; review: string }>>({});
 
   useEffect(() => {
     const resetStickyCheckoutState = () => {
@@ -88,6 +150,25 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
       window.removeEventListener("pageshow", resetStickyCheckoutState);
     };
   }, []);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("lda-learner-bookings");
+    if (stored) {
+      setBookingRecords(JSON.parse(stored) as BookingRecord[]);
+    } else {
+      setBookingRecords(demoBookingRecords);
+      localStorage.setItem("lda-learner-bookings", JSON.stringify(demoBookingRecords));
+    }
+
+    if ("Notification" in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!bookingRecords.length) return;
+    localStorage.setItem("lda-learner-bookings", JSON.stringify(bookingRecords));
+  }, [bookingRecords]);
 
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -140,10 +221,42 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
       instructorId: string;
       lessonSummary: string;
       learnerEmail?: string | null;
+      date?: string;
+      time?: string;
+      pickup?: string;
+      pricePence?: number;
+      car?: string;
     };
+    const bookedInstructor = instructors.find((instructor) => instructor.id === bookingDetails.instructorId) ?? instructors[0];
 
     setConfirmationRef(booking);
     setCheckoutState("confirmed");
+    setBookingRecords((records) => {
+      if (records.some((record) => record.id === booking)) return records;
+
+      return [
+        {
+          id: booking,
+          instructorName: bookingDetails.instructorName,
+          instructorId: bookingDetails.instructorId,
+          lessonSummary: bookingDetails.lessonSummary,
+          date: bookingDetails.date ?? availabilityDate,
+          time: bookingDetails.time ?? selectedSlot,
+          pickup: bookingDetails.pickup ?? postcode,
+          pricePence: bookingDetails.pricePence ?? bookedInstructor.price,
+          car: bookingDetails.car ?? bookedInstructor.car,
+          status: "upcoming"
+        },
+        ...records
+      ];
+    });
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("LDA lesson booked", {
+        body: `Your lesson with ${bookingDetails.instructorName} is confirmed. Reference ${booking}.`
+      });
+    }
+
     fetch("/api/bookings/confirm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -156,7 +269,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
         lessonSummary: bookingDetails.lessonSummary
       })
     }).catch(() => undefined);
-  }, [learnerPhone]);
+  }, [availabilityDate, learnerPhone, postcode, selectedSlot]);
 
   const filteredInstructors = useMemo(() => {
     const maxDistance = distanceLimit(distance);
@@ -176,6 +289,59 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const availableSlots = selectedInstructor.slots[availabilityDate] ?? [];
   const lessonSummary = `${availabilityDate} at ${selectedSlot || "selected time"} from ${postcode}. ${selectedInstructor.car}, ${selectedInstructor.transmission}.`;
   const canPay = Boolean(selectedInstructor && selectedSlot && postcode);
+  const upcomingBookings = bookingRecords.filter((booking) => booking.status === "pending" || booking.status === "upcoming");
+  const completedBookings = bookingRecords.filter((booking) => booking.status === "completed");
+  const cancelledBookings = bookingRecords.filter((booking) => booking.status === "cancelled");
+
+  async function enableNotifications() {
+    if (!("Notification" in window)) {
+      setNotificationPermission("unsupported");
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+  }
+
+  function useCurrentLocation() {
+    if (!navigator.geolocation) {
+      setLocationStatus("Location is not supported on this device.");
+      return;
+    }
+
+    setLocationStatus("Finding your current location...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setLocationStatus("Live location enabled for nearby instructor sorting.");
+      },
+      () => setLocationStatus("Location permission was not granted. Postcode search still works."),
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }
+
+  function cancelBooking(bookingId: string) {
+    setBookingRecords((records) =>
+      records.map((booking) => (booking.id === bookingId && booking.status !== "completed" ? { ...booking, status: "cancelled" } : booking))
+    );
+  }
+
+  function submitReview(bookingId: string) {
+    const draft = reviewDrafts[bookingId];
+    if (!draft?.rating) return;
+
+    setBookingRecords((records) =>
+      records.map((booking) =>
+        booking.id === bookingId
+          ? {
+              ...booking,
+              rating: draft.rating,
+              review: draft.review.trim()
+            }
+          : booking
+      )
+    );
+  }
 
   async function startCheckout() {
     if (!canPay) return;
@@ -189,6 +355,11 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
         instructorName: selectedInstructor.name,
         instructorId: selectedInstructor.id,
         lessonSummary,
+        date: availabilityDate,
+        time: selectedSlot,
+        pickup: postcode,
+        pricePence: selectedInstructor.price,
+        car: selectedInstructor.car,
         learnerEmail,
         learnerPhone
       })
@@ -272,6 +443,67 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
         </label>
       </section>
 
+      <section className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+        <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
+                <MapPin size={16} /> Nearby instructor map
+              </div>
+              <h2 className="mt-3 text-2xl font-black">View instructors around your pickup area.</h2>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">{locationStatus}</p>
+            </div>
+            <button type="button" onClick={useCurrentLocation} className="lda-pill lda-pill-sm">
+              Use my location
+            </button>
+          </div>
+          <div className="relative mt-5 h-72 overflow-hidden rounded border border-zinc-200 bg-[radial-gradient(circle_at_20%_20%,#fee2e2,transparent_28%),linear-gradient(135deg,#f8fafc,#fff)]">
+            <div className="absolute left-0 right-0 top-1/2 h-px bg-zinc-300" />
+            <div className="absolute bottom-0 top-0 left-1/3 w-px bg-zinc-300" />
+            <div className="absolute bottom-0 top-0 right-1/4 w-px bg-zinc-200" />
+            <div className="absolute left-8 top-8 rounded-full border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-zinc-700">
+              {userPosition ? `You: ${userPosition.lat.toFixed(3)}, ${userPosition.lng.toFixed(3)}` : postcode}
+            </div>
+            {filteredInstructors.map((instructor, index) => {
+              const positions = [
+                { left: "24%", top: "52%" },
+                { left: "58%", top: "31%" },
+                { left: "72%", top: "64%" }
+              ];
+              const position = positions[index % positions.length];
+
+              return (
+                <button
+                  key={instructor.id}
+                  type="button"
+                  onClick={() => setSelectedInstructorId(instructor.id)}
+                  className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border px-3 py-2 text-xs font-black shadow-sm ${selectedInstructor.id === instructor.id ? "border-brand bg-brand text-white" : "border-zinc-300 bg-white text-black"}`}
+                  style={position}
+                >
+                  {instructor.name.split(" ")[0]} · {instructor.distanceMiles} mi
+                </button>
+              );
+            })}
+          </div>
+        </article>
+
+        <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
+            <BellRing size={16} /> Lesson notifications
+          </div>
+          <h2 className="mt-3 text-2xl font-black">Get booking updates.</h2>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">
+            LDA can send confirmation emails, in-app notifications, and browser alerts when a lesson is booked or changed.
+          </p>
+          <button type="button" onClick={enableNotifications} className="lda-pill lda-pill-sm mt-5">
+            Enable notifications
+          </button>
+          <div className="mt-4 rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-bold text-zinc-700">
+            Browser status: {notificationPermission}
+          </div>
+        </article>
+      </section>
+
       <section className="grid gap-5 xl:grid-cols-[1fr_420px]">
         <div className="grid gap-5">
           <div className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
@@ -284,7 +516,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
               <article key={instructor.id} className={`rounded border p-5 shadow-sm ${selectedInstructor.id === instructor.id ? "border-brand bg-red-50" : "border-zinc-200 bg-white"}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="grid h-12 w-12 place-items-center rounded bg-black text-lg font-black text-white">{instructor.name.slice(0, 1)}</div>
+                    <div className="grid h-16 w-16 place-items-center rounded bg-black text-xl font-black text-white">{instructor.name.slice(0, 1)}</div>
                     <h3 className="mt-4 text-xl font-black">{instructor.name}</h3>
                   </div>
                   <span className="rounded bg-red-500/10 px-2 py-1 text-xs font-black text-brand">Verified {instructor.type}</span>
@@ -293,7 +525,11 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
                 <div className="mt-4 grid gap-2 text-sm text-zinc-700">
                   <span className="inline-flex items-center gap-2"><Star size={16} className="text-brand" /> {instructor.rating} rating</span>
                   <span className="inline-flex items-center gap-2"><MapPin size={16} className="text-brand" /> {instructor.distanceMiles} miles away</span>
-                  <span className="inline-flex items-center gap-2"><CarFront size={16} className="text-brand" /> {instructor.car}</span>
+                  <span className="inline-flex items-center gap-2"><CarFront size={16} className="text-brand" /> {instructor.car} · {instructor.transmission}</span>
+                  <span className="inline-flex items-center gap-2"><Clock3 size={16} className="text-brand" /> Next: {instructor.next}</span>
+                </div>
+                <div className="mt-3 rounded border border-zinc-200 bg-zinc-50 p-3 text-xs font-bold leading-5 text-zinc-700">
+                  Covers {instructor.areas}. Hourly rate {formatMoney(instructor.price)}.
                 </div>
                 <div className="mt-5 flex items-center justify-between border-t border-zinc-200 pt-4">
                   <div>
@@ -351,7 +587,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
             </button>
             {checkoutState === "error" ? <p className="mt-3 text-sm font-bold text-brand">{checkoutError || "Checkout could not open. Check Stripe keys in Vercel."}</p> : null}
             {checkoutState === "confirmed" ? (
-              <div className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-4 text-sm leading-6 text-red-950">
+              <div className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-4 text-sm leading-6 text-red-100">
                 <MailCheck className="mb-2" />
                 Thank you for booking {selectedInstructor.name}. Your unique booking reference is <span className="font-black">{confirmationRef}</span>. Only share it with your instructor when they arrive.
               </div>
@@ -380,6 +616,81 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
             When the lesson is completed, your instructor can send feedback, checklist updates, and revision videos so the next lesson does not repeat covered skills.
           </p>
           <Link href="/progress-tracker" className="lda-pill lda-pill-sm mt-5">Open progress tracker</Link>
+        </article>
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-2">
+        <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
+            <History size={16} /> Booking history
+          </div>
+          <h3 className="mt-3 text-2xl font-black">Upcoming, completed, and cancelled lessons.</h3>
+          <div className="mt-5 grid gap-3">
+            {[...upcomingBookings, ...completedBookings, ...cancelledBookings].map((booking) => (
+              <div key={booking.id} className="rounded border border-zinc-200 bg-zinc-50 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="font-black">{booking.instructorName}</div>
+                    <div className="mt-1 text-sm text-zinc-600">{booking.date} at {booking.time} · {booking.car}</div>
+                    <div className="mt-1 text-xs font-bold text-zinc-500">{booking.id}</div>
+                  </div>
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black uppercase text-zinc-700">{booking.status}</span>
+                </div>
+                <div className="mt-3 text-sm text-zinc-700">{booking.lessonSummary}</div>
+                {(booking.status === "pending" || booking.status === "upcoming") ? (
+                  <button type="button" onClick={() => cancelBooking(booking.id)} className="mt-4 inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-50 px-3 py-2 text-xs font-black text-brand hover:ring-2 hover:ring-brand">
+                    <XCircle size={15} /> Cancel lesson
+                  </button>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
+            <MessageSquareText size={16} /> Rate your instructor
+          </div>
+          <h3 className="mt-3 text-2xl font-black">Review after a completed lesson.</h3>
+          <div className="mt-5 grid gap-3">
+            {completedBookings.map((booking) => {
+              const draft = reviewDrafts[booking.id] ?? { rating: booking.rating ?? 5, review: booking.review ?? "" };
+
+              return (
+                <div key={booking.id} className="rounded border border-zinc-200 bg-zinc-50 p-4">
+                  <div className="font-black">{booking.instructorName}</div>
+                  <div className="mt-1 text-sm text-zinc-600">{booking.date} · {booking.car}</div>
+                  <div className="mt-3 flex gap-1">
+                    {[1, 2, 3, 4, 5].map((rating) => (
+                      <button
+                        key={rating}
+                        type="button"
+                        onClick={() => setReviewDrafts((drafts) => ({ ...drafts, [booking.id]: { ...draft, rating } }))}
+                        className={rating <= draft.rating ? "text-brand" : "text-zinc-300"}
+                        aria-label={`${rating} star review`}
+                      >
+                        <Star size={22} fill="currentColor" />
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    value={draft.review}
+                    onChange={(event) => setReviewDrafts((drafts) => ({ ...drafts, [booking.id]: { ...draft, review: event.target.value } }))}
+                    placeholder="Write an optional review for this instructor"
+                    className="mt-3 min-h-24 w-full rounded border border-zinc-300 bg-white p-3 text-sm font-bold text-black"
+                  />
+                  <button type="button" onClick={() => submitReview(booking.id)} className="lda-pill lda-pill-sm mt-3">
+                    Save review
+                  </button>
+                  {booking.rating ? (
+                    <div className="mt-3 rounded border border-red-500/20 bg-red-50 p-3 text-sm font-bold text-red-950">
+                      Saved: {booking.rating}/5 {booking.review ? `· ${booking.review}` : ""}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
         </article>
       </section>
     </section>
