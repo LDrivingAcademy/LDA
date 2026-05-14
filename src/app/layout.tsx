@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { CookieConsent } from "@/components/cookie-consent";
 import { PageTranslator } from "@/components/page-translator";
+import { RoutePrefetcher } from "@/components/route-prefetcher";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en-GB" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         {children}
+        <RoutePrefetcher />
         <CookieConsent />
         <PageTranslator />
       </body>
