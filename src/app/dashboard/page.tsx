@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, PlusCircle, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, Sparkles } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
 import { LearnerBookingDashboard } from "@/components/learner-booking-dashboard";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
@@ -58,12 +58,22 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen bg-white text-black">
       <header className="border-b border-zinc-800 bg-ink text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div>
             <div className="text-sm font-bold text-red-200">LDA dashboard</div>
-            <h1 className="text-2xl font-black">{profile?.full_name || user.email}</h1>
+            <div className="mt-1 flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl font-black">{profile?.full_name || user.email}</h1>
+              <span className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100">
+                {isInstructor ? "Instructor" : hasLearnerPlus ? "Learner Plus" : "Learner"}
+              </span>
+              {!isInstructor && !hasLearnerPlus ? (
+                <Link href="/learner-plus" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
+                  Upgrade to Plus
+                </Link>
+              ) : null}
+            </div>
           </div>
           <form action={signOut}>
             <button className="lda-pill lda-pill-sm">Sign out</button>
@@ -71,58 +81,42 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-8 sm:px-6 lg:grid-cols-3 lg:px-8">
-        <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-          <ShieldCheck className="text-brand" />
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl font-black">Account role</h2>
-            {!isInstructor && !hasLearnerPlus ? (
-              <Link href="/learner-plus" className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-black text-red-100 hover:ring-2 hover:ring-brand">
-                <PlusCircle size={15} /> Upgrade to Learner Plus
-              </Link>
-            ) : hasLearnerPlus ? (
-              <span className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-black text-red-100">
-                <BadgeCheck size={15} /> Learner Plus active
-              </span>
-            ) : null}
-          </div>
-          <p className="mt-2 text-zinc-400">{isInstructor ? "instructor" : hasLearnerPlus ? "learner plus" : "learner"}</p>
-        </article>
-        <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:px-8">
+        <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <CalendarCheck className="text-brand" />
           <h2 className="mt-4 text-xl font-black">Learner journey</h2>
-          <p className="mt-2 text-zinc-400">Local instructors, price selector, eligibility checks, booking, payment, and reviews.</p>
+          <p className="mt-2 text-zinc-600">Plan the full route from first lesson to getting on the road after passing.</p>
+          <div className="mt-4 grid gap-2 text-sm font-bold text-zinc-700 sm:grid-cols-2">
+            <span>Theory test booking</span>
+            <span>Driving lessons</span>
+            <span>Practical test booking</span>
+            <span>First car guidance</span>
+            <span>Insurance quote support</span>
+            <span>Progress and revision</span>
+          </div>
+          <Link href="#learner-journey" className="lda-pill lda-pill-sm mt-5">
+            Start learner journey <ArrowRight size={16} />
+          </Link>
         </article>
         {isInstructor ? (
-          <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
+          <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
             <FileCheck2 className="text-brand" />
             <h2 className="mt-4 text-xl font-black">Instructor verification</h2>
-            <p className="mt-2 text-zinc-400">
+            <p className="mt-2 text-zinc-600">
               Status: <span className="font-black">{instructorProfile?.verification_status ?? "not started"}</span>
             </p>
           </article>
         ) : (
-          <>
-            <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-              <Sparkles className="text-brand" />
-              <h2 className="mt-4 text-xl font-black">LDA SmartMatch</h2>
-              <p className="mt-2 text-zinc-400">
-                Run the adaptive LDA matcher from your dashboard to compare instructor skills, support needs, availability, price, reviews, and lesson goals.
-              </p>
-              <Link href="/smart-match" className="lda-pill lda-pill-sm mt-5">
-                Open SmartMatch <ArrowRight size={16} />
-              </Link>
-            </article>
-            <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-              <PlusCircle className="text-brand" />
-              <h2 className="mt-4 text-xl font-black">{hasLearnerPlus ? "Learner Plus active" : "Learner Plus"}</h2>
-              <p className="mt-2 text-zinc-400">
-                {hasLearnerPlus
-                  ? "Your account is upgraded for premium SmartMatch, priority support, deeper progress tools, and extra learning resources."
-                  : "Optional upgrade for premium SmartMatch, priority support, deeper progress tools, and extra learning resources."}
-              </p>
-            </article>
-          </>
+          <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
+            <Sparkles className="text-brand" />
+            <h2 className="mt-4 text-xl font-black">LDA SmartMatch</h2>
+            <p className="mt-2 text-zinc-600">
+              Compare instructor skills, support needs, availability, price, reviews, and lesson goals.
+            </p>
+            <Link href="/smart-match" className="lda-pill lda-pill-sm mt-5">
+              Open SmartMatch <ArrowRight size={16} />
+            </Link>
+          </article>
         )}
       </section>
 
