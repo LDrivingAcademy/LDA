@@ -50,7 +50,7 @@ export function RoutePrefetcher() {
       prefetch(getInternalHref(event.target));
     }
 
-    document.addEventListener("pointerenter", handleIntent, true);
+    document.addEventListener("pointerover", handleIntent, true);
     document.addEventListener("focusin", handleIntent, true);
     document.addEventListener("touchstart", handleIntent, { capture: true, passive: true });
 
@@ -64,7 +64,7 @@ export function RoutePrefetcher() {
 
     return () => {
       window.clearTimeout(timer);
-      document.removeEventListener("pointerenter", handleIntent, true);
+      document.removeEventListener("pointerover", handleIntent, true);
       document.removeEventListener("focusin", handleIntent, true);
       document.removeEventListener("touchstart", handleIntent, true);
     };
