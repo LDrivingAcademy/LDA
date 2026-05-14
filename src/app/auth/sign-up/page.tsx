@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft, CarFront, GraduationCap, MailCheck, MessageSquareText, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CarFront, GraduationCap, MailCheck, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
-import { signUp, signUpWithPhonePassword } from "../actions";
+import { signUp } from "../actions";
 
 export default async function SignUpPage({
   searchParams
@@ -30,7 +30,7 @@ export default async function SignUpPage({
               {isInstructor ? "Create your instructor account." : "Create your learner account."}
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-300">
-              Sign up once with your email or mobile number. LDA stores your verified profile in Supabase so you can return later through Log in without repeating the whole setup.
+              Sign up once with your email. LDA uses email confirmation to protect accounts, then stores your verified profile so you can return later through Log in without repeating setup.
             </p>
             <Link href={`/auth/login?role=${isInstructor ? "instructor" : "learner"}`} className="lda-pill lda-pill-sm mt-5">
               Already have an account? Log in
@@ -81,39 +81,8 @@ export default async function SignUpPage({
               </button>
             </form>
             <p className="mt-4 text-xs leading-5 text-zinc-500">
-              After you confirm the email link, LDA will ask for learner eligibility or instructor verification details and store them against your account. After that, use Log in with your email and password.
+              After you confirm the email link, LDA will ask for learner eligibility or instructor verification details and store them against your account. A phone number can be added later for lesson updates and can be used for returning login once linked to your account.
             </p>
-            <div className="mt-5 border-t border-zinc-800 pt-5">
-              <div className="mb-3">
-                <div className="text-sm font-black uppercase text-brand">Prefer text message?</div>
-                <h3 className="mt-1 text-xl font-black">Use a mobile code</h3>
-              </div>
-              <form action={signUpWithPhonePassword} className="grid gap-3">
-                <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
-                <input type="hidden" name="next" value={nextPath} />
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <label className="grid gap-1">
-                    <span className="text-sm font-bold text-zinc-400">First name</span>
-                    <input required name="firstName" autoComplete="given-name" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="First name" />
-                  </label>
-                  <label className="grid gap-1">
-                    <span className="text-sm font-bold text-zinc-400">Last name</span>
-                    <input required name="lastName" autoComplete="family-name" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Last name" />
-                  </label>
-                </div>
-                <label className="grid gap-1">
-                  <span className="text-sm font-bold text-zinc-400">Mobile number</span>
-                  <input required name="phone" type="tel" autoComplete="tel" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="07123 456789" />
-                </label>
-                <label className="grid gap-1">
-                  <span className="text-sm font-bold text-zinc-400">Create password</span>
-                  <input required name="password" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
-                </label>
-                <button className="lda-pill mt-2">
-                  <MessageSquareText size={18} /> Create account by text
-                </button>
-              </form>
-            </div>
           </section>
         </div>
       </div>

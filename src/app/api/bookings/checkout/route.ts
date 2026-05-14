@@ -48,14 +48,14 @@ export async function POST(request: Request) {
     return NextResponse.json({
       mode: "demo",
       message: "Stripe is not configured yet. Add STRIPE_SECRET_KEY to create live Checkout sessions.",
-      checkoutUrl: `${appUrl}/dashboard?demoCheckout=1&booking=${encodeURIComponent(bookingId)}`
+      checkoutUrl: `${appUrl}/learner-dashboard?demoCheckout=1&booking=${encodeURIComponent(bookingId)}`
     });
   }
 
   const params = new URLSearchParams({
     mode: "payment",
-    success_url: `${appUrl}/dashboard?payment=success&booking=${encodeURIComponent(bookingId)}`,
-    cancel_url: `${appUrl}/dashboard?payment=cancelled&booking=${encodeURIComponent(bookingId)}`,
+    success_url: `${appUrl}/learner-dashboard?payment=success&booking=${encodeURIComponent(bookingId)}`,
+    cancel_url: `${appUrl}/learner-dashboard?payment=cancelled&booking=${encodeURIComponent(bookingId)}`,
     "metadata[booking_id]": bookingId,
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": currency,

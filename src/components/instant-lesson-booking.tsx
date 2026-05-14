@@ -2,6 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { Apple, BadgeCheck, CreditCard, Mail, ShieldCheck } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 type InstantLessonBookingProps = {
   instructorName: string;
@@ -16,40 +17,17 @@ type VerifyState =
   | { status: "valid"; message: string; mode: string }
   | { status: "invalid"; message: string };
 
-type PaymentMethod = "apple_pay" | "visa" | "mastercard" | "maestro" | "paypal";
-
-const paymentMethods: Array<{
-  id: PaymentMethod;
-  label: string;
-  detail: string;
-  icon: "apple" | "card" | "paypal";
-}> = [
-  { id: "apple_pay", label: "Apple Pay", detail: "Available on supported Apple devices through Stripe.", icon: "apple" },
-  { id: "visa", label: "Visa", detail: "Pay securely by card through Stripe Checkout.", icon: "card" },
-  { id: "mastercard", label: "Mastercard", detail: "Pay securely by card through Stripe Checkout.", icon: "card" },
-  { id: "maestro", label: "Maestro", detail: "Card support depends on the live Stripe account.", icon: "card" },
-  { id: "paypal", label: "PayPal", detail: "Available when PayPal is enabled on the Stripe account.", icon: "paypal" }
-];
-
-function paymentLabel(method: PaymentMethod) {
-  return paymentMethods.find((paymentMethod) => paymentMethod.id === method)?.label ?? "payment";
-}
-
-function PaymentIcon({ icon }: { icon: "apple" | "card" | "paypal" }) {
-  if (icon === "apple") {
-    return <Apple size={16} />;
-  }
-
-  if (icon === "paypal") {
-    return <BadgeCheck size={16} />;
-  }
-
-  return <CreditCard size={16} />;
-}
-
 function cleanLicenceNumber(value: string) {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
+
+const paymentOptions: { value: string; label: string; icon: LucideIcon }[] = [
+  { value: "apple_pay", label: "Apple Pay", icon: Apple },
+  { value: "visa", label: "Visa", icon: CreditCard },
+  { value: "mastercard", label: "Mastercard", icon: CreditCard },
+  { value: "maestro", label: "Maestro", icon: CreditCard },
+  { value: "paypal", label: "PayPal", icon: BadgeCheck }
+];
 
 export function InstantLessonBooking({
   instructorName,
@@ -59,14 +37,15 @@ export function InstantLessonBooking({
 }: InstantLessonBookingProps) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [licenceNumber, setLicenceNumber] = useState("");
   const [permission, setPermission] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>("apple_pay");
   const [verifyState, setVerifyState] = useState<VerifyState>({
     status: "idle",
     message: "Enter the 16-character provisional licence number, then run the DVLA check."
   });
   const [checkoutState, setCheckoutState] = useState<"idle" | "loading" | "error">("idle");
+  const [paymentPreference, setPaymentPreference] = useState("card");
 
   const normalisedLicence = useMemo(() => cleanLicenceNumber(licenceNumber), [licenceNumber]);
   const canPay = Boolean(verifyState.status === "valid" && fullName.trim() && email.trim() && permission);
@@ -114,12 +93,13 @@ export function InstantLessonBooking({
       body: JSON.stringify({
         fullName,
         learnerEmail: email,
+        learnerPhone: phone,
         provisionalLicenceNumber: normalisedLicence,
         instructorName,
         instructorEmail,
         lessonSummary,
         amountPence,
-        preferredPaymentMethod: selectedPaymentMethod
+        paymentPreference
       })
     });
     const result = await response.json();
@@ -161,6 +141,17 @@ export function InstantLessonBooking({
             onChange={(event) => setEmail(event.target.value)}
             className="min-h-12 rounded border border-zinc-300 px-4 font-bold text-black"
             placeholder="name@gmail.com, name@hotmail.com..."
+          />
+        </label>
+
+        <label className="grid gap-1">
+          <span className="text-sm font-black text-zinc-700">Phone number <span className="font-medium text-zinc-500">(optional)</span></span>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+            className="min-h-12 rounded border border-zinc-300 px-4 font-bold text-black"
+            placeholder="Used for text confirmation and lesson updates"
           />
         </label>
 
@@ -210,39 +201,27 @@ export function InstantLessonBooking({
 
       <div className="mt-6 rounded bg-zinc-100 p-4">
         <div className="text-sm font-black text-zinc-600">Payment methods</div>
-        <div className="mt-3 grid gap-2">
-          {paymentMethods.map((method) => (
-            <label
-              key={method.id}
-              className={`flex cursor-pointer items-start gap-3 rounded border px-3 py-3 text-sm font-bold ${
-                selectedPaymentMethod === method.id
-                  ? "border-brand bg-white text-black shadow-sm"
-                  : "border-transparent bg-white text-zinc-700"
+        <div className="mt-3 flex flex-wrap gap-2 text-xs font-black text-zinc-700">
+          {paymentOptions.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setPaymentPreference(value)}
+              className={`inline-flex items-center gap-1 rounded-full border px-3 py-2 transition ${
+                paymentPreference === value ? "border-brand bg-brand text-white" : "border-zinc-200 bg-white text-zinc-800 hover:border-brand"
               }`}
             >
-              <input
-                type="radio"
-                name="preferredPaymentMethod"
-                value={method.id}
-                checked={selectedPaymentMethod === method.id}
-                onChange={() => setSelectedPaymentMethod(method.id)}
-                className="mt-1"
-              />
-              <span className="mt-0.5 text-brand"><PaymentIcon icon={method.icon} /></span>
-              <span>
-                <span className="block font-black">{method.label}</span>
-                <span className="mt-1 block text-xs leading-5 text-zinc-500">{method.detail}</span>
-              </span>
-            </label>
+              <Icon size={14} /> {label}
+            </button>
           ))}
         </div>
         <p className="mt-3 text-xs leading-5 text-zinc-500">
-          Stripe Checkout handles cards and eligible wallets securely. The next screen will show the live methods enabled on the Stripe account.
+          Each option opens Stripe Checkout. Cards, Apple Pay, Visa, Mastercard and Maestro are handled securely through Stripe; Apple Pay requires domain verification and PayPal depends on account eligibility.
         </p>
       </div>
 
       <button disabled={!canPay || checkoutState === "loading"} className="lda-pill mt-6 w-full" type="submit">
-        <Mail size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : `Pay with ${paymentLabel(selectedPaymentMethod)}`}
+        <Mail size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : "Pay and reserve lesson now"}
       </button>
       {checkoutState === "error" ? (
         <p className="mt-3 text-sm font-bold text-brand">Payment could not start. Please try again or contact support.</p>

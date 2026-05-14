@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendBookingConfirmationEmails } from "@/lib/email";
+import { sendSms } from "@/lib/sms";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type ConfirmRequest = {
@@ -7,6 +8,7 @@ type ConfirmRequest = {
   learnerId?: string;
   instructorId?: string;
   learnerEmail?: string;
+  learnerPhone?: string;
   instructorEmail?: string;
   instructorName: string;
   lessonSummary: string;
@@ -25,6 +27,11 @@ export async function POST(request: Request) {
     manageUrl
   });
 
+  await sendSms({
+    to: input.learnerPhone,
+    body: `LDA booking confirmed. Reference: ${input.bookingId}. Thank you for booking ${input.instructorName}. Only share this reference with your instructor when they arrive.`
+  });
+
   const supabase = createAdminClient();
 
   if (supabase && input.instructorId) {
@@ -39,6 +46,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    message: "Learner email, instructor email, and instructor notification flow completed or queued."
+    message: "Learner email, text confirmation, instructor email, and instructor notification flow completed or queued."
   });
 }

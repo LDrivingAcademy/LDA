@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 type InstantConfirmationEmailProps = {
   reference: string;
   learnerEmail: string;
+  learnerPhone?: string;
   learnerName: string;
   instructorName: string;
   lessonSummary: string;
@@ -13,6 +14,7 @@ type InstantConfirmationEmailProps = {
 export function InstantConfirmationEmail({
   reference,
   learnerEmail,
+  learnerPhone,
   learnerName,
   instructorName,
   lessonSummary
@@ -35,6 +37,7 @@ export function InstantConfirmationEmail({
       body: JSON.stringify({
         reference,
         learnerEmail,
+        learnerPhone,
         learnerName,
         instructorName,
         lessonSummary
@@ -50,7 +53,7 @@ export function InstantConfirmationEmail({
       .catch(() => {
         setStatus("Confirmation email could not be sent yet. Your reference number is still valid.");
       });
-  }, [instructorName, learnerEmail, learnerName, lessonSummary, reference]);
+  }, [instructorName, learnerEmail, learnerName, learnerPhone, lessonSummary, reference]);
 
   return <p className="mt-4 text-sm font-bold text-zinc-600">{status}</p>;
 }

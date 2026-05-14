@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { sendInstantBookingConfirmationEmail } from "@/lib/email";
+import { sendSms } from "@/lib/sms";
 
 type InstantConfirmRequest = {
   reference?: string;
   learnerEmail?: string;
+  learnerPhone?: string;
   learnerName?: string;
   instructorName?: string;
   lessonSummary?: string;
@@ -24,8 +26,13 @@ export async function POST(request: Request) {
     lessonSummary: input.lessonSummary ?? "Instant LDA lesson"
   });
 
+  await sendSms({
+    to: input.learnerPhone,
+    body: `LDA instant lesson confirmed. Reference: ${input.reference}. Thank you for booking ${input.instructorName ?? "your LDA instructor"}.`
+  });
+
   return NextResponse.json({
     ok: true,
-    message: "Instant booking confirmation email sent or skipped in demo mode."
+    message: "Instant booking confirmation email and text confirmation sent or skipped when provider keys are not configured."
   });
 }

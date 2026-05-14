@@ -8,6 +8,7 @@ export default async function InstantLessonConfirmedPage({
   searchParams: Promise<{
     reference?: string;
     email?: string;
+    phone?: string;
     name?: string;
     instructor?: string;
     summary?: string;
@@ -16,6 +17,7 @@ export default async function InstantLessonConfirmedPage({
   const params = await searchParams;
   const reference = params.reference ?? "LDA-PENDING";
   const learnerEmail = params.email ?? "";
+  const learnerPhone = params.phone ?? "";
   const learnerName = params.name ?? "Learner";
   const instructorName = params.instructor ?? "your LDA instructor";
   const lessonSummary = params.summary ?? `Instant lesson with ${instructorName}`;
@@ -49,7 +51,7 @@ export default async function InstantLessonConfirmedPage({
               <div>
                 <div className="font-black">Confirmation email</div>
                 <p className="mt-1 text-sm leading-6 text-zinc-600">
-                  A professional confirmation email with this reference number will be sent to {learnerEmail || "the email address provided"}.
+                  A professional confirmation email with this reference number will be sent to {learnerEmail || "the email address provided"}. If a phone number was provided, LDA will also send a text confirmation.
                 </p>
               </div>
             </div>
@@ -57,6 +59,7 @@ export default async function InstantLessonConfirmedPage({
               <InstantConfirmationEmail
                 reference={reference}
                 learnerEmail={learnerEmail}
+                learnerPhone={learnerPhone}
                 learnerName={learnerName}
                 instructorName={instructorName}
                 lessonSummary={lessonSummary}
@@ -64,7 +67,7 @@ export default async function InstantLessonConfirmedPage({
             ) : null}
           </div>
 
-          <Link href="/tracking" className="lda-pill mt-8">
+          <Link href="/learner-dashboard#tracking" className="lda-pill mt-8">
             Open live tracking preview
           </Link>
         </div>

@@ -10,7 +10,7 @@ export default async function LoginPage({
 }) {
   const { message, role } = await searchParams;
   const isInstructor = role === "instructor";
-  const nextPath = "/dashboard";
+  const nextPath = isInstructor ? "/instructor-dashboard" : "/learner-dashboard";
 
   return (
     <main className="min-h-screen bg-ink px-4 py-8 text-white">

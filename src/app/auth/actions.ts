@@ -58,6 +58,10 @@ function verifyRedirect(role: "learner" | "instructor", message: string): never 
   redirect(`/auth/verify?role=${role}&message=${encodeURIComponent(message)}`);
 }
 
+function dashboardPathForRole(role: "learner" | "instructor") {
+  return role === "instructor" ? "/instructor-dashboard" : "/learner-dashboard";
+}
+
 export async function sendMagicLink(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const fullName = getSubmittedFullName(formData);
@@ -180,7 +184,7 @@ export async function completeVerification(formData: FormData) {
     const provisionalConfirmed = formData.get("provisionalLicenceConfirmed") === "on";
 
     if (!dateOfBirth || !isAtLeast17(dateOfBirth)) {
-      verifyRedirect("learner", "Enter a valid date of birth showing you are 17 or over before booking.");
+      verifyRedirect("learner", "Incorrect date of birth.");
     }
 
     if (!ageConfirmed) {
@@ -230,7 +234,7 @@ export async function completeVerification(formData: FormData) {
     });
 
     revalidatePath("/", "layout");
-    redirect("/dashboard?verification=pending");
+    redirect("/instructor-dashboard?verification=pending");
   }
 
   const dateOfBirth = String(formData.get("dateOfBirth") ?? "").trim();
@@ -243,14 +247,14 @@ export async function completeVerification(formData: FormData) {
   });
 
   revalidatePath("/", "layout");
-  redirect("/dashboard?verified=1");
+  redirect("/learner-dashboard?verified=1");
 }
 
 export async function signIn(formData: FormData) {
   const identifier = String(formData.get("identifier") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const nextPath = safeNextPath(formData.get("next"));
   const role = safeRole(formData.get("accountIntent"));
+  const nextPath = safeNextPath(formData.get("next") ?? dashboardPathForRole(role));
 
   const supabase = await createClient();
   if (!supabase) {
@@ -310,41 +314,6 @@ export async function signUp(formData: FormData) {
 
   revalidatePath("/", "layout");
   redirect(`/auth/check-email?email=${encodeURIComponent(email)}&role=${role}`);
-}
-
-export async function signUpWithPhonePassword(formData: FormData) {
-  const supabase = await createClient();
-  if (!supabase) {
-    authError("Supabase environment variables are not configured yet.");
-  }
-
-  const phone = normalizePhone(formData.get("phone"));
-  const password = String(formData.get("password") ?? "");
-  const fullName = getSubmittedFullName(formData);
-  const role = safeRole(formData.get("accountIntent"));
-
-  if (!phone || !phone.startsWith("+")) {
-    passwordRedirect("Enter your mobile number in UK format, for example 07123 456789, or international format with +44.", role);
-  }
-
-  if (password.length < 8) {
-    passwordRedirect("Use a password with at least 8 characters.", role);
-  }
-
-  const { error } = await supabase.auth.signUp({
-    phone,
-    password,
-    options: {
-      data: { account_intent: role, full_name: fullName }
-    }
-  });
-
-  if (error) {
-    passwordRedirect(error.message, role);
-  }
-
-  revalidatePath("/", "layout");
-  redirect(`/auth/phone/verify?phone=${encodeURIComponent(phone)}&role=${role}&name=${encodeURIComponent(fullName)}`);
 }
 
 export async function requestPasswordReset(formData: FormData) {

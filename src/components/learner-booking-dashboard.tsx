@@ -73,7 +73,7 @@ function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function LearnerBookingDashboard({ learnerEmail }: { learnerEmail?: string | null }) {
+export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learnerEmail?: string | null; learnerPhone?: string | null }) {
   const postcodeRef = useRef<HTMLInputElement>(null);
   const [postcode, setPostcode] = useState("EN5 5XY");
   const [distance, setDistance] = useState("5");
@@ -85,6 +85,7 @@ export function LearnerBookingDashboard({ learnerEmail }: { learnerEmail?: strin
   const [selectedSlot, setSelectedSlot] = useState("09:30");
   const [paymentOption, setPaymentOption] = useState("Stripe");
   const [checkoutState, setCheckoutState] = useState<"idle" | "loading" | "error" | "confirmed">("idle");
+  const [checkoutError, setCheckoutError] = useState("");
   const [confirmationRef, setConfirmationRef] = useState("");
 
   useEffect(() => {
@@ -150,6 +151,7 @@ export function LearnerBookingDashboard({ learnerEmail }: { learnerEmail?: strin
         instructorName: bookingDetails.instructorName,
         instructorId: bookingDetails.instructorId,
         learnerEmail: bookingDetails.learnerEmail,
+        learnerPhone,
         lessonSummary: bookingDetails.lessonSummary
       })
     }).catch(() => undefined);
@@ -178,6 +180,7 @@ export function LearnerBookingDashboard({ learnerEmail }: { learnerEmail?: strin
   async function startCheckout() {
     if (!canPay) return;
     setCheckoutState("loading");
+    setCheckoutError("");
     const reference = makeBookingReference(selectedInstructor.id);
 
     localStorage.setItem(
@@ -186,7 +189,8 @@ export function LearnerBookingDashboard({ learnerEmail }: { learnerEmail?: strin
         instructorName: selectedInstructor.name,
         instructorId: selectedInstructor.id,
         lessonSummary,
-        learnerEmail
+        learnerEmail,
+        learnerPhone
       })
     );
 
@@ -201,9 +205,10 @@ export function LearnerBookingDashboard({ learnerEmail }: { learnerEmail?: strin
         stripeConnectedAccountId: selectedInstructor.stripeConnectedAccountId
       })
     });
-    const result = await response.json();
+    const result = await response.json().catch(() => ({}));
 
     if (!response.ok || !result.checkoutUrl) {
+      setCheckoutError(result.error || result.message || "Checkout could not open. Check Stripe keys in Vercel.");
       setCheckoutState("error");
       return;
     }
@@ -350,7 +355,7 @@ export function LearnerBookingDashboard({ learnerEmail }: { learnerEmail?: strin
             <button disabled={!canPay || checkoutState === "loading"} onClick={startCheckout} className="lda-pill mt-5 w-full">
               <CreditCard size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : "Pay with Stripe"}
             </button>
-            {checkoutState === "error" ? <p className="mt-3 text-sm font-bold text-brand">Checkout could not open. Check Stripe keys in Vercel.</p> : null}
+            {checkoutState === "error" ? <p className="mt-3 text-sm font-bold text-brand">{checkoutError || "Checkout could not open. Check Stripe keys in Vercel."}</p> : null}
             {checkoutState === "confirmed" ? (
               <div className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-4 text-sm leading-6 text-red-100">
                 <MailCheck className="mb-2" />

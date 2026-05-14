@@ -15,6 +15,7 @@ import {
   UsersRound
 } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { FeedbackButton } from "@/components/feedback-button";
 import { LanguageSelector } from "@/components/language-selector";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
@@ -245,6 +246,7 @@ export default function HomePage() {
           </div>
         </section>
       </main>
+      <FeedbackButton />
       <SiteFooter />
     </>
   );

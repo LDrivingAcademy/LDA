@@ -44,6 +44,14 @@ type AuthMagicLinkEmailInput = {
   confirmUrl: string;
 };
 
+type ProductFeedbackEmailInput = {
+  name?: string;
+  email?: string;
+  issue: string;
+  details: string;
+  pageUrl?: string;
+};
+
 export function canSendTransactionalEmail() {
   return Boolean(process.env.RESEND_API_KEY);
 }
@@ -274,4 +282,38 @@ export async function sendAuthMagicLinkEmail(input: AuthMagicLinkEmailInput) {
   `;
 
   return sendResendEmail(input.to, "Your L Driving Academy login link", html, text);
+}
+
+export async function sendProductFeedbackEmail(input: ProductFeedbackEmailInput) {
+  const supportEmail = process.env.LDA_FEEDBACK_EMAIL ?? process.env.APP_SUPPORT_EMAIL ?? "info@ldrivingacademy.co.uk";
+  const name = escapeHtml(input.name || "Not provided");
+  const email = escapeHtml(input.email || "Not provided");
+  const issue = escapeHtml(input.issue);
+  const details = escapeHtml(input.details);
+  const pageUrl = escapeHtml(input.pageUrl || "Not provided");
+  const appUrl = process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk";
+  const encodedIssue = encodeURIComponent(input.issue);
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
+      <h1>LDA product feedback</h1>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Page:</strong> ${pageUrl}</p>
+      <h2>Feedback issue</h2>
+      <p>${issue}</p>
+      <h2>Information supplied</h2>
+      <p>${details.replace(/\n/g, "<br />")}</p>
+      <div style="margin-top: 24px; padding: 18px; background: #f4f4f5; border-radius: 8px;">
+        <p><strong>Owner review:</strong> decide whether this feedback should become an LDA change request.</p>
+        <p>
+          <a href="${appUrl}/owner-dashboard?feedback=accept&issue=${encodedIssue}" style="display:inline-block;background:#ed1b24;color:#fff;text-decoration:none;font-weight:800;padding:12px 18px;border-radius:999px;margin-right:8px;">Accept feedback</a>
+          <a href="${appUrl}/owner-dashboard?feedback=decline&issue=${encodedIssue}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;font-weight:800;padding:12px 18px;border-radius:999px;">Decline</a>
+        </p>
+        <p style="font-size:12px;color:#52525b;">Accepting creates a human-reviewed change request. Codex should still be asked to implement approved product changes in the workspace.</p>
+      </div>
+    </div>
+  `;
+
+  return sendResendEmail(supportEmail, `LDA feedback: ${input.issue}`, html);
 }

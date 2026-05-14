@@ -5,7 +5,6 @@ import { headers } from "next/headers";
 import { createHandoffSecret, hashHandoffSecret, setHandoffCookie } from "@/lib/auth-handoff";
 import { canSendTransactionalEmail, sendAuthMagicLinkEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 
 function authError(message: string): never {
   redirect(`/auth/login?message=${encodeURIComponent(message)}`);
@@ -21,16 +20,6 @@ function getSubmittedFullName(formData: FormData) {
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
   return fullName || [firstName, lastName].filter(Boolean).join(" ").trim();
-}
-
-function normalizePhone(value: FormDataEntryValue | null) {
-  const phone = String(value ?? "").trim().replace(/\s+/g, "");
-
-  if (phone.startsWith("07") && phone.length === 11) {
-    return `+44${phone.slice(1)}`;
-  }
-
-  return phone;
 }
 
 async function getAppOrigin() {
@@ -131,62 +120,4 @@ export async function sendMagicLink(formData: FormData) {
 
   await setHandoffCookie(handoffId, handoffSecret);
   redirect(`/auth/check-email?email=${encodeURIComponent(email)}&role=${role}&request=${handoffId}`);
-}
-
-export async function sendPhoneOtp(formData: FormData) {
-  const phone = normalizePhone(formData.get("phone"));
-  const fullName = getSubmittedFullName(formData);
-  const role = safeRole(formData.get("accountIntent"));
-  const supabase = await createClient();
-
-  if (!phone || !phone.startsWith("+")) {
-    redirect(`/auth/login?role=${role}&message=${encodeURIComponent("Enter your mobile number in UK format, for example 07123 456789, or international format with +44.")}`);
-  }
-
-  if (!supabase) {
-    redirect(`/auth/login?role=${role}&message=${encodeURIComponent("Supabase is not configured yet. Add the Supabase URL and publishable key in Vercel before text-message login can run.")}`);
-  }
-
-  const { error } = await supabase.auth.signInWithOtp({
-    phone,
-    options: {
-      data: {
-        account_intent: role,
-        full_name: fullName
-      }
-    }
-  });
-
-  if (error) {
-    redirect(`/auth/login?role=${role}&message=${encodeURIComponent(`LDA could not send the text-message code. Check Supabase Phone Auth and SMS provider settings. ${error.message}`)}`);
-  }
-
-  redirect(`/auth/phone/verify?phone=${encodeURIComponent(phone)}&role=${role}&name=${encodeURIComponent(fullName)}`);
-}
-
-export async function verifyPhoneOtp(formData: FormData) {
-  const phone = normalizePhone(formData.get("phone"));
-  const token = String(formData.get("token") ?? "").trim();
-  const role = safeRole(formData.get("accountIntent"));
-  const supabase = await createClient();
-
-  if (!supabase) {
-    redirect(`/auth/login?role=${role}&message=${encodeURIComponent("Supabase is not configured yet. Add the Supabase URL and publishable key in Vercel before text-message login can run.")}`);
-  }
-
-  if (!phone || !token) {
-    redirect(`/auth/phone/verify?phone=${encodeURIComponent(phone)}&role=${role}&message=${encodeURIComponent("Enter the text-message code sent to your phone.")}`);
-  }
-
-  const { error } = await supabase.auth.verifyOtp({
-    phone,
-    token,
-    type: "sms"
-  });
-
-  if (error) {
-    redirect(`/auth/phone/verify?phone=${encodeURIComponent(phone)}&role=${role}&message=${encodeURIComponent(error.message)}`);
-  }
-
-  redirect(`/auth/verify?role=${role}`);
 }

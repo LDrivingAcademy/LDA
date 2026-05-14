@@ -100,18 +100,8 @@ export function DateOfBirthField({ latestEligibleDate }: { latestEligibleDate: s
           </select>
         </label>
       </div>
-      <label className="grid gap-1">
-        <span className="text-xs font-bold uppercase text-zinc-500">Or use calendar</span>
-        <input
-          value={dateValue}
-          onChange={(event) => setDateValue(event.target.value)}
-          type="date"
-          max={latestEligibleDate}
-          className="rounded border border-zinc-800 bg-black px-3 py-3 text-white"
-        />
-      </label>
       <span className="text-xs leading-5 text-zinc-500">
-        Pick year, month, and day quickly, or use the calendar. Learners must be 17 or over before booking.
+        Choose your day, month, and year. LDA checks the date before booking can continue.
       </span>
     </div>
   );

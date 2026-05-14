@@ -3,12 +3,13 @@ import { NextResponse } from "next/server";
 type InstantCheckoutRequest = {
   fullName?: string;
   learnerEmail?: string;
+  learnerPhone?: string;
   provisionalLicenceNumber?: string;
   instructorName?: string;
   instructorEmail?: string;
   lessonSummary?: string;
   amountPence?: number;
-  preferredPaymentMethod?: "apple_pay" | "visa" | "mastercard" | "maestro" | "paypal";
+  paymentPreference?: string;
 };
 
 function createReference() {
@@ -21,10 +22,6 @@ function required(value?: string) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
-function getAppUrl() {
-  return (process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk").trim().replace(/\/$/, "");
-}
-
 export async function POST(request: Request) {
   const body = (await request.json()) as InstantCheckoutRequest;
 
@@ -33,16 +30,16 @@ export async function POST(request: Request) {
   }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-  const appUrl = getAppUrl();
+  const appUrl = process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk";
   const currency = process.env.STRIPE_DEFAULT_CURRENCY ?? "gbp";
   const amountPence = body.amountPence ?? 6500;
   const instructorName = body.instructorName ?? "your LDA instructor";
   const lessonSummary = body.lessonSummary ?? `Instant LDA lesson with ${instructorName}`;
-  const preferredPaymentMethod = body.preferredPaymentMethod ?? "apple_pay";
   const reference = createReference();
   const successParams = new URLSearchParams({
     reference,
     email: body.learnerEmail ?? "",
+    phone: body.learnerPhone ?? "",
     name: body.fullName ?? "",
     instructor: instructorName,
     summary: lessonSummary
@@ -54,14 +51,10 @@ export async function POST(request: Request) {
     return NextResponse.json({
       mode: "demo",
       reference,
-      message: `Stripe is not configured yet. Demo confirmation created for ${preferredPaymentMethod}. Add STRIPE_SECRET_KEY for live payment collection.`,
+      message: "Stripe is not configured yet. Add STRIPE_SECRET_KEY for live payment collection.",
       checkoutUrl: successUrl
     });
   }
-
-  const paymentMethodTypes = preferredPaymentMethod === "paypal" && process.env.STRIPE_ENABLE_PAYPAL === "true"
-    ? ["paypal", "card"]
-    : ["card"];
 
   const params = new URLSearchParams({
     mode: "payment",
@@ -69,8 +62,9 @@ export async function POST(request: Request) {
     cancel_url: cancelUrl,
     "metadata[booking_reference]": reference,
     "metadata[learner_email]": body.learnerEmail ?? "",
+    "metadata[learner_phone]": body.learnerPhone ?? "",
     "metadata[instructor_name]": instructorName,
-    "metadata[preferred_payment_method]": preferredPaymentMethod,
+    "metadata[payment_preference]": body.paymentPreference ?? "card",
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": currency,
     "line_items[0][price_data][unit_amount]": String(amountPence),
@@ -79,9 +73,10 @@ export async function POST(request: Request) {
     "customer_email": body.learnerEmail ?? ""
   });
 
-  paymentMethodTypes.forEach((method, index) => {
-    params.set(`payment_method_types[${index}]`, method);
-  });
+  if (process.env.STRIPE_ENABLE_PAYPAL === "true") {
+    params.set("payment_method_types[0]", "card");
+    params.set("payment_method_types[1]", "paypal");
+  }
 
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",

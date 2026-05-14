@@ -107,11 +107,11 @@ export default async function VerifyAccountPage({
 
                   <label className="flex items-start gap-3 rounded border border-zinc-800 bg-black p-3 text-sm leading-6 text-zinc-300">
                     <input required name="termsAccepted" type="checkbox" className="mt-1" />
-                    <span>I accept the LDA terms, privacy notice, cookie policy, and booking rules. Final solicitor-reviewed wording must be confirmed before live paid bookings.</span>
+                    <span>I accept the LDA terms of use, privacy policy, cookie policy, and booking rules.</span>
                   </label>
                   <label className="flex items-start gap-3 rounded border border-zinc-800 bg-black p-3 text-sm leading-6 text-zinc-300">
                     <input name="marketingOptIn" type="checkbox" className="mt-1" />
-                    <span>Email me learner tips, launch offers, free trials, and LDA updates. I can unsubscribe later.</span>
+                    <span>Email me learner tips, launch offers, free trials, and LDA updates.</span>
                   </label>
 
                   <button className="lda-pill mt-2">

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, ShieldCheck } from "lucide-react";
+import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, PlusCircle, ShieldCheck, Sparkles } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
 import { LearnerBookingDashboard } from "@/components/learner-booking-dashboard";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
@@ -46,7 +46,7 @@ export default async function DashboardPage() {
   }
 
   const [{ data: profile }, { data: roles }, { data: instructorProfile }, { data: learnerProfile }] = await Promise.all([
-    supabase.from("profiles").select("full_name,email").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name,email,phone").eq("id", user.id).maybeSingle(),
     supabase.from("account_roles").select("role").eq("user_id", user.id),
     supabase.from("instructor_profiles").select("verification_status,hourly_rate_pence,areas_covered").eq("user_id", user.id).maybeSingle(),
     supabase.from("learner_profiles").select("date_of_birth,provisional_licence_confirmed_at,terms_accepted_at").eq("user_id", user.id).maybeSingle()
@@ -76,24 +76,39 @@ export default async function DashboardPage() {
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-8 sm:px-6 lg:grid-cols-3 lg:px-8">
         <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
           <ShieldCheck className="text-brand" />
-          <h2 className="mt-4 text-xl font-black">Account role</h2>
-          <p className="mt-2 text-zinc-400">{roleLabels}</p>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-black">Account role</h2>
+            {!isInstructor ? (
+              <Link href="/learner-plus" className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-black text-red-100 hover:ring-2 hover:ring-brand">
+                <PlusCircle size={15} /> Upgrade to Learner Plus
+              </Link>
+            ) : null}
+          </div>
+          <p className="mt-2 text-zinc-400">{isInstructor ? "instructor" : "learner"}</p>
         </article>
         <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
           <CalendarCheck className="text-brand" />
           <h2 className="mt-4 text-xl font-black">Learner journey</h2>
           <p className="mt-2 text-zinc-400">Local instructors, price selector, eligibility checks, booking, payment, and reviews.</p>
         </article>
-        <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-          <FileCheck2 className="text-brand" />
-          <h2 className="mt-4 text-xl font-black">Instructor verification</h2>
-          <p className="mt-2 text-zinc-400">
-            Status: <span className="font-black">{instructorProfile?.verification_status ?? "not started"}</span>
-          </p>
-        </article>
+        {isInstructor ? (
+          <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
+            <FileCheck2 className="text-brand" />
+            <h2 className="mt-4 text-xl font-black">Instructor verification</h2>
+            <p className="mt-2 text-zinc-400">
+              Status: <span className="font-black">{instructorProfile?.verification_status ?? "not started"}</span>
+            </p>
+          </article>
+        ) : (
+          <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
+            <Sparkles className="text-brand" />
+            <h2 className="mt-4 text-xl font-black">Learner Plus</h2>
+            <p className="mt-2 text-zinc-400">Optional upgrade for premium SmartMatch, priority support, deeper progress tools, and extra learning resources.</p>
+          </article>
+        )}
       </section>
 
-      {isInstructor ? <InstructorDashboard /> : <LearnerBookingDashboard learnerEmail={profile?.email ?? user.email} />}
+      {isInstructor ? <InstructorDashboard /> : <LearnerBookingDashboard learnerEmail={profile?.email ?? user.email} learnerPhone={profile?.phone} />}
     </main>
   );
 }
