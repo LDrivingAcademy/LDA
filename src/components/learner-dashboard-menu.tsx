@@ -5,19 +5,10 @@ import Link from "next/link";
 import { ChevronRight, Menu } from "lucide-react";
 
 const learnerMenuItems = [
-  { label: "Live Tracking", href: "/account#live-tracking" },
-  { label: "After Lesson Revision", href: "/account#after-lesson-revision" },
-  { label: "Rate Your Instructor", href: "/account#rate-your-instructor" },
-  { label: "Your Booking History", href: "/account#booking-history" },
-  { label: "Notification Hub", href: "/account#notification-hub" }
-];
-
-const accountItems = [
-  "Invite Friends and Family",
-  "Promotional Codes",
-  "Manage Your Profile",
-  "Your Log In Activities",
-  "Settings"
+  { label: "After Lesson Revision", href: "/after-lesson-revision" },
+  { label: "Rate Your Instructor", href: "/rate-instructor" },
+  { label: "Your Booking History", href: "/booking-history" },
+  { label: "Notification Hub", href: "/notification-hub" }
 ];
 
 export function LearnerDashboardMenu() {
@@ -73,11 +64,6 @@ export function LearnerDashboardMenu() {
           <Link href="/account" onClick={() => setIsOpen(false)} className="flex items-center justify-between px-6 py-4 text-sm font-black hover:bg-red-500/15">
             Account <ChevronRight size={17} />
           </Link>
-          <div className="grid gap-2 border-t border-zinc-800 bg-black/40 p-4 text-xs font-bold text-zinc-300">
-            {accountItems.map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
         </div>
       ) : null}
     </div>
