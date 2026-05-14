@@ -1,8 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { headers } from "next/headers";
 import { canSendTransactionalEmail, sendAuthMagicLinkEmail } from "@/lib/email";
 import { createHandoffSecret, hashHandoffSecret, setHandoffCookie } from "@/lib/auth-handoff";
@@ -52,6 +52,17 @@ function normalizePhone(value: FormDataEntryValue | null) {
 
 function passwordRedirect(message: string, role: "learner" | "instructor" = "learner"): never {
   redirect(`/auth/login?role=${role}&message=${encodeURIComponent(message)}`);
+}
+
+function signUpRedirect(message: string, role: "learner" | "instructor" = "learner"): never {
+  redirect(`/auth/sign-up?role=${role}&message=${encodeURIComponent(message)}`);
+}
+
+function recoveryRedirect(message: string, role: "learner" | "instructor", returnTo?: string): never {
+  const fallback = `/auth/forgot-password?role=${role}`;
+  const target = returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : fallback;
+  const separator = target.includes("?") ? "&" : "?";
+  redirect(`${target}${separator}message=${encodeURIComponent(message)}`);
 }
 
 function verifyRedirect(role: "learner" | "instructor", message: string): never {
@@ -280,56 +291,119 @@ export async function signIn(formData: FormData) {
 }
 
 export async function signUp(formData: FormData) {
-  const supabase = await createClient();
-  if (!supabase) {
-    authError("Supabase environment variables are not configured yet.");
-  }
-
-  const email = String(formData.get("email") ?? "");
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const accountIntent = String(formData.get("accountIntent") ?? "learner");
   const role = safeRole(formData.get("accountIntent"));
-  const appOrigin = await getAppOrigin();
-  const emailRedirectTo = new URL("/auth/callback", appOrigin);
-  emailRedirectTo.searchParams.set("role", role);
-  emailRedirectTo.searchParams.set("next", `/auth/verify?role=${role}`);
+  const nextPath = `/auth/verify?role=${role}`;
 
   if (accountIntent === "admin") {
-    authError("Admin accounts must be created manually by the site owner.");
+    signUpRedirect("Admin accounts must be created manually by the site owner.", role);
   }
 
-  const { error } = await supabase.auth.signUp({
+  if (!email || !email.includes("@")) {
+    signUpRedirect("Enter a valid email address to create your account.", role);
+  }
+
+  if (password.length < 8) {
+    signUpRedirect("Use a password with at least 8 characters.", role);
+  }
+
+  const adminClient = createAdminClient();
+  const missingConfig = [];
+
+  if (!adminClient) {
+    missingConfig.push("SUPABASE_SERVICE_ROLE_KEY");
+  }
+
+  if (!canSendTransactionalEmail()) {
+    missingConfig.push("RESEND_API_KEY");
+  }
+
+  if (missingConfig.length) {
+    signUpRedirect(`Cross-device email sign-up is not fully configured. Add ${missingConfig.join(" and ")} in Vercel, then redeploy.`, role);
+  }
+
+  if (!adminClient) {
+    signUpRedirect("Cross-device email sign-up is not fully configured. Add SUPABASE_SERVICE_ROLE_KEY in Vercel, then redeploy.", role);
+  }
+
+  const appOrigin = await getAppOrigin();
+  const redirectTo = new URL("/auth/callback", appOrigin);
+  redirectTo.searchParams.set("role", role);
+  redirectTo.searchParams.set("next", nextPath);
+
+  const handoffId = crypto.randomUUID();
+  const handoffSecret = createHandoffSecret();
+  const secretHash = await hashHandoffSecret(handoffSecret);
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+  const { error: handoffError } = await adminClient.from("auth_handoff_requests").insert({
+    id: handoffId,
     email,
-    password,
+    full_name: null,
+    role,
+    next_path: nextPath,
+    secret_hash: secretHash,
+    expires_at: expiresAt
+  });
+
+  if (handoffError) {
+    signUpRedirect(`LDA could not start email verification. Run the latest Supabase migration, then try again. ${handoffError.message}`, role);
+  }
+
+  const { data, error } = await adminClient.auth.admin.generateLink({
+    type: "signup",
     options: {
-      emailRedirectTo: emailRedirectTo.toString(),
+      redirectTo: redirectTo.toString(),
       data: { account_intent: accountIntent }
-    }
+    },
+    email,
+    password
   });
 
   if (error) {
-    authError(error.message);
+    signUpRedirect(error.message, role);
   }
 
+  const confirmUrl = new URL("/auth/confirm", appOrigin);
+  confirmUrl.searchParams.set("token_hash", data.properties.hashed_token);
+  confirmUrl.searchParams.set("type", data.properties.verification_type || "signup");
+  confirmUrl.searchParams.set("redirect_to", data.properties.redirect_to || redirectTo.toString());
+  confirmUrl.searchParams.set("role", role);
+  confirmUrl.searchParams.set("handoff", handoffId);
+  confirmUrl.searchParams.set("handoff_secret", handoffSecret);
+
+  try {
+    await sendAuthMagicLinkEmail({
+      to: email,
+      role,
+      confirmUrl: confirmUrl.toString()
+    });
+  } catch (sendError) {
+    signUpRedirect(sendError instanceof Error ? sendError.message : "LDA could not send the secure email confirmation. Check the Resend API key and domain verification.", role);
+  }
+
+  await setHandoffCookie(handoffId, handoffSecret);
   revalidatePath("/", "layout");
-  redirect(`/auth/check-email?email=${encodeURIComponent(email)}&role=${role}`);
+  redirect(`/auth/check-email?email=${encodeURIComponent(email)}&role=${role}&request=${handoffId}`);
 }
 
 export async function requestPasswordReset(formData: FormData) {
-  const identifier = String(formData.get("identifier") ?? "").trim();
   const role = safeRole(formData.get("accountIntent"));
+  const returnTo = String(formData.get("returnTo") ?? "");
+  const identifier = String(formData.get("email") ?? formData.get("identifier") ?? "").trim();
   const supabase = await createClient();
 
   if (!supabase) {
-    passwordRedirect("Supabase environment variables are not configured yet.", role);
+    recoveryRedirect("Supabase environment variables are not configured yet.", role, returnTo);
   }
 
   if (!identifier) {
-    passwordRedirect("Enter your account email or mobile number first.", role);
+    recoveryRedirect("Enter your account email first.", role, returnTo);
   }
 
   if (!identifier.includes("@")) {
-    passwordRedirect("SMS password reset needs the SMS provider recovery flow connected. For now, use email reset or contact LDA support so we can verify the account safely.", role);
+    recoveryRedirect("Enter the email on your LDA account. Phone recovery is used as a support check, but the reset link is sent by email.", role, returnTo);
   }
 
   const redirectTo = new URL("/auth/callback", await getAppOrigin());
@@ -341,10 +415,10 @@ export async function requestPasswordReset(formData: FormData) {
   });
 
   if (error) {
-    passwordRedirect(error.message, role);
+    recoveryRedirect(error.message, role, returnTo);
   }
 
-  passwordRedirect("Password reset sent. Check your email and follow the secure reset link.", role);
+  recoveryRedirect("Password reset sent. Check your email and follow the secure reset link.", role, returnTo);
 }
 
 export async function updatePassword(formData: FormData) {

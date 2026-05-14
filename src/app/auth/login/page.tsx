@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, CarFront, GraduationCap, KeyRound, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
-import { requestPasswordReset, signIn } from "../actions";
+import { signIn } from "../actions";
 
 export default async function LoginPage({
   searchParams
@@ -75,25 +75,9 @@ export default async function LoginPage({
             <p className="mt-4 text-xs leading-5 text-zinc-500">
               Verification is only used when you first sign up or reset your password. Returning accounts log in with the email or mobile number and password already linked to the account.
             </p>
-            <div className="mt-5 border-t border-zinc-800 pt-5">
-              <div className="mb-3">
-                <div className="text-sm font-black uppercase text-brand">Forgot password?</div>
-                <h3 className="mt-1 text-xl font-black">Send a reset link</h3>
-                <p className="mt-2 text-xs leading-5 text-zinc-500">
-                  Enter the email on your account and LDA will send a secure reset link. Mobile-number recovery will be connected once the SMS recovery provider is enabled.
-                </p>
-              </div>
-              <form action={requestPasswordReset} className="grid gap-3">
-                <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
-                <label className="grid gap-1">
-                  <span className="text-sm font-bold text-zinc-400">Email or mobile number</span>
-                  <input required name="identifier" autoComplete="username" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="you@example.com or 07123 456789" />
-                </label>
-                <button className="lda-pill lda-pill-sm mt-2">
-                  Send reset link
-                </button>
-              </form>
-            </div>
+            <Link href={`/auth/forgot-password?role=${isInstructor ? "instructor" : "learner"}`} className="mt-4 inline-flex text-sm font-black text-red-100 underline decoration-brand decoration-2 underline-offset-4 hover:text-white">
+              Forgot password?
+            </Link>
           </section>
         </div>
       </div>

@@ -30,9 +30,11 @@ export default async function CheckEmailPage({
             We sent a secure LDA sign-in link to <span className="font-black text-white">{email || "your email address"}</span>. Click that link and you will come back here to complete {safeRole === "instructor" ? "instructor verification" : "learner verification"}.
           </p>
           <div className="mt-6 rounded border border-zinc-800 bg-black p-4 text-sm leading-6 text-zinc-400">
-            The link can be opened on your phone, laptop, or tablet. The device that opens the email will continue, and this original tab will also continue automatically once approval is complete.
+            {request
+              ? "The link can be opened on your phone, laptop, or tablet. The device that opens the email will continue, and this original tab will also continue automatically once approval is complete."
+              : "Open the email on this device or another device, then continue to the secure LDA verification page from that link."}
           </div>
-          <AuthHandoffPoller requestId={request} role={safeRole} />
+          {request ? <AuthHandoffPoller requestId={request} role={safeRole} /> : null}
         </section>
       </div>
     </main>
