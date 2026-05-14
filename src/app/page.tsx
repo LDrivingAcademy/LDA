@@ -163,16 +163,21 @@ export default function HomePage() {
           <div className="mx-auto grid max-w-7xl gap-4 rounded border border-zinc-200 bg-zinc-50 p-5 shadow-sm md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <div className="inline-flex items-center gap-2 text-sm font-black uppercase text-brand">
-                <Clock3 size={17} /> Lesson now
+                <Clock3 size={17} /> On-demand lesson
               </div>
               <h2 className="mt-2 text-2xl font-black tracking-normal">Need a short-notice lesson?</h2>
               <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-zinc-700">
                 Enter pickup details, verify your provisional licence, pay securely, then receive a booking reference and tracking link.
               </p>
             </div>
-            <Link href="/lesson-now" className="lda-pill justify-self-start md:justify-self-end">
-              Book Lesson Now
-            </Link>
+            <div className="grid gap-3 justify-self-start md:justify-self-end">
+              <Link href="/lesson-now" className="lda-pill">
+                On-demand lesson
+              </Link>
+              <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm">
+                Book future lessons
+              </Link>
+            </div>
           </div>
         </section>
 
