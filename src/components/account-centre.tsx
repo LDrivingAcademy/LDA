@@ -12,9 +12,76 @@ type LoginActivity = {
   location: string;
 };
 
+type BookingRecord = {
+  id: string;
+  instructor: string;
+  status: "Upcoming" | "Completed" | "Cancelled";
+  startsAt: string;
+  duration: string;
+  pickup: string;
+  car: string;
+  transmission: string;
+  price: string;
+  paymentStatus: string;
+  reference: string;
+  notes: string;
+  refundSummary?: string;
+};
+
+const demoBookings: BookingRecord[] = [
+  {
+    id: "LDA-UPCOMING-1001",
+    instructor: "Amelia Khan",
+    status: "Upcoming",
+    startsAt: "2026-05-16T10:00:00+01:00",
+    duration: "2 hours",
+    pickup: "EN5 5XY",
+    car: "Toyota Yaris Hybrid",
+    transmission: "Automatic",
+    price: "£84.00",
+    paymentStatus: "Paid",
+    reference: "LDA-84K2Q",
+    notes: "Focus: town driving, lane discipline, and meeting traffic."
+  },
+  {
+    id: "LDA-COMPLETE-0904",
+    instructor: "Marcus Reed",
+    status: "Completed",
+    startsAt: "2026-05-08T15:00:00+01:00",
+    duration: "90 minutes",
+    pickup: "EN5 5XY",
+    car: "Ford Fiesta",
+    transmission: "Manual",
+    price: "£58.50",
+    paymentStatus: "Paid",
+    reference: "LDA-3M9TR",
+    notes: "Completed: clutch control, moving off safely, mirror checks, and left turns."
+  }
+];
+
 function createReferralCode() {
   const seed = typeof window !== "undefined" ? window.localStorage.getItem("lda-profile-name") || "LDA" : "LDA";
   return `${seed.replace(/[^a-z0-9]/gi, "").slice(0, 6).toUpperCase() || "LDA"}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+}
+
+function formatLessonDate(value: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(value));
+}
+
+function BookingDetail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded border border-zinc-200 bg-zinc-50 p-3">
+      <div className="text-[11px] font-black uppercase text-zinc-500">{label}</div>
+      <div className="mt-1 font-black text-zinc-950">{value}</div>
+    </div>
+  );
 }
 
 export function AccountCentre() {
@@ -22,6 +89,10 @@ export function AccountCentre() {
   const [referralCode, setReferralCode] = useState("LDA-FRIEND");
   const [deletionRequested, setDeletionRequested] = useState(false);
   const [activity, setActivity] = useState<LoginActivity[]>([]);
+  const [bookings, setBookings] = useState<BookingRecord[]>(demoBookings);
+  const [openBookingId, setOpenBookingId] = useState<string | null>(demoBookings[1]?.id ?? null);
+  const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
+  const [cancelStatus, setCancelStatus] = useState<string | null>(null);
   const [notificationPrefs, setNotificationPrefs] = useState({
     lessonUpdates: true,
     driverEnRoute: true,
@@ -62,6 +133,45 @@ export function AccountCentre() {
       setActivity([currentActivity]);
     }
   }, []);
+
+  async function confirmCancellation(booking: BookingRecord) {
+    setCancelStatus("Cancelling lesson and notifying both sides...");
+
+    try {
+      const response = await fetch("/api/bookings/cancel", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          bookingId: booking.id,
+          instructorName: booking.instructor,
+          lessonSummary: `${formatLessonDate(booking.startsAt)} from ${booking.pickup} for ${booking.duration}`,
+          startsAt: booking.startsAt,
+          reason: "Learner cancelled from booking history"
+        })
+      });
+      const result = await response.json();
+      const refundSummary = result.refundSummary || "Refund eligibility will be reviewed against the cancellation policy.";
+
+      if (!response.ok) {
+        throw new Error(result?.message || "Cancellation could not be completed.");
+      }
+
+      setBookings((current) =>
+        current.map((item) =>
+          item.id === booking.id
+            ? { ...item, status: "Cancelled", refundSummary, notes: "Cancelled by learner. Instructor notification and learner confirmation have been queued where contact details are available." }
+            : item
+        )
+      );
+      setPendingCancelId(null);
+      setOpenBookingId(booking.id);
+      setCancelStatus("Lesson cancelled. Learner and instructor notifications have been queued.");
+    } catch (error) {
+      setCancelStatus(error instanceof Error ? error.message : "Cancellation could not be completed.");
+    }
+  }
 
   return (
     <main className="min-h-screen bg-white text-black">
@@ -104,21 +214,76 @@ export function AccountCentre() {
         <article id="booking-history" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
           <History className="text-brand" />
           <h2 className="mt-4 text-2xl font-black">Your Booking History</h2>
-          <p className="mt-2 text-sm leading-6 text-zinc-600">See previous, upcoming, cancelled, and completed lessons in one place.</p>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">
+            See previous, upcoming, cancelled, and completed lessons in one place. Click the instructor name to open the lesson details.
+          </p>
           <div className="mt-4 grid gap-3">
-            {[
-              ["Amelia Khan", "Upcoming", "16 May 2026 at 10:00"],
-              ["Marcus Reed", "Completed", "8 May 2026 at 15:00"]
-            ].map(([instructor, status, time]) => (
-              <div key={`${instructor}-${time}`} className="rounded border border-zinc-200 bg-zinc-50 p-4 text-sm">
+            {bookings.map((booking) => (
+              <div key={booking.id} className="rounded border border-zinc-200 bg-zinc-50 p-4 text-sm">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="font-black">{instructor}</span>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black uppercase text-zinc-700">{status}</span>
+                  <button
+                    type="button"
+                    onClick={() => setOpenBookingId((current) => (current === booking.id ? null : booking.id))}
+                    className="text-left font-black text-black underline decoration-red-500 decoration-2 underline-offset-4 hover:text-brand"
+                  >
+                    {booking.instructor}
+                  </button>
+                  <span className={booking.status === "Cancelled" ? "rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase text-red-700" : booking.status === "Completed" ? "rounded-full bg-emerald-100 px-3 py-1 text-xs font-black uppercase text-emerald-700" : "rounded-full bg-white px-3 py-1 text-xs font-black uppercase text-zinc-700"}>
+                    {booking.status}
+                  </span>
                 </div>
-                <div className="mt-1 text-zinc-600">{time}</div>
+                <div className="mt-1 text-zinc-600">{formatLessonDate(booking.startsAt)}</div>
+                {openBookingId === booking.id ? (
+                  <div className="mt-4 grid gap-3 rounded border border-zinc-200 bg-white p-4">
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <BookingDetail label="Reference" value={booking.reference} />
+                      <BookingDetail label="Payment" value={booking.paymentStatus} />
+                      <BookingDetail label="Pickup" value={booking.pickup} />
+                      <BookingDetail label="Duration" value={booking.duration} />
+                      <BookingDetail label="Car" value={booking.car} />
+                      <BookingDetail label="Transmission" value={booking.transmission} />
+                      <BookingDetail label="Price" value={booking.price} />
+                      <BookingDetail label="Status" value={booking.status} />
+                    </div>
+                    <p className="rounded bg-zinc-50 p-3 text-sm font-semibold leading-6 text-zinc-700">{booking.notes}</p>
+                    {booking.refundSummary ? <p className="rounded border border-red-200 bg-red-50 p-3 text-sm font-black leading-6 text-red-900">{booking.refundSummary}</p> : null}
+                    {booking.status === "Upcoming" ? (
+                      <div className="rounded border border-red-200 bg-red-50 p-4">
+                        <div className="text-sm font-black text-red-900">Need to cancel this lesson?</div>
+                        <p className="mt-2 text-xs font-semibold leading-5 text-red-950">
+                          Cancellation may trigger a full, partial, or no refund depending on the time before lesson start, instructor travel, and the LDA cancellation policy.
+                        </p>
+                        <Link href="/cancellation-policy" className="mt-2 inline-flex text-xs font-black text-brand underline underline-offset-4">
+                          Read the cancellation policy
+                        </Link>
+                        {pendingCancelId === booking.id ? (
+                          <div className="mt-4 rounded border border-red-300 bg-white p-3">
+                            <p className="text-sm font-black text-black">Are you sure you want to cancel this lesson?</p>
+                            <p className="mt-1 text-xs font-semibold leading-5 text-zinc-600">
+                              If you confirm, LDA will notify your instructor, send learner confirmation by email/text where available, and apply the refund rules.
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <button type="button" onClick={() => confirmCancellation(booking)} className="lda-pill lda-pill-sm">
+                                Yes, cancel lesson
+                              </button>
+                              <button type="button" onClick={() => setPendingCancelId(null)} className="rounded-full border border-zinc-300 px-4 py-2 text-xs font-black text-zinc-800 hover:ring-2 hover:ring-brand">
+                                Keep lesson
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button type="button" onClick={() => setPendingCancelId(booking.id)} className="lda-pill lda-pill-sm mt-4">
+                            Cancel upcoming lesson
+                          </button>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
+          {cancelStatus ? <p className="mt-4 rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-black text-zinc-800">{cancelStatus}</p> : null}
         </article>
 
         <article id="rate-your-instructor" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
