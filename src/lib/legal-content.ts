@@ -92,8 +92,10 @@ export const legalPages: Record<string, LegalPageContent> = {
       {
         heading: "Cancellation window",
         body: [
-          "Current MVP setting uses a 24-hour default cancellation window. Final policy must define when learners get a full, partial, or no refund.",
-          "The policy must explain what happens when instructors cancel, are late, or cannot deliver a lesson."
+          "Current MVP setting uses a 24-hour default cancellation window. Cancellations made more than 24 hours before the lesson can be eligible for a full refund, subject to payment processor timing.",
+          "Cancellations inside 24 hours may be eligible for a partial refund or manual review, depending on instructor availability, travel, and whether the instructor could reasonably replace the lesson slot.",
+          "Very late cancellations, including cancellations close to instructor en-route time, may be non-refundable unless LDA support approves an exception.",
+          "The final solicitor-reviewed policy must explain what happens when instructors cancel, are late, or cannot deliver a lesson."
         ]
       },
       {
