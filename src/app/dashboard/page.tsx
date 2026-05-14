@@ -32,17 +32,7 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return (
-      <main className="min-h-screen bg-black px-4 py-10">
-        <section className="mx-auto max-w-4xl rounded border border-zinc-800 bg-zinc-950 p-6 shadow-sm">
-          <h1 className="text-3xl font-black">Sign in to search approved local instructors</h1>
-          <p className="mt-3 leading-7 text-zinc-400">Your next page is the learner search dashboard: local instructors, filters, price selector, availability, and booking checks.</p>
-          <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm mt-5">
-            Continue as learner <ArrowRight size={16} />
-          </Link>
-        </section>
-      </main>
-    );
+    redirect("/");
   }
 
   const [{ data: profile }, { data: roles }, { data: instructorProfile }, { data: learnerProfile }] = await Promise.all([
@@ -100,11 +90,21 @@ export default async function DashboardPage() {
             </p>
           </article>
         ) : (
-          <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-            <Sparkles className="text-brand" />
-            <h2 className="mt-4 text-xl font-black">Learner Plus</h2>
-            <p className="mt-2 text-zinc-400">Optional upgrade for premium SmartMatch, priority support, deeper progress tools, and extra learning resources.</p>
-          </article>
+          <>
+            <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
+              <Sparkles className="text-brand" />
+              <h2 className="mt-4 text-xl font-black">LDA SmartMatch</h2>
+              <p className="mt-2 text-zinc-400">Run the adaptive LDA matcher from your dashboard to compare instructor skills, support needs, availability, price, reviews, and lesson goals.</p>
+              <Link href="/smart-match" className="lda-pill lda-pill-sm mt-5">
+                Open SmartMatch <ArrowRight size={16} />
+              </Link>
+            </article>
+            <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
+              <PlusCircle className="text-brand" />
+              <h2 className="mt-4 text-xl font-black">Learner Plus</h2>
+              <p className="mt-2 text-zinc-400">Optional upgrade for premium SmartMatch, priority support, deeper progress tools, and extra learning resources.</p>
+            </article>
+          </>
         )}
       </section>
 
