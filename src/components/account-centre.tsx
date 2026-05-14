@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Gift, KeyRound, MapPin, ShieldAlert, TicketPercent, Trash2, UserRound } from "lucide-react";
+import { ArrowLeft, BadgeCheck, BellRing, Gift, History, KeyRound, LogOut, MapPin, MessageSquareText, Navigation, ShieldAlert, Star, TicketPercent, Trash2, UserRound } from "lucide-react";
+import { signOut } from "@/app/auth/actions";
 
 type LoginActivity = {
   device: string;
@@ -21,6 +22,15 @@ export function AccountCentre() {
   const [referralCode, setReferralCode] = useState("LDA-FRIEND");
   const [deletionRequested, setDeletionRequested] = useState(false);
   const [activity, setActivity] = useState<LoginActivity[]>([]);
+  const [notificationPrefs, setNotificationPrefs] = useState({
+    lessonUpdates: true,
+    driverEnRoute: true,
+    driverArrived: true,
+    cancellationUpdates: true,
+    offers: false
+  });
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
   const referralLink = useMemo(() => `https://ldrivingacademy.co.uk/auth/sign-up?role=learner&ref=${referralCode}`, [referralCode]);
 
   useEffect(() => {
@@ -68,6 +78,102 @@ export function AccountCentre() {
       </header>
 
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:px-8">
+        <article id="live-tracking" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <Navigation className="text-brand" />
+          <h2 className="mt-4 text-2xl font-black">Live Tracking</h2>
+          <h3 className="mt-2 text-xl font-black text-zinc-800">Available near lesson time.</h3>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">
+            Tracking starts when an instructor marks themselves en route, usually around 15 minutes before pickup, and stops once they arrive at the agreed location.
+          </p>
+          <Link href="/tracking" className="lda-pill lda-pill-sm mt-4">
+            Open tracking view
+          </Link>
+        </article>
+
+        <article id="after-lesson-revision" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <BadgeCheck className="text-brand" />
+          <h2 className="mt-4 text-2xl font-black">After Lesson Revision</h2>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">
+            Review instructor notes, completed lesson checklist items, and recommended videos before your next lesson.
+          </p>
+          <Link href="/progress-tracker" className="lda-pill lda-pill-sm mt-4">
+            Open progress tracker
+          </Link>
+        </article>
+
+        <article id="booking-history" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <History className="text-brand" />
+          <h2 className="mt-4 text-2xl font-black">Your Booking History</h2>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">See previous, upcoming, cancelled, and completed lessons in one place.</p>
+          <div className="mt-4 grid gap-3">
+            {[
+              ["Amelia Khan", "Upcoming", "16 May 2026 at 10:00"],
+              ["Marcus Reed", "Completed", "8 May 2026 at 15:00"]
+            ].map(([instructor, status, time]) => (
+              <div key={`${instructor}-${time}`} className="rounded border border-zinc-200 bg-zinc-50 p-4 text-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-black">{instructor}</span>
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black uppercase text-zinc-700">{status}</span>
+                </div>
+                <div className="mt-1 text-zinc-600">{time}</div>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article id="rate-your-instructor" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <MessageSquareText className="text-brand" />
+          <h2 className="mt-4 text-2xl font-black">Rate Your Instructor</h2>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">Leave a review after a completed lesson. Learners are not reviewed on LDA.</p>
+          <div className="mt-4 flex gap-1">
+            {[1, 2, 3, 4, 5].map((rating) => (
+              <button
+                key={rating}
+                type="button"
+                onClick={() => setReviewRating(rating)}
+                className={rating <= reviewRating ? "text-brand" : "text-zinc-300"}
+                aria-label={`${rating} star review`}
+              >
+                <Star size={24} fill="currentColor" />
+              </button>
+            ))}
+          </div>
+          <textarea
+            value={reviewText}
+            onChange={(event) => setReviewText(event.target.value)}
+            placeholder="Write an optional review for your completed lesson"
+            className="mt-4 min-h-24 w-full rounded border border-zinc-300 bg-white p-3 text-sm font-bold text-black"
+          />
+          <button type="button" className="lda-pill lda-pill-sm mt-4">
+            Save review
+          </button>
+        </article>
+
+        <article id="notification-hub" className="rounded border border-zinc-200 bg-white p-5 shadow-sm lg:col-span-2">
+          <BellRing className="text-brand" />
+          <h2 className="mt-4 text-2xl font-black">Notification Hub</h2>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">Choose which lesson alerts LDA can send for your account.</p>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {[
+              ["lessonUpdates", "Lesson confirmations and changes"],
+              ["driverEnRoute", "Instructor en route alerts"],
+              ["driverArrived", "Instructor has arrived"],
+              ["cancellationUpdates", "Cancellation and refund updates"],
+              ["offers", "Deals, free trials, and learner offers"]
+            ].map(([key, label]) => (
+              <label key={key} className="flex items-center justify-between gap-4 rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-black text-zinc-800">
+                <span>{label}</span>
+                <input
+                  type="checkbox"
+                  checked={notificationPrefs[key as keyof typeof notificationPrefs]}
+                  onChange={(event) => setNotificationPrefs((prefs) => ({ ...prefs, [key]: event.target.checked }))}
+                  className="h-5 w-5 accent-red-600"
+                />
+              </label>
+            ))}
+          </div>
+        </article>
+
         <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
           <Gift className="text-brand" />
           <h2 className="mt-4 text-2xl font-black">Invite Friends and Family</h2>
@@ -96,7 +202,7 @@ export function AccountCentre() {
               ["Personal Info", "/auth/verify?role=learner"],
               ["Change Password", "/auth/forgot-password?role=learner"],
               ["Add a Recovery Number", "/auth/verify?role=learner"],
-              ["Your Logging Activities", "#logging-activities"]
+              ["Your Log In Activities", "#log-in-activities"]
             ].map(([label, href]) => (
               <Link key={label} href={href} className="flex items-center justify-between rounded border border-zinc-200 bg-zinc-50 p-4 text-sm font-black hover:ring-2 hover:ring-brand">
                 {label} <KeyRound size={16} className="text-brand" />
@@ -105,9 +211,9 @@ export function AccountCentre() {
           </div>
         </article>
 
-        <article id="logging-activities" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+        <article id="log-in-activities" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
           <MapPin className="text-brand" />
-          <h2 className="mt-4 text-2xl font-black">Your Logging Activities</h2>
+          <h2 className="mt-4 text-2xl font-black">Your Log In Activities</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-600">Recent account activity from this browser. Production security can extend this with IP intelligence and suspicious-location email checks.</p>
           <div className="mt-5 grid gap-3">
             {activity.map((item) => (
@@ -134,11 +240,14 @@ export function AccountCentre() {
               {deletionRequested ? <p className="mt-3 text-sm font-black text-red-700">Deletion request noted. A final confirmation workflow will be added before live release.</p> : null}
             </div>
             <div className="rounded border border-zinc-200 bg-zinc-50 p-4">
-              <h3 className="text-xl font-black">Sign Up</h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-600">Create a learner or instructor profile if you need another role on LDA.</p>
-              <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm mt-4">
-                Open sign up
-              </Link>
+              <LogOut className="text-brand" />
+              <h3 className="mt-3 text-xl font-black">Sign Out</h3>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">Leave this device signed out of your LDA account.</p>
+              <form action={signOut}>
+                <button type="submit" className="lda-pill lda-pill-sm mt-4">
+                  Sign out
+                </button>
+              </form>
             </div>
           </div>
         </article>
