@@ -4,16 +4,18 @@ import Link from "next/link";
 import { ChevronRight, Menu } from "lucide-react";
 
 const learnerMenuItems = [
-  { label: "After Lesson Revision", href: "/dashboard#after-lesson-revision" },
-  { label: "Rate Your Instructor", href: "/dashboard#rate-your-instructor" },
-  { label: "Your Booking History", href: "/dashboard#booking-history" },
-  { label: "Notification Hub", href: "/dashboard#notification-hub" }
+  { label: "Live Tracking", href: "/account#live-tracking" },
+  { label: "After Lesson Revision", href: "/account#after-lesson-revision" },
+  { label: "Rate Your Instructor", href: "/account#rate-your-instructor" },
+  { label: "Your Booking History", href: "/account#booking-history" },
+  { label: "Notification Hub", href: "/account#notification-hub" }
 ];
 
 const accountItems = [
   "Invite Friends and Family",
   "Promotional Codes",
   "Manage Your Profile",
+  "Your Log In Activities",
   "Settings"
 ];
 
