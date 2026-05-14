@@ -9,6 +9,13 @@ type CheckoutRequest = {
   paymentPreference?: string;
 };
 
+function normalisePaymentPreference(value?: string) {
+  return String(value ?? "card")
+    .trim()
+    .toLowerCase()
+    .replaceAll(" ", "_");
+}
+
 function normaliseAppUrl(request: Request) {
   const configuredUrl = process.env.APP_WEBSITE_URL?.trim();
   const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
@@ -42,6 +49,7 @@ export async function POST(request: Request) {
   const amountPence = body.amountPence ?? 4200;
   const instructorName = body.instructorName ?? "your driving instructor";
   const bookingId = body.bookingId ?? "demo-booking";
+  const paymentPreference = normalisePaymentPreference(body.paymentPreference);
   const commissionPercent = Number(process.env.LDA_PLATFORM_COMMISSION_PERCENT ?? 10);
   const applicationFeeAmount = Math.round(amountPence * (commissionPercent / 100));
 
@@ -58,17 +66,17 @@ export async function POST(request: Request) {
     success_url: `${appUrl}/learner-dashboard?payment=success&booking=${encodeURIComponent(bookingId)}`,
     cancel_url: `${appUrl}/learner-dashboard?payment=cancelled&booking=${encodeURIComponent(bookingId)}`,
     "metadata[booking_id]": bookingId,
-    "metadata[payment_preference]": body.paymentPreference ?? "card",
+    "metadata[payment_preference]": paymentPreference,
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": currency,
     "line_items[0][price_data][unit_amount]": String(amountPence),
     "line_items[0][price_data][product_data][name]": `LDA driving lesson with ${instructorName}`
   });
 
-  if (body.paymentPreference === "PayPal") {
+  if (paymentPreference === "paypal" || process.env.STRIPE_ENABLE_PAYPAL === "true") {
     params.set("payment_method_types[0]", "card");
     params.set("payment_method_types[1]", "paypal");
-  } else if (body.paymentPreference) {
+  } else if (paymentPreference) {
     params.set("payment_method_types[0]", "card");
   }
 

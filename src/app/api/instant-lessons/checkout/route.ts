@@ -22,6 +22,13 @@ function required(value?: string) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function normalisePaymentPreference(value?: string) {
+  return String(value ?? "card")
+    .trim()
+    .toLowerCase()
+    .replaceAll(" ", "_");
+}
+
 function normaliseAppUrl(request: Request) {
   const configuredUrl = process.env.APP_WEBSITE_URL?.trim();
   const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
@@ -60,6 +67,7 @@ export async function POST(request: Request) {
   const amountPence = body.amountPence ?? 6500;
   const instructorName = body.instructorName ?? "your LDA instructor";
   const lessonSummary = body.lessonSummary ?? `Instant LDA lesson with ${instructorName}`;
+  const paymentPreference = normalisePaymentPreference(body.paymentPreference);
   const reference = createReference();
   const successParams = new URLSearchParams({
     reference,
@@ -89,7 +97,7 @@ export async function POST(request: Request) {
     "metadata[learner_email]": body.learnerEmail ?? "",
     "metadata[learner_phone]": body.learnerPhone ?? "",
     "metadata[instructor_name]": instructorName,
-    "metadata[payment_preference]": body.paymentPreference ?? "card",
+    "metadata[payment_preference]": paymentPreference,
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": currency,
     "line_items[0][price_data][unit_amount]": String(amountPence),
@@ -98,10 +106,10 @@ export async function POST(request: Request) {
     "customer_email": body.learnerEmail ?? ""
   });
 
-  if (body.paymentPreference === "paypal" || process.env.STRIPE_ENABLE_PAYPAL === "true") {
+  if (paymentPreference === "paypal" || process.env.STRIPE_ENABLE_PAYPAL === "true") {
     params.set("payment_method_types[0]", "card");
     params.set("payment_method_types[1]", "paypal");
-  } else if (body.paymentPreference) {
+  } else if (paymentPreference) {
     params.set("payment_method_types[0]", "card");
   }
 

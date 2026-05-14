@@ -22,6 +22,7 @@ function cleanLicenceNumber(value: string) {
 }
 
 const paymentOptions: { value: string; label: string; icon: LucideIcon }[] = [
+  { value: "card", label: "Manual card entry", icon: CreditCard },
   { value: "apple_pay", label: "Apple Pay", icon: Apple },
   { value: "visa", label: "Visa", icon: CreditCard },
   { value: "mastercard", label: "Mastercard", icon: CreditCard },
@@ -46,6 +47,7 @@ export function InstantLessonBooking({
   });
   const [checkoutState, setCheckoutState] = useState<"idle" | "loading" | "error">("idle");
   const [paymentPreference, setPaymentPreference] = useState("card");
+  const [checkoutError, setCheckoutError] = useState("");
 
   const normalisedLicence = useMemo(() => cleanLicenceNumber(licenceNumber), [licenceNumber]);
   const canPay = Boolean(verifyState.status === "valid" && fullName.trim() && email.trim() && permission);
@@ -85,6 +87,7 @@ export function InstantLessonBooking({
 
     setPaymentPreference(preferredPaymentOption);
     setCheckoutState("loading");
+    setCheckoutError("");
 
     const response = await fetch("/api/instant-lessons/checkout", {
       method: "POST",
@@ -104,6 +107,7 @@ export function InstantLessonBooking({
     const result = await response.json();
 
     if (!response.ok || !result.checkoutUrl) {
+      setCheckoutError(result.error || "Payment could not start. Please try again or contact support.");
       setCheckoutState("error");
       return;
     }
@@ -230,7 +234,7 @@ export function InstantLessonBooking({
         <Mail size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : "Pay and reserve lesson now"}
       </button>
       {checkoutState === "error" ? (
-        <p className="mt-3 text-sm font-bold text-brand">Payment could not start. Please try again or contact support.</p>
+        <p className="mt-3 text-sm font-bold text-brand">{checkoutError || "Payment could not start. Please try again or contact support."}</p>
       ) : null}
     </form>
   );
