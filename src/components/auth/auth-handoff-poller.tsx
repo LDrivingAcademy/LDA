@@ -15,7 +15,7 @@ export function AuthHandoffPoller({
   const [state, setState] = useState<HandoffState>(requestId ? "pending" : "error");
   const [message, setMessage] = useState(
     requestId
-      ? "Keep this tab open. Once you approve the email link on your phone, this device will continue automatically."
+      ? "Keep this tab open. Once you approve the email link, this device will continue automatically."
       : "This login tab cannot auto-continue because the hand-off request is missing. Request a fresh email link from this device."
   );
 
@@ -83,7 +83,7 @@ export function AuthHandoffPoller({
         <div>
           <h2 className="font-black text-white">
             {state === "pending"
-              ? "Waiting for phone approval"
+              ? "Waiting for approval"
               : state === "authenticated"
                 ? "Approved"
                 : "Login hand-off needs a fresh link"}
