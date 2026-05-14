@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Menu } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { LanguageSelector } from "@/components/language-selector";
 
 const menuLinks = [
@@ -13,21 +16,58 @@ const menuLinks = [
 ];
 
 export function MainMenu() {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
   return (
-    <details className="group relative">
-      <summary className="grid h-11 w-11 cursor-pointer list-none place-items-center rounded border border-zinc-700 bg-zinc-950 text-white hover:border-red-500 focus-ring [&::-webkit-details-marker]:hidden" aria-label="Open menu">
+    <div ref={menuRef} className="relative">
+      <button
+        type="button"
+        aria-expanded={isOpen}
+        aria-label={isOpen ? "Close menu" : "Open menu"}
+        onClick={() => setIsOpen((open) => !open)}
+        className="grid h-11 w-11 cursor-pointer place-items-center rounded border border-zinc-700 bg-zinc-950 text-white hover:border-red-500 focus-ring"
+      >
         <Menu size={24} />
-      </summary>
-      <div className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded border border-zinc-800 bg-zinc-950 py-2 text-white shadow-2xl">
-        <div className="border-b border-zinc-800 px-4 py-3">
-          <LanguageSelector />
+      </button>
+      {isOpen ? (
+        <div className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded border border-zinc-800 bg-zinc-950 py-2 text-white shadow-2xl">
+          <div className="border-b border-zinc-800 px-4 py-3">
+            <LanguageSelector />
+          </div>
+          {menuLinks.map((link) => (
+            <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} className="block px-4 py-3 text-sm font-black hover:bg-red-500/10 hover:text-brand">
+              {link.label}
+            </Link>
+          ))}
         </div>
-        {menuLinks.map((link) => (
-          <Link key={link.href} href={link.href} className="block px-4 py-3 text-sm font-black hover:bg-red-500/10 hover:text-brand">
-            {link.label}
-          </Link>
-        ))}
-      </div>
-    </details>
+      ) : null}
+    </div>
   );
 }
