@@ -1,22 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import {
-  BadgeCheck,
-  BellRing,
   CalendarCheck,
   CarFront,
   Clock3,
   CreditCard,
-  History,
   MailCheck,
-  MessageSquareText,
   MapPin,
-  Navigation,
   SlidersHorizontal,
-  Star,
-  XCircle
+  Star
 } from "lucide-react";
 import { demoInstructors } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
@@ -131,17 +124,8 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const [checkoutError, setCheckoutError] = useState("");
   const [confirmationRef, setConfirmationRef] = useState("");
   const [bookingRecords, setBookingRecords] = useState<BookingRecord[]>([]);
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("unsupported");
-  const [notificationPrefs, setNotificationPrefs] = useState({
-    lessonUpdates: true,
-    driverEnRoute: true,
-    driverArrived: true,
-    cancellationUpdates: true,
-    offers: false
-  });
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState("Use your location to show nearby instructors on the map.");
-  const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; review: string }>>({});
 
   useEffect(() => {
     const resetStickyCheckoutState = () => {
@@ -165,17 +149,6 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
     } else {
       setBookingRecords(demoBookingRecords);
       localStorage.setItem("lda-learner-bookings", JSON.stringify(demoBookingRecords));
-    }
-
-    if ("Notification" in window) {
-      setNotificationPermission(Notification.permission);
-      if (Notification.permission === "default") {
-        window.setTimeout(() => {
-          Notification.requestPermission().then((permission) => {
-            setNotificationPermission(permission);
-          });
-        }, 1200);
-      }
     }
   }, []);
 
@@ -303,19 +276,6 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const availableSlots = selectedInstructor.slots[availabilityDate] ?? [];
   const lessonSummary = `${availabilityDate} at ${selectedSlot || "selected time"} from ${postcode}. ${selectedInstructor.car}, ${selectedInstructor.transmission}.`;
   const canPay = Boolean(selectedInstructor && selectedSlot && postcode);
-  const upcomingBookings = bookingRecords.filter((booking) => booking.status === "pending" || booking.status === "upcoming");
-  const completedBookings = bookingRecords.filter((booking) => booking.status === "completed");
-  const cancelledBookings = bookingRecords.filter((booking) => booking.status === "cancelled");
-
-  async function enableNotifications() {
-    if (!("Notification" in window)) {
-      setNotificationPermission("unsupported");
-      return;
-    }
-
-    const permission = await Notification.requestPermission();
-    setNotificationPermission(permission);
-  }
 
   function useCurrentLocation() {
     if (!navigator.geolocation) {
@@ -331,29 +291,6 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
       },
       () => setLocationStatus("Location permission was not granted. Postcode search still works."),
       { enableHighAccuracy: true, timeout: 8000 }
-    );
-  }
-
-  function cancelBooking(bookingId: string) {
-    setBookingRecords((records) =>
-      records.map((booking) => (booking.id === bookingId && booking.status !== "completed" ? { ...booking, status: "cancelled" } : booking))
-    );
-  }
-
-  function submitReview(bookingId: string) {
-    const draft = reviewDrafts[bookingId];
-    if (!draft?.rating) return;
-
-    setBookingRecords((records) =>
-      records.map((booking) =>
-        booking.id === bookingId
-          ? {
-              ...booking,
-              rating: draft.rating,
-              review: draft.review.trim()
-            }
-          : booking
-      )
     );
   }
 
@@ -456,7 +393,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
         </label>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+      <section className="grid gap-5">
         <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -470,9 +407,6 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
               <button type="button" onClick={useCurrentLocation} className="lda-pill lda-pill-sm">
                 Use my location
               </button>
-              <Link href="/tracking" className="lda-pill lda-pill-sm">
-                Live tracking
-              </Link>
             </div>
           </div>
           <div className="relative mt-5 h-72 overflow-hidden rounded border border-zinc-200 bg-[radial-gradient(circle_at_20%_20%,#fee2e2,transparent_28%),linear-gradient(135deg,#f8fafc,#fff)]">
@@ -502,41 +436,6 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
                 </button>
               );
             })}
-          </div>
-        </article>
-
-        <article id="notification-hub" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-            <BellRing size={16} /> Notification Hub
-          </div>
-          <h2 className="mt-3 text-2xl font-black">Choose how LDA keeps you updated.</h2>
-          <p className="mt-2 text-sm leading-6 text-zinc-600">
-            Browser alerts are requested automatically when supported. You can still control which lesson updates LDA should send.
-          </p>
-          <div className="mt-5 grid gap-3">
-            {[
-              ["lessonUpdates", "Lesson confirmations and changes"],
-              ["driverEnRoute", "Instructor en route alerts"],
-              ["driverArrived", "Instructor has arrived"],
-              ["cancellationUpdates", "Cancellation and refund updates"],
-              ["offers", "Deals, free trials, and learner offers"]
-            ].map(([key, label]) => (
-              <label key={key} className="flex items-center justify-between gap-4 rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-black text-zinc-800">
-                <span>{label}</span>
-                <input
-                  type="checkbox"
-                  checked={notificationPrefs[key as keyof typeof notificationPrefs]}
-                  onChange={(event) => setNotificationPrefs((prefs) => ({ ...prefs, [key]: event.target.checked }))}
-                  className="h-5 w-5 accent-red-600"
-                />
-              </label>
-            ))}
-          </div>
-          <button type="button" onClick={enableNotifications} className="lda-pill lda-pill-sm mt-5">
-            Refresh browser permission
-          </button>
-          <div className="mt-4 rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-bold text-zinc-700">
-            Browser status: {notificationPermission}
           </div>
         </article>
       </section>
@@ -631,104 +530,6 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
             ) : null}
           </section>
         </aside>
-      </section>
-
-      <section className="grid gap-5 xl:grid-cols-2">
-        <article id="tracking" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-            <Navigation size={16} /> Live tracking
-          </div>
-          <h3 className="mt-3 text-2xl font-black">Available near lesson time.</h3>
-          <p className="mt-3 text-sm leading-6 text-zinc-600">
-            Tracking starts around 15 minutes before the lesson when the instructor marks themselves en route, then stops when they arrive at the pickup address.
-          </p>
-          <Link href="/tracking" className="lda-pill lda-pill-sm mt-5">Open tracking view</Link>
-        </article>
-        <article id="after-lesson-revision" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-            <BadgeCheck size={16} /> After the lesson
-          </div>
-          <h3 className="mt-3 text-2xl font-black">Review notes and videos.</h3>
-          <p className="mt-3 text-sm leading-6 text-zinc-600">
-            When the lesson is completed, your instructor can send feedback, checklist updates, and revision videos so the next lesson does not repeat covered skills.
-          </p>
-          <Link href="/progress-tracker" className="lda-pill lda-pill-sm mt-5">Open progress tracker</Link>
-        </article>
-      </section>
-
-      <section className="grid gap-5 xl:grid-cols-2">
-        <article id="booking-history" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-            <History size={16} /> Booking history
-          </div>
-          <h3 className="mt-3 text-2xl font-black">Upcoming, completed, and cancelled lessons.</h3>
-          <div className="mt-5 grid gap-3">
-            {[...upcomingBookings, ...completedBookings, ...cancelledBookings].map((booking) => (
-              <div key={booking.id} className="rounded border border-zinc-200 bg-zinc-50 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <div className="font-black">{booking.instructorName}</div>
-                    <div className="mt-1 text-sm text-zinc-600">{booking.date} at {booking.time} · {booking.car}</div>
-                    <div className="mt-1 text-xs font-bold text-zinc-500">{booking.id}</div>
-                  </div>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black uppercase text-zinc-700">{booking.status}</span>
-                </div>
-                <div className="mt-3 text-sm text-zinc-700">{booking.lessonSummary}</div>
-                {(booking.status === "pending" || booking.status === "upcoming") ? (
-                  <button type="button" onClick={() => cancelBooking(booking.id)} className="mt-4 inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-50 px-3 py-2 text-xs font-black text-brand hover:ring-2 hover:ring-brand">
-                    <XCircle size={15} /> Cancel lesson
-                  </button>
-                ) : null}
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article id="rate-your-instructor" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-            <MessageSquareText size={16} /> Rate your instructor
-          </div>
-          <h3 className="mt-3 text-2xl font-black">Review after a completed lesson.</h3>
-          <div className="mt-5 grid gap-3">
-            {completedBookings.map((booking) => {
-              const draft = reviewDrafts[booking.id] ?? { rating: booking.rating ?? 5, review: booking.review ?? "" };
-
-              return (
-                <div key={booking.id} className="rounded border border-zinc-200 bg-zinc-50 p-4">
-                  <div className="font-black">{booking.instructorName}</div>
-                  <div className="mt-1 text-sm text-zinc-600">{booking.date} · {booking.car}</div>
-                  <div className="mt-3 flex gap-1">
-                    {[1, 2, 3, 4, 5].map((rating) => (
-                      <button
-                        key={rating}
-                        type="button"
-                        onClick={() => setReviewDrafts((drafts) => ({ ...drafts, [booking.id]: { ...draft, rating } }))}
-                        className={rating <= draft.rating ? "text-brand" : "text-zinc-300"}
-                        aria-label={`${rating} star review`}
-                      >
-                        <Star size={22} fill="currentColor" />
-                      </button>
-                    ))}
-                  </div>
-                  <textarea
-                    value={draft.review}
-                    onChange={(event) => setReviewDrafts((drafts) => ({ ...drafts, [booking.id]: { ...draft, review: event.target.value } }))}
-                    placeholder="Write an optional review for this instructor"
-                    className="mt-3 min-h-24 w-full rounded border border-zinc-300 bg-white p-3 text-sm font-bold text-black"
-                  />
-                  <button type="button" onClick={() => submitReview(booking.id)} className="lda-pill lda-pill-sm mt-3">
-                    Save review
-                  </button>
-                  {booking.rating ? (
-                    <div className="mt-3 rounded border border-red-500/20 bg-red-50 p-3 text-sm font-bold text-red-950">
-                      Saved: {booking.rating}/5 {booking.review ? `· ${booking.review}` : ""}
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        </article>
       </section>
     </section>
   );
