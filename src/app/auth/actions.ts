@@ -266,6 +266,7 @@ export async function signIn(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   const role = safeRole(formData.get("accountIntent"));
   const nextPath = safeNextPath(formData.get("next") ?? dashboardPathForRole(role));
+  const rememberMe = formData.get("rememberMe") === "on";
 
   const supabase = await createClient();
   if (!supabase) {
@@ -284,6 +285,20 @@ export async function signIn(formData: FormData) {
 
   if (error) {
     passwordRedirect(error.message, role);
+  }
+
+  const cookieStore = await cookies();
+  if (rememberMe) {
+    const rememberedIdentifier = identifier.includes("@") ? identifier.toLowerCase() : normalizePhone(identifier);
+    cookieStore.set("lda_remember_identifier", rememberedIdentifier, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 180,
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production"
+    });
+  } else {
+    cookieStore.delete("lda_remember_identifier");
   }
 
   revalidatePath("/", "layout");

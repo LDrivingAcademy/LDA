@@ -125,15 +125,6 @@ export default function HomePage() {
               <p className="mt-5 max-w-lg text-lg leading-8 text-zinc-700">
                 Book verified local driving instructors, compare upfront prices, choose a lesson time, and pay online in a few clear steps.
               </p>
-
-              <section className="mt-8 max-w-[560px]">
-                <Link href="/lesson-now" className="lda-pill">
-                  <Clock3 size={22} /> Lesson now
-                </Link>
-                <p className="mt-3 max-w-lg rounded bg-red-50 px-4 py-3 text-sm font-bold leading-6 text-zinc-800">
-                  Lesson Now is for short-notice bookings: enter your pickup details, verify your provisional licence, pay securely, then receive a booking reference and tracking link.
-                </p>
-              </section>
             </div>
 
             <section className="h-full overflow-hidden rounded bg-white text-white shadow-sm lg:mt-8">
@@ -165,6 +156,23 @@ export default function HomePage() {
                 </div>
               </div>
             </section>
+          </div>
+        </section>
+
+        <section className="bg-white px-4 pb-8 sm:px-6 lg:px-8">
+          <div className="mx-auto grid max-w-7xl gap-4 rounded border border-zinc-200 bg-zinc-50 p-5 shadow-sm md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 text-sm font-black uppercase text-brand">
+                <Clock3 size={17} /> Lesson now
+              </div>
+              <h2 className="mt-2 text-2xl font-black tracking-normal">Need a short-notice lesson?</h2>
+              <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-zinc-700">
+                Enter pickup details, verify your provisional licence, pay securely, then receive a booking reference and tracking link.
+              </p>
+            </div>
+            <Link href="/lesson-now" className="lda-pill justify-self-start md:justify-self-end">
+              Book Lesson Now
+            </Link>
           </div>
         </section>
 

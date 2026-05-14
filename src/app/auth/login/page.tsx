@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ArrowLeft, CarFront, GraduationCap, KeyRound, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { signIn } from "../actions";
@@ -11,6 +12,7 @@ export default async function LoginPage({
   const { message, role } = await searchParams;
   const isInstructor = role === "instructor";
   const nextPath = isInstructor ? "/instructor-dashboard" : "/learner-dashboard";
+  const rememberedIdentifier = (await cookies()).get("lda_remember_identifier")?.value ?? "";
 
   return (
     <main className="min-h-screen bg-ink px-4 py-8 text-white">
@@ -62,11 +64,20 @@ export default async function LoginPage({
               <input type="hidden" name="next" value={nextPath} />
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-400">Email or mobile number</span>
-                <input required name="identifier" autoComplete="username" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="you@example.com or 07123 456789" />
+                <input required name="identifier" autoComplete="username" defaultValue={rememberedIdentifier} className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="you@example.com or 07123 456789" />
               </label>
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-400">Password</span>
                 <input required name="password" type="password" autoComplete="current-password" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Your password" />
+              </label>
+              <label className="flex items-start gap-3 rounded border border-zinc-800 bg-black p-3 text-sm font-bold leading-6 text-zinc-300">
+                <input name="rememberMe" type="checkbox" defaultChecked={Boolean(rememberedIdentifier)} className="mt-1 accent-red-600" />
+                <span>
+                  Remember me on this device
+                  <span className="block text-xs font-medium leading-5 text-zinc-500">
+                    LDA remembers your email or phone only. Your browser can save the password securely.
+                  </span>
+                </span>
               </label>
               <button className="lda-pill mt-2">
                 <KeyRound size={18} /> Log in
