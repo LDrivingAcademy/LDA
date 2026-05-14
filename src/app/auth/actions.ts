@@ -33,11 +33,25 @@ function getSubmittedFullName(formData: FormData) {
 
 async function getAppOrigin() {
   if (process.env.APP_WEBSITE_URL) {
-    return process.env.APP_WEBSITE_URL;
+    return process.env.APP_WEBSITE_URL.trim();
   }
 
   const requestOrigin = (await headers()).get("origin");
   return requestOrigin || "https://ldrivingacademy.co.uk";
+}
+
+function normalizePhone(value: FormDataEntryValue | null) {
+  const phone = String(value ?? "").trim().replace(/\s+/g, "");
+
+  if (phone.startsWith("07") && phone.length === 11) {
+    return `+44${phone.slice(1)}`;
+  }
+
+  return phone;
+}
+
+function passwordRedirect(message: string, role: "learner" | "instructor" = "learner"): never {
+  redirect(`/auth/login?role=${role}&message=${encodeURIComponent(message)}`);
 }
 
 function verifyRedirect(role: "learner" | "instructor", message: string): never {
@@ -233,29 +247,28 @@ export async function completeVerification(formData: FormData) {
 }
 
 export async function signIn(formData: FormData) {
-  const email = String(formData.get("email") ?? "");
+  const identifier = String(formData.get("identifier") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const nextPath = safeNextPath(formData.get("next"));
-
-  const demoCredentials: Record<string, { password: string; role: "learner" | "instructor" }> = {
-    "learner@ldrivingacademy.co.uk": { password: "LDAlearner123!", role: "learner" },
-    "instructor@ldrivingacademy.co.uk": { password: "LDAinstructor123!", role: "instructor" }
-  };
-  const demoAccount = demoCredentials[email.toLowerCase()];
-
-  if (demoAccount && demoAccount.password === password) {
-    redirect(`/demo/${demoAccount.role}`);
-  }
+  const role = safeRole(formData.get("accountIntent"));
 
   const supabase = await createClient();
   if (!supabase) {
     authError("Supabase environment variables are not configured yet.");
   }
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (!identifier || !password) {
+    passwordRedirect("Enter your email or mobile number and password.", role);
+  }
+
+  const signInPayload = identifier.includes("@")
+    ? { email: identifier.toLowerCase(), password }
+    : { phone: normalizePhone(identifier), password };
+
+  const { error } = await supabase.auth.signInWithPassword(signInPayload);
 
   if (error) {
-    authError(error.message);
+    passwordRedirect(error.message, role);
   }
 
   revalidatePath("/", "layout");
@@ -272,7 +285,11 @@ export async function signUp(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   const fullName = getSubmittedFullName(formData);
   const accountIntent = String(formData.get("accountIntent") ?? "learner");
-  const nextPath = safeNextPath(formData.get("next"));
+  const role = safeRole(formData.get("accountIntent"));
+  const appOrigin = await getAppOrigin();
+  const emailRedirectTo = new URL("/auth/callback", appOrigin);
+  emailRedirectTo.searchParams.set("role", role);
+  emailRedirectTo.searchParams.set("next", `/auth/verify?role=${role}`);
 
   if (accountIntent === "admin") {
     authError("Admin accounts must be created manually by the site owner.");
@@ -282,6 +299,7 @@ export async function signUp(formData: FormData) {
     email,
     password,
     options: {
+      emailRedirectTo: emailRedirectTo.toString(),
       data: { account_intent: accountIntent, full_name: fullName }
     }
   });
@@ -291,7 +309,101 @@ export async function signUp(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect(`${nextPath}?message=Check your email if confirmation is enabled.`);
+  redirect(`/auth/check-email?email=${encodeURIComponent(email)}&role=${role}`);
+}
+
+export async function signUpWithPhonePassword(formData: FormData) {
+  const supabase = await createClient();
+  if (!supabase) {
+    authError("Supabase environment variables are not configured yet.");
+  }
+
+  const phone = normalizePhone(formData.get("phone"));
+  const password = String(formData.get("password") ?? "");
+  const fullName = getSubmittedFullName(formData);
+  const role = safeRole(formData.get("accountIntent"));
+
+  if (!phone || !phone.startsWith("+")) {
+    passwordRedirect("Enter your mobile number in UK format, for example 07123 456789, or international format with +44.", role);
+  }
+
+  if (password.length < 8) {
+    passwordRedirect("Use a password with at least 8 characters.", role);
+  }
+
+  const { error } = await supabase.auth.signUp({
+    phone,
+    password,
+    options: {
+      data: { account_intent: role, full_name: fullName }
+    }
+  });
+
+  if (error) {
+    passwordRedirect(error.message, role);
+  }
+
+  revalidatePath("/", "layout");
+  redirect(`/auth/phone/verify?phone=${encodeURIComponent(phone)}&role=${role}&name=${encodeURIComponent(fullName)}`);
+}
+
+export async function requestPasswordReset(formData: FormData) {
+  const identifier = String(formData.get("identifier") ?? "").trim();
+  const role = safeRole(formData.get("accountIntent"));
+  const supabase = await createClient();
+
+  if (!supabase) {
+    passwordRedirect("Supabase environment variables are not configured yet.", role);
+  }
+
+  if (!identifier) {
+    passwordRedirect("Enter your account email or mobile number first.", role);
+  }
+
+  if (!identifier.includes("@")) {
+    passwordRedirect("SMS password reset needs the SMS provider recovery flow connected. For now, use email reset or contact LDA support so we can verify the account safely.", role);
+  }
+
+  const redirectTo = new URL("/auth/callback", await getAppOrigin());
+  redirectTo.searchParams.set("role", role);
+  redirectTo.searchParams.set("next", "/auth/update-password");
+
+  const { error } = await supabase.auth.resetPasswordForEmail(identifier.toLowerCase(), {
+    redirectTo: redirectTo.toString()
+  });
+
+  if (error) {
+    passwordRedirect(error.message, role);
+  }
+
+  passwordRedirect("Password reset sent. Check your email and follow the secure reset link.", role);
+}
+
+export async function updatePassword(formData: FormData) {
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const supabase = await createClient();
+
+  if (!supabase) {
+    authError("Supabase environment variables are not configured yet.");
+  }
+
+  if (password.length < 8) {
+    redirect(`/auth/update-password?message=${encodeURIComponent("Use a password with at least 8 characters.")}`);
+  }
+
+  if (password !== confirmPassword) {
+    redirect(`/auth/update-password?message=${encodeURIComponent("The two passwords do not match.")}`);
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    redirect(`/auth/update-password?message=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/", "layout");
+  redirect(`/auth/login?message=${encodeURIComponent("Password updated. Log in with your new password.")}`);
 }
 
 export async function signOut() {
@@ -305,12 +417,4 @@ export async function signOut() {
 
   revalidatePath("/", "layout");
   redirect("/");
-}
-
-export async function demoSignIn(formData: FormData) {
-  const role = String(formData.get("demoRole") ?? "learner");
-  const safeRole = ["learner", "instructor", "admin"].includes(role) ? role : "learner";
-
-  revalidatePath("/", "layout");
-  redirect(`/demo/${safeRole}`);
 }

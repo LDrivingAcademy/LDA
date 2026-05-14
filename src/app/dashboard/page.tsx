@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, ShieldCheck } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
@@ -10,48 +9,6 @@ import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 import { instructorJourneyStages } from "@/lib/marketplace-content";
 
 export default async function DashboardPage() {
-  const demoRole = (await cookies()).get("lda_demo_role")?.value;
-
-  if (demoRole) {
-    const isInstructorDemo = demoRole === "instructor";
-
-    return (
-      <main className="min-h-screen bg-black">
-        <header className="border-b border-zinc-800 bg-ink text-white">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <div>
-              <div className="text-sm font-bold text-red-200">LDA demo dashboard</div>
-              <h1 className="text-2xl font-black">{isInstructorDemo ? "Demo Instructor" : "Demo Learner"}</h1>
-            </div>
-            <form action={signOut}>
-              <button className="lda-pill lda-pill-sm">Exit demo</button>
-            </form>
-          </div>
-        </header>
-
-        <section className="mx-auto grid max-w-7xl gap-5 px-4 py-8 sm:px-6 lg:grid-cols-3 lg:px-8">
-          <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-            <ShieldCheck className="text-brand" />
-            <h2 className="mt-4 text-xl font-black">Account role</h2>
-            <p className="mt-2 text-zinc-400">{demoRole}</p>
-          </article>
-          <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-            <CalendarCheck className="text-brand" />
-            <h2 className="mt-4 text-xl font-black">Demo mode</h2>
-            <p className="mt-2 text-zinc-400">Use this to test navigation and journey flow before real accounts are configured.</p>
-          </article>
-          <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
-            <FileCheck2 className="text-brand" />
-            <h2 className="mt-4 text-xl font-black">Verification</h2>
-            <p className="mt-2 text-zinc-400">Status: <span className="font-black">{isInstructorDemo ? "pending demo approval" : "learner demo"}</span></p>
-          </article>
-        </section>
-
-        {isInstructorDemo ? <InstructorDashboard /> : <LearnerBookingDashboard learnerEmail="learner@ldrivingacademy.co.uk" />}
-      </main>
-    );
-  }
-
   const supabase = await createClient();
 
   if (!hasSupabaseConfig() || !supabase) {

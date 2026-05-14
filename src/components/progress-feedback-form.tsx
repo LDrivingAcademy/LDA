@@ -17,10 +17,10 @@ const starterSkills = [
 ];
 
 export function ProgressFeedbackForm() {
-  const [learnerName, setLearnerName] = useState("Demo learner");
-  const [learnerEmail, setLearnerEmail] = useState("learner@ldrivingacademy.co.uk");
+  const [learnerName, setLearnerName] = useState("Learner name");
+  const [learnerEmail, setLearnerEmail] = useState("");
   const [instructorName, setInstructorName] = useState("Amelia Hart");
-  const [lessonReference, setLessonReference] = useState("LDA-DEMO-1007");
+  const [lessonReference, setLessonReference] = useState("LDA-BOOKING-REF");
   const [skills, setSkills] = useState(starterSkills.map((title, index) => ({ title, complete: index < 3 })));
   const [newSkill, setNewSkill] = useState("");
   const [instructorNotes, setInstructorNotes] = useState("Good progress with control and observations. Keep practising mirror checks before changing speed or direction.");

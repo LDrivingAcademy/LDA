@@ -44,8 +44,8 @@ const suggestionCards: {
   },
   {
     title: "Smart Match",
-    body: "Let LDA match you with instructors based on distance, rating, price, car, and next slot.",
-    href: "/auth/login?role=learner",
+    body: "Use LDA SmartMatch to adapt instructor choice around support needs, reviews, skills, price, and availability.",
+    href: "/smart-match",
     image: "match",
     cta: "Details"
   },
@@ -179,15 +179,15 @@ export default function HomePage() {
                   className="absolute inset-0 h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="lda-pill lda-pill-sm absolute left-7 top-7 sm:left-auto sm:right-8">
+                <Link href="/smart-match" className="lda-pill lda-pill-sm absolute left-7 top-7 sm:left-auto sm:right-8">
                   LDA Smart Match
-                </div>
+                </Link>
                 <div className="relative z-10 pt-24">
                   <h2 className="max-w-4xl text-4xl font-black tracking-normal text-white drop-shadow-lg sm:text-5xl">
                     LDA finds the best local instructor for you.
                   </h2>
                   <p className="mt-4 max-w-4xl text-base font-bold leading-7 text-white drop-shadow">
-                    Smart Match compares distance, instructor rating, price, car, transmission, availability, and verification status across local approved instructors.
+                    Smart Match compares distance, instructor rating, price, car, transmission, availability, verification status, teaching strengths, and support preferences.
                   </p>
                   <div className="mt-6 rounded bg-white/95 p-4 text-black shadow-2xl backdrop-blur sm:max-w-2xl">
                     <div className="text-xs font-black uppercase text-zinc-500">LDA top tips to pass</div>

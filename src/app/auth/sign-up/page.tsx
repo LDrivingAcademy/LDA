@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, CarFront, GraduationCap, MailCheck, MessageSquareText, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
-import { sendMagicLink, sendPhoneOtp } from "../handoff-actions";
+import { signUp, signUpWithPhonePassword } from "../actions";
 
 export default async function SignUpPage({
   searchParams
@@ -52,10 +52,10 @@ export default async function SignUpPage({
           <section className="rounded border border-zinc-800 bg-zinc-950 p-5 text-white shadow-2xl">
             <div className="mb-5">
               <div className="text-sm font-black uppercase text-brand">{isInstructor ? "Instructor sign up" : "Learner sign up"}</div>
-              <h2 className="mt-1 text-2xl font-black">Verify by email or text</h2>
+              <h2 className="mt-1 text-2xl font-black">Create and verify account</h2>
             </div>
             {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-100">{message}</div> : null}
-            <form action={sendMagicLink} className="grid gap-3">
+            <form action={signUp} className="grid gap-3">
               <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
               <input type="hidden" name="next" value={nextPath} />
               <div className="grid gap-3 sm:grid-cols-2">
@@ -72,19 +72,23 @@ export default async function SignUpPage({
                 <span className="text-sm font-bold text-zinc-400">Email</span>
                 <input required name="email" type="email" autoComplete="email" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="you@example.com" />
               </label>
+              <label className="grid gap-1">
+                <span className="text-sm font-bold text-zinc-400">Create password</span>
+                <input required name="password" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
+              </label>
               <button className="lda-pill mt-2">
-                <MailCheck size={18} /> Send secure email link
+                <MailCheck size={18} /> Create account by email
               </button>
             </form>
             <p className="mt-4 text-xs leading-5 text-zinc-500">
-              After you confirm the link, LDA will ask for learner eligibility or instructor verification details and store them against your account.
+              After you confirm the email link, LDA will ask for learner eligibility or instructor verification details and store them against your account. After that, use Log in with your email and password.
             </p>
             <div className="mt-5 border-t border-zinc-800 pt-5">
               <div className="mb-3">
                 <div className="text-sm font-black uppercase text-brand">Prefer text message?</div>
                 <h3 className="mt-1 text-xl font-black">Use a mobile code</h3>
               </div>
-              <form action={sendPhoneOtp} className="grid gap-3">
+              <form action={signUpWithPhonePassword} className="grid gap-3">
                 <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
                 <input type="hidden" name="next" value={nextPath} />
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -101,8 +105,12 @@ export default async function SignUpPage({
                   <span className="text-sm font-bold text-zinc-400">Mobile number</span>
                   <input required name="phone" type="tel" autoComplete="tel" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="07123 456789" />
                 </label>
+                <label className="grid gap-1">
+                  <span className="text-sm font-bold text-zinc-400">Create password</span>
+                  <input required name="password" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
+                </label>
                 <button className="lda-pill mt-2">
-                  <MessageSquareText size={18} /> Send text code
+                  <MessageSquareText size={18} /> Create account by text
                 </button>
               </form>
             </div>
