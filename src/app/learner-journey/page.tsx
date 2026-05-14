@@ -142,20 +142,20 @@ export default function LearnerJourneyPage() {
           <div className="flex items-center gap-7">
             <Brand />
             <nav className="hidden items-center gap-7 lg:flex">
-              <Link href="/learner-dashboard" className="rounded-full px-3 py-2 text-sm font-black text-white ring-2 ring-brand">
+              <Link href="/learner-dashboard" className="rounded-full border border-red-500/60 bg-red-500/15 px-3 py-2 text-sm font-black text-white ring-2 ring-brand">
                 Learner
               </Link>
-              <Link href="/smart-match" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+              <Link href="/smart-match" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 SmartMatch
               </Link>
-              <Link href="/support/learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+              <Link href="/support/learner" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 Support
               </Link>
             </nav>
           </div>
           <div className="hidden items-center gap-6 md:flex">
             <LanguageSelector />
-            <Link href="/learner-dashboard" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+            <Link href="/learner-dashboard" className="lda-pill lda-pill-sm">
               <ArrowLeft size={17} /> Back to dashboard
             </Link>
           </div>
@@ -182,7 +182,7 @@ export default function LearnerJourneyPage() {
                 <Link href="#journey-sections" className="lda-pill lda-pill-sm">
                   View journey sections <ArrowRight size={17} />
                 </Link>
-                <Link href="/learner-dashboard" className="inline-flex items-center justify-center gap-2 rounded-full border border-red-500/60 px-5 py-3 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+                <Link href="/learner-dashboard" className="lda-pill lda-pill-sm">
                   <ArrowLeft size={17} /> Return to booking
                 </Link>
               </div>
