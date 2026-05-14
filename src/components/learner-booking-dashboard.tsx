@@ -132,6 +132,13 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const [confirmationRef, setConfirmationRef] = useState("");
   const [bookingRecords, setBookingRecords] = useState<BookingRecord[]>([]);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("unsupported");
+  const [notificationPrefs, setNotificationPrefs] = useState({
+    lessonUpdates: true,
+    driverEnRoute: true,
+    driverArrived: true,
+    cancellationUpdates: true,
+    offers: false
+  });
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState("Use your location to show nearby instructors on the map.");
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; review: string }>>({});
@@ -162,6 +169,13 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
 
     if ("Notification" in window) {
       setNotificationPermission(Notification.permission);
+      if (Notification.permission === "default") {
+        window.setTimeout(() => {
+          Notification.requestPermission().then((permission) => {
+            setNotificationPermission(permission);
+          });
+        }, 1200);
+      }
     }
   }, []);
 
@@ -452,9 +466,14 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
               <h2 className="mt-3 text-2xl font-black">View instructors around your pickup area.</h2>
               <p className="mt-2 text-sm leading-6 text-zinc-600">{locationStatus}</p>
             </div>
-            <button type="button" onClick={useCurrentLocation} className="lda-pill lda-pill-sm">
-              Use my location
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button type="button" onClick={useCurrentLocation} className="lda-pill lda-pill-sm">
+                Use my location
+              </button>
+              <Link href="/tracking" className="lda-pill lda-pill-sm">
+                Live tracking
+              </Link>
+            </div>
           </div>
           <div className="relative mt-5 h-72 overflow-hidden rounded border border-zinc-200 bg-[radial-gradient(circle_at_20%_20%,#fee2e2,transparent_28%),linear-gradient(135deg,#f8fafc,#fff)]">
             <div className="absolute left-0 right-0 top-1/2 h-px bg-zinc-300" />
@@ -486,16 +505,35 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
           </div>
         </article>
 
-        <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+        <article id="notification-hub" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-            <BellRing size={16} /> Lesson notifications
+            <BellRing size={16} /> Notification Hub
           </div>
-          <h2 className="mt-3 text-2xl font-black">Get booking updates.</h2>
+          <h2 className="mt-3 text-2xl font-black">Choose how LDA keeps you updated.</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-600">
-            LDA can send confirmation emails, in-app notifications, and browser alerts when a lesson is booked or changed.
+            Browser alerts are requested automatically when supported. You can still control which lesson updates LDA should send.
           </p>
+          <div className="mt-5 grid gap-3">
+            {[
+              ["lessonUpdates", "Lesson confirmations and changes"],
+              ["driverEnRoute", "Instructor en route alerts"],
+              ["driverArrived", "Instructor has arrived"],
+              ["cancellationUpdates", "Cancellation and refund updates"],
+              ["offers", "Deals, free trials, and learner offers"]
+            ].map(([key, label]) => (
+              <label key={key} className="flex items-center justify-between gap-4 rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-black text-zinc-800">
+                <span>{label}</span>
+                <input
+                  type="checkbox"
+                  checked={notificationPrefs[key as keyof typeof notificationPrefs]}
+                  onChange={(event) => setNotificationPrefs((prefs) => ({ ...prefs, [key]: event.target.checked }))}
+                  className="h-5 w-5 accent-red-600"
+                />
+              </label>
+            ))}
+          </div>
           <button type="button" onClick={enableNotifications} className="lda-pill lda-pill-sm mt-5">
-            Enable notifications
+            Refresh browser permission
           </button>
           <div className="mt-4 rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-bold text-zinc-700">
             Browser status: {notificationPermission}
@@ -606,7 +644,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
           </p>
           <Link href="/tracking" className="lda-pill lda-pill-sm mt-5">Open tracking view</Link>
         </article>
-        <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+        <article id="after-lesson-revision" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
             <BadgeCheck size={16} /> After the lesson
           </div>
@@ -619,7 +657,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
       </section>
 
       <section className="grid gap-5 xl:grid-cols-2">
-        <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+        <article id="booking-history" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
             <History size={16} /> Booking history
           </div>
@@ -646,7 +684,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
           </div>
         </article>
 
-        <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+        <article id="rate-your-instructor" className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
             <MessageSquareText size={16} /> Rate your instructor
           </div>
