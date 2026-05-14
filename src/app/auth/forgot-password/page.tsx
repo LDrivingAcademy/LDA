@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Mail, RotateCcw } from "lucide-react";
 import { Brand } from "@/components/brand";
-import { requestPasswordReset } from "../actions";
 
 export default async function ForgotPasswordPage({
   searchParams
@@ -38,7 +37,7 @@ export default async function ForgotPasswordPage({
             <div className="text-sm font-black uppercase text-brand">{isInstructor ? "Instructor recovery" : "Learner recovery"}</div>
             <h2 className="mt-1 text-2xl font-black">Send reset confirmation</h2>
             {message ? <div className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-100">{message}</div> : null}
-            <form action={requestPasswordReset} className="mt-5 grid gap-3">
+            <form action="/api/auth/password-reset" method="post" className="mt-5 grid gap-3">
               <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
               <input type="hidden" name="returnTo" value={`/auth/forgot-password?role=${isInstructor ? "instructor" : "learner"}`} />
               <label className="grid gap-1">
