@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   CalendarCheck,
   CarFront,
@@ -407,6 +408,9 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
               <button type="button" onClick={useCurrentLocation} className="lda-pill lda-pill-sm">
                 Use my location
               </button>
+              <Link href="/tracking" className="lda-pill lda-pill-sm">
+                Live tracking
+              </Link>
             </div>
           </div>
           <div className="relative mt-5 h-72 overflow-hidden rounded border border-zinc-200 bg-[radial-gradient(circle_at_20%_20%,#fee2e2,transparent_28%),linear-gradient(135deg,#f8fafc,#fff)]">
