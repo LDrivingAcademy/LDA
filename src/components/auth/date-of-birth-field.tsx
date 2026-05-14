@@ -36,14 +36,23 @@ export function DateOfBirthField({ latestEligibleDate }: { latestEligibleDate: s
     const endYear = Number(latest.year);
     return Array.from({ length: endYear - 1920 + 1 }, (_, index) => String(endYear - index));
   }, [latest.year]);
-  const [dateValue, setDateValue] = useState("");
-  const { year, month, day } = splitDate(dateValue);
+  const [day, setDay] = useState("");
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
+  const dateValue = buildDate(year, month, day);
 
   function updateDate(next: { year?: string; month?: string; day?: string }) {
-    const nextYear = next.year ?? year;
-    const nextMonth = next.month ?? month;
-    const nextDay = next.day ?? day;
-    setDateValue(buildDate(nextYear, nextMonth, nextDay));
+    if (typeof next.day === "string") {
+      setDay(next.day);
+    }
+
+    if (typeof next.month === "string") {
+      setMonth(next.month);
+    }
+
+    if (typeof next.year === "string") {
+      setYear(next.year);
+    }
   }
 
   return (
