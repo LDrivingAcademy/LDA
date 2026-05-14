@@ -22,6 +22,31 @@ function required(value?: string) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function normaliseAppUrl(request: Request) {
+  const configuredUrl = process.env.APP_WEBSITE_URL?.trim();
+  const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+  const candidates = [
+    configuredUrl,
+    configuredUrl && !configuredUrl.startsWith("http") ? `https://${configuredUrl}` : undefined,
+    forwardedHost ? `${forwardedProto}://${forwardedHost}` : undefined,
+    "https://ldrivingacademy.co.uk"
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+
+    try {
+      const url = new URL(candidate);
+      return url.origin;
+    } catch {
+      // Try the next candidate. A malformed APP_WEBSITE_URL should not block checkout.
+    }
+  }
+
+  return "https://ldrivingacademy.co.uk";
+}
+
 export async function POST(request: Request) {
   const body = (await request.json()) as InstantCheckoutRequest;
 
@@ -30,7 +55,7 @@ export async function POST(request: Request) {
   }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-  const appUrl = process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk";
+  const appUrl = normaliseAppUrl(request);
   const currency = process.env.STRIPE_DEFAULT_CURRENCY ?? "gbp";
   const amountPence = body.amountPence ?? 6500;
   const instructorName = body.instructorName ?? "your LDA instructor";
@@ -73,9 +98,11 @@ export async function POST(request: Request) {
     "customer_email": body.learnerEmail ?? ""
   });
 
-  if (process.env.STRIPE_ENABLE_PAYPAL === "true") {
+  if (body.paymentPreference === "paypal" || process.env.STRIPE_ENABLE_PAYPAL === "true") {
     params.set("payment_method_types[0]", "card");
     params.set("payment_method_types[1]", "paypal");
+  } else if (body.paymentPreference) {
+    params.set("payment_method_types[0]", "card");
   }
 
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {

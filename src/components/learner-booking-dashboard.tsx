@@ -177,8 +177,9 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const lessonSummary = `${availabilityDate} at ${selectedSlot || "selected time"} from ${postcode}. ${selectedInstructor.car}, ${selectedInstructor.transmission}.`;
   const canPay = Boolean(selectedInstructor && selectedSlot && postcode);
 
-  async function startCheckout() {
+  async function startCheckout(preferredPaymentOption = paymentOption) {
     if (!canPay) return;
+    setPaymentOption(preferredPaymentOption);
     setCheckoutState("loading");
     setCheckoutError("");
     const reference = makeBookingReference(selectedInstructor.id);
@@ -202,7 +203,8 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
         instructorName: selectedInstructor.name,
         lessonSummary,
         amountPence: selectedInstructor.price,
-        stripeConnectedAccountId: selectedInstructor.stripeConnectedAccountId
+        stripeConnectedAccountId: selectedInstructor.stripeConnectedAccountId,
+        paymentPreference: preferredPaymentOption
       })
     });
     const result = await response.json().catch(() => ({}));
@@ -344,15 +346,15 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
               {paymentOptions.map((option) => (
-                <button key={option} type="button" onClick={() => setPaymentOption(option)} className={`rounded border px-3 py-2 text-xs font-black ${paymentOption === option ? "border-brand bg-brand text-white" : "border-zinc-800 bg-black text-zinc-300"}`}>
+                <button key={option} type="button" disabled={!canPay || checkoutState === "loading"} onClick={() => startCheckout(option)} className={`rounded border px-3 py-2 text-xs font-black ${paymentOption === option ? "border-brand bg-brand text-white" : "border-zinc-800 bg-black text-zinc-300"}`}>
                   {option}
                 </button>
               ))}
             </div>
             <p className="mt-3 text-xs leading-5 text-zinc-500">
-              Stripe Checkout handles manual card entry plus eligible Visa, Mastercard, Maestro, Apple Pay, and PayPal methods when enabled in Stripe.
+              These buttons open Stripe Checkout. Manual card entry, Visa, Mastercard, Maestro, and eligible Apple Pay are handled through Stripe's secure card form. PayPal appears when it is enabled and eligible on your Stripe account.
             </p>
-            <button disabled={!canPay || checkoutState === "loading"} onClick={startCheckout} className="lda-pill mt-5 w-full">
+            <button disabled={!canPay || checkoutState === "loading"} onClick={() => startCheckout("Stripe")} className="lda-pill mt-5 w-full">
               <CreditCard size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : "Pay with Stripe"}
             </button>
             {checkoutState === "error" ? <p className="mt-3 text-sm font-bold text-brand">{checkoutError || "Checkout could not open. Check Stripe keys in Vercel."}</p> : null}

@@ -6,6 +6,7 @@ type CheckoutRequest = {
   lessonSummary?: string;
   amountPence?: number;
   stripeConnectedAccountId?: string;
+  paymentPreference?: string;
 };
 
 function normaliseAppUrl(request: Request) {
@@ -57,11 +58,19 @@ export async function POST(request: Request) {
     success_url: `${appUrl}/learner-dashboard?payment=success&booking=${encodeURIComponent(bookingId)}`,
     cancel_url: `${appUrl}/learner-dashboard?payment=cancelled&booking=${encodeURIComponent(bookingId)}`,
     "metadata[booking_id]": bookingId,
+    "metadata[payment_preference]": body.paymentPreference ?? "card",
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": currency,
     "line_items[0][price_data][unit_amount]": String(amountPence),
     "line_items[0][price_data][product_data][name]": `LDA driving lesson with ${instructorName}`
   });
+
+  if (body.paymentPreference === "PayPal") {
+    params.set("payment_method_types[0]", "card");
+    params.set("payment_method_types[1]", "paypal");
+  } else if (body.paymentPreference) {
+    params.set("payment_method_types[0]", "card");
+  }
 
   if (body.stripeConnectedAccountId) {
     params.set("payment_intent_data[transfer_data][destination]", body.stripeConnectedAccountId);

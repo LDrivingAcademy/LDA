@@ -3,15 +3,12 @@ import {
   CalendarCheck,
   CarFront,
   CheckCircle2,
-  Circle,
   ClipboardCheck,
   Clock3,
   HelpCircle,
-  Navigation,
   RadioTower,
   Share2,
   Sparkles,
-  Square,
   UsersRound
 } from "lucide-react";
 import { Brand } from "@/components/brand";
@@ -136,39 +133,6 @@ export default function HomePage() {
                 <p className="mt-3 max-w-lg rounded bg-red-50 px-4 py-3 text-sm font-bold leading-6 text-zinc-800">
                   Lesson Now is for short-notice bookings: enter your pickup details, verify your provisional licence, pay securely, then receive a booking reference and tracking link.
                 </p>
-
-                <div className="mt-7 grid gap-3">
-                  <div className="relative rounded bg-zinc-100 px-5 py-5">
-                    <div className="absolute left-7 top-1/2 h-20 w-px bg-black" />
-                    <div className="flex items-center gap-5">
-                      <Circle className="relative z-10 fill-black text-black" size={18} />
-                      <div>
-                        <div className="text-sm font-bold text-zinc-500">Pickup location</div>
-                        <div className="mt-1 text-xl font-black">Enter your postcode</div>
-                      </div>
-                      <Navigation className="ml-auto text-black" size={24} />
-                    </div>
-                  </div>
-
-                  <div className="rounded bg-zinc-100 px-5 py-5">
-                    <div className="flex items-center gap-5">
-                      <Square className="fill-black text-black" size={18} />
-                      <div>
-                        <div className="text-sm font-bold text-zinc-500">Lesson preference</div>
-                        <div className="mt-1 text-xl font-black">Automatic or Manual</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <Link href="/auth/sign-up?role=learner" className="lda-pill">
-                    See lesson prices
-                  </Link>
-                  <Link href="/instructor" className="lda-pill">
-                    Become an instructor
-                  </Link>
-                </div>
               </section>
             </div>
 

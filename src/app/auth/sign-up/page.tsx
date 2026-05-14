@@ -30,7 +30,7 @@ export default async function SignUpPage({
               {isInstructor ? "Create your instructor account." : "Create your learner account."}
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-300">
-              Sign up once with your email. LDA uses email confirmation to protect accounts, then stores your verified profile so you can return later through Log in without repeating setup.
+              Sign up once with your email. LDA uses email confirmation to protect accounts, then asks for your profile details on the next secure step.
             </p>
             <Link href={`/auth/login?role=${isInstructor ? "instructor" : "learner"}`} className="lda-pill lda-pill-sm mt-5">
               Already have an account? Log in
@@ -58,16 +58,6 @@ export default async function SignUpPage({
             <form action={signUp} className="grid gap-3">
               <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
               <input type="hidden" name="next" value={nextPath} />
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="grid gap-1">
-                  <span className="text-sm font-bold text-zinc-400">First name</span>
-                  <input required name="firstName" autoComplete="given-name" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="First name" />
-                </label>
-                <label className="grid gap-1">
-                  <span className="text-sm font-bold text-zinc-400">Last name</span>
-                  <input required name="lastName" autoComplete="family-name" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Last name" />
-                </label>
-              </div>
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-400">Email</span>
                 <input required name="email" type="email" autoComplete="email" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="you@example.com" />
@@ -81,7 +71,7 @@ export default async function SignUpPage({
               </button>
             </form>
             <p className="mt-4 text-xs leading-5 text-zinc-500">
-              After you confirm the email link, LDA will ask for learner eligibility or instructor verification details and store them against your account. A phone number can be added later for lesson updates and can be used for returning login once linked to your account.
+              After you confirm the email link, LDA will ask for your first name, last name, optional phone number, and learner eligibility or instructor verification details. A phone number can be added later for lesson updates and can be used for returning login once linked to your account.
             </p>
           </section>
         </div>

@@ -78,13 +78,12 @@ export function InstantLessonBooking({
     });
   }
 
-  async function startCheckout(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  async function startCheckout(preferredPaymentOption = paymentPreference) {
     if (!canPay) {
       return;
     }
 
+    setPaymentPreference(preferredPaymentOption);
     setCheckoutState("loading");
 
     const response = await fetch("/api/instant-lessons/checkout", {
@@ -99,7 +98,7 @@ export function InstantLessonBooking({
         instructorEmail,
         lessonSummary,
         amountPence,
-        paymentPreference
+        paymentPreference: preferredPaymentOption
       })
     });
     const result = await response.json();
@@ -113,7 +112,13 @@ export function InstantLessonBooking({
   }
 
   return (
-    <form onSubmit={startCheckout} className="rounded bg-white p-5 text-black shadow-2xl">
+    <form
+      onSubmit={(event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        startCheckout("card");
+      }}
+      className="rounded bg-white p-5 text-black shadow-2xl"
+    >
       <div className="text-sm font-black uppercase text-brand">Instant guest booking</div>
       <h2 className="mt-2 text-3xl font-black tracking-normal">Book without creating an account.</h2>
       <p className="mt-2 text-sm leading-6 text-zinc-600">
@@ -206,7 +211,8 @@ export function InstantLessonBooking({
             <button
               key={value}
               type="button"
-              onClick={() => setPaymentPreference(value)}
+              disabled={!canPay || checkoutState === "loading"}
+              onClick={() => startCheckout(value)}
               className={`inline-flex items-center gap-1 rounded-full border px-3 py-2 transition ${
                 paymentPreference === value ? "border-brand bg-brand text-white" : "border-zinc-200 bg-white text-zinc-800 hover:border-brand"
               }`}
@@ -216,7 +222,7 @@ export function InstantLessonBooking({
           ))}
         </div>
         <p className="mt-3 text-xs leading-5 text-zinc-500">
-          Each option opens Stripe Checkout. Cards, Apple Pay, Visa, Mastercard and Maestro are handled securely through Stripe; Apple Pay requires domain verification and PayPal depends on account eligibility.
+          Each option opens Stripe Checkout. Manual card entry, Visa, Mastercard, Maestro, and eligible Apple Pay are handled by Stripe's secure card form; Apple Pay requires Stripe domain verification and PayPal depends on account eligibility.
         </p>
       </div>
 

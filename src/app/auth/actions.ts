@@ -287,7 +287,6 @@ export async function signUp(formData: FormData) {
 
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
-  const fullName = getSubmittedFullName(formData);
   const accountIntent = String(formData.get("accountIntent") ?? "learner");
   const role = safeRole(formData.get("accountIntent"));
   const appOrigin = await getAppOrigin();
@@ -304,7 +303,7 @@ export async function signUp(formData: FormData) {
     password,
     options: {
       emailRedirectTo: emailRedirectTo.toString(),
-      data: { account_intent: accountIntent, full_name: fullName }
+      data: { account_intent: accountIntent }
     }
   });
 
