@@ -94,8 +94,8 @@ export default async function DashboardPage() {
             <span>Insurance quote support</span>
             <span>Progress and revision</span>
           </div>
-          <Link href="#learner-journey" className="lda-pill lda-pill-sm mt-5">
-            Start learner journey <ArrowRight size={16} />
+          <Link href="/learner-journey" className="lda-pill lda-pill-sm mt-5">
+            Learner journey progress <ArrowRight size={16} />
           </Link>
         </article>
         {isInstructor ? (
