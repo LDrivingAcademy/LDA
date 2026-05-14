@@ -7,6 +7,17 @@ type BookingEmailInput = {
   manageUrl: string;
 };
 
+type BookingCancellationEmailInput = {
+  bookingReference: string;
+  learnerEmail?: string;
+  instructorEmail?: string;
+  learnerName?: string;
+  instructorName: string;
+  lessonSummary: string;
+  refundSummary: string;
+  policyUrl: string;
+};
+
 type InstantBookingEmailInput = {
   reference: string;
   learnerEmail: string;
@@ -40,6 +51,12 @@ type ProgressFeedbackEmailInput = {
 type AuthMagicLinkEmailInput = {
   to: string;
   fullName?: string;
+  role: "learner" | "instructor";
+  confirmUrl: string;
+};
+
+type PasswordResetEmailInput = {
+  to: string;
   role: "learner" | "instructor";
   confirmUrl: string;
 };
@@ -157,6 +174,48 @@ export async function sendBookingConfirmationEmails(input: BookingEmailInput) {
 
   if (input.instructorEmail) {
     tasks.push(sendResendEmail(input.instructorEmail, "New paid LDA lesson booking", instructorHtml));
+  }
+
+  return Promise.all(tasks);
+}
+
+export async function sendBookingCancellationEmails(input: BookingCancellationEmailInput) {
+  const bookingReference = escapeHtml(input.bookingReference);
+  const learnerName = escapeHtml(input.learnerName || "Learner");
+  const instructorName = escapeHtml(input.instructorName);
+  const lessonSummary = escapeHtml(input.lessonSummary);
+  const refundSummary = escapeHtml(input.refundSummary);
+  const policyUrl = escapeHtml(input.policyUrl);
+  const learnerHtml = `
+    <h1>Your LDA lesson has been cancelled</h1>
+    <p>Hello ${learnerName},</p>
+    <p>Your lesson with <strong>${instructorName}</strong> has been cancelled.</p>
+    <p>${lessonSummary}</p>
+    <div style="margin: 24px 0; padding: 18px; background: #f4f4f5; border-radius: 8px;">
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #52525b;">Booking reference</div>
+      <div style="font-size: 28px; font-weight: 900; letter-spacing: 1px;">${bookingReference}</div>
+    </div>
+    <p><strong>Refund status:</strong> ${refundSummary}</p>
+    <p>Cancellation and refund decisions follow the LDA cancellation policy.</p>
+    <p><a href="${policyUrl}">Read cancellation policy</a></p>
+  `;
+  const instructorHtml = `
+    <h1>LDA lesson cancelled</h1>
+    <p>The learner has cancelled a lesson with you.</p>
+    <p>${lessonSummary}</p>
+    <p><strong>Booking reference:</strong> ${bookingReference}</p>
+    <p><strong>Refund status:</strong> ${refundSummary}</p>
+    <p>Please check your instructor dashboard for updates.</p>
+  `;
+
+  const tasks = [];
+
+  if (input.learnerEmail) {
+    tasks.push(sendResendEmail(input.learnerEmail, `LDA lesson cancelled ${input.bookingReference}`, learnerHtml));
+  }
+
+  if (input.instructorEmail) {
+    tasks.push(sendResendEmail(input.instructorEmail, `LDA lesson cancelled ${input.bookingReference}`, instructorHtml));
   }
 
   return Promise.all(tasks);
@@ -282,6 +341,39 @@ export async function sendAuthMagicLinkEmail(input: AuthMagicLinkEmailInput) {
   `;
 
   return sendResendEmail(input.to, "Your L Driving Academy login link", html, text);
+}
+
+export async function sendPasswordResetEmail(input: PasswordResetEmailInput) {
+  const roleLabel = input.role === "instructor" ? "instructor" : "learner";
+  const confirmUrl = escapeHtml(input.confirmUrl);
+  const text = [
+    "Hello,",
+    "",
+    `Use this secure link to reset your LDA ${roleLabel} account password:`,
+    input.confirmUrl,
+    "",
+    "The link opens the LDA new-password page after your email has been confirmed.",
+    "",
+    "If you did not request this reset, you can ignore this email."
+  ].join("\n");
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
+      <h1>Reset your LDA password</h1>
+      <p>Hello,</p>
+      <p>Click the button below to confirm your email and choose a new password for your ${roleLabel} account.</p>
+      <p style="margin: 28px 0;">
+        <a href="${confirmUrl}" style="display:inline-block;background:#ed1b24;color:#fff;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:999px;">
+          Set a new password
+        </a>
+      </p>
+      <p>This secure link can be opened on your phone, laptop, or tablet. It will take you straight to the LDA password reset page.</p>
+      <p>If the button does not work, copy and paste this link into your browser:</p>
+      <p><a href="${confirmUrl}">${confirmUrl}</a></p>
+      <p>If you did not request this reset, you can safely ignore it.</p>
+    </div>
+  `;
+
+  return sendResendEmail(input.to, "Reset your L Driving Academy password", html, text);
 }
 
 export async function sendProductFeedbackEmail(input: ProductFeedbackEmailInput) {
