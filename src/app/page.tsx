@@ -96,6 +96,7 @@ export default function HomePage() {
               <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
               <Link href="#safety" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
+              <Link href="/cancellation-policy" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Cancellation policy</Link>
               <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 About
               </Link>
