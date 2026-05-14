@@ -32,18 +32,26 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/");
+    redirect("/auth/login?role=learner");
   }
 
   const [{ data: profile }, { data: roles }, { data: instructorProfile }, { data: learnerProfile }] = await Promise.all([
     supabase.from("profiles").select("full_name,email,phone").eq("id", user.id).maybeSingle(),
     supabase.from("account_roles").select("role").eq("user_id", user.id),
     supabase.from("instructor_profiles").select("verification_status,hourly_rate_pence,areas_covered").eq("user_id", user.id).maybeSingle(),
-    supabase.from("learner_profiles").select("date_of_birth,provisional_licence_confirmed_at,terms_accepted_at").eq("user_id", user.id).maybeSingle()
+    supabase
+      .from("learner_profiles")
+      .select("date_of_birth,provisional_licence_confirmed_at,terms_accepted_at,learner_plus_active,learner_plus_started_at,learner_plus_expires_at")
+      .eq("user_id", user.id)
+      .maybeSingle()
   ]);
 
   const roleLabels = roles?.map((role) => role.role).join(", ") || "learner";
   const isInstructor = roleLabels.includes("instructor");
+  const hasLearnerPlus =
+    !isInstructor &&
+    Boolean(learnerProfile?.learner_plus_active) &&
+    (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
 
   if (!isInstructor && !hasCompletedLearnerEligibility(learnerProfile)) {
     redirect("/auth/verify?role=learner&message=Complete learner eligibility before booking. Your date of birth must show you are 17 or over, and you must accept the terms and provisional licence checks.");
@@ -68,13 +76,17 @@ export default async function DashboardPage() {
           <ShieldCheck className="text-brand" />
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-xl font-black">Account role</h2>
-            {!isInstructor ? (
+            {!isInstructor && !hasLearnerPlus ? (
               <Link href="/learner-plus" className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-black text-red-100 hover:ring-2 hover:ring-brand">
                 <PlusCircle size={15} /> Upgrade to Learner Plus
               </Link>
+            ) : hasLearnerPlus ? (
+              <span className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-black text-red-100">
+                <BadgeCheck size={15} /> Learner Plus active
+              </span>
             ) : null}
           </div>
-          <p className="mt-2 text-zinc-400">{isInstructor ? "instructor" : "learner"}</p>
+          <p className="mt-2 text-zinc-400">{isInstructor ? "instructor" : hasLearnerPlus ? "learner plus" : "learner"}</p>
         </article>
         <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
           <CalendarCheck className="text-brand" />
@@ -94,15 +106,21 @@ export default async function DashboardPage() {
             <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
               <Sparkles className="text-brand" />
               <h2 className="mt-4 text-xl font-black">LDA SmartMatch</h2>
-              <p className="mt-2 text-zinc-400">Run the adaptive LDA matcher from your dashboard to compare instructor skills, support needs, availability, price, reviews, and lesson goals.</p>
+              <p className="mt-2 text-zinc-400">
+                Run the adaptive LDA matcher from your dashboard to compare instructor skills, support needs, availability, price, reviews, and lesson goals.
+              </p>
               <Link href="/smart-match" className="lda-pill lda-pill-sm mt-5">
                 Open SmartMatch <ArrowRight size={16} />
               </Link>
             </article>
             <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
               <PlusCircle className="text-brand" />
-              <h2 className="mt-4 text-xl font-black">Learner Plus</h2>
-              <p className="mt-2 text-zinc-400">Optional upgrade for premium SmartMatch, priority support, deeper progress tools, and extra learning resources.</p>
+              <h2 className="mt-4 text-xl font-black">{hasLearnerPlus ? "Learner Plus active" : "Learner Plus"}</h2>
+              <p className="mt-2 text-zinc-400">
+                {hasLearnerPlus
+                  ? "Your account is upgraded for premium SmartMatch, priority support, deeper progress tools, and extra learning resources."
+                  : "Optional upgrade for premium SmartMatch, priority support, deeper progress tools, and extra learning resources."}
+              </p>
             </article>
           </>
         )}
