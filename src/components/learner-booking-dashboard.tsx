@@ -404,7 +404,6 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
               placeholder="EN5 5XY"
               className="rounded border border-zinc-300 bg-white px-3 py-3 text-sm font-bold text-black"
             />
-            <span className="text-xs text-zinc-500">Google Places autocomplete activates when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set.</span>
           </label>
           <label className="grid gap-1">
             <span className="text-xs font-black uppercase text-zinc-600">Distance</span>
