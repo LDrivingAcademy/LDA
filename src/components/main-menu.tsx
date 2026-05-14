@@ -12,6 +12,7 @@ const menuLinks = [
   { href: "/auth/sign-up?role=instructor", label: "Instructor sign up" },
   { href: "/instructor", label: "Become an Instructor" },
   { href: "/about", label: "About" },
+  { href: "/cancellation-policy", label: "Cancellation policy" },
   { href: "/contact", label: "Help" }
 ];
 
