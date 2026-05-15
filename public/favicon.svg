@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="L Driving Academy">
+  <rect width="96" height="96" rx="18" fill="#090909"/>
+  <path d="M24 70V22h15v35h33v13H24Z" fill="#ffffff"/>
+  <path d="M55 22c11 0 19 8 19 19s-8 19-19 19h-8V47h8c4 0 7-2 7-6s-3-6-7-6h-8V22h8Z" fill="#d71920"/>
+  <path d="M23 76h50" stroke="#d71920" stroke-width="7" stroke-linecap="round"/>
+</svg>
