@@ -10,8 +10,25 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "LDA | L Driving Academy",
+  metadataBase: new URL("https://ldrivingacademy.co.uk"),
+  title: "L Driving Academy",
+  applicationName: "L Driving Academy",
   description: "A UK learner-driver marketplace for verified driving instructors, transparent pricing, booking, and online payments.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/lda-logo.jpg", type: "image/jpeg", sizes: "520x300" }
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/lda-logo.jpg"
+  },
+  openGraph: {
+    title: "L Driving Academy",
+    description: "A UK learner-driver marketplace for verified driving instructors, transparent pricing, booking, and online payments.",
+    siteName: "L Driving Academy",
+    images: [{ url: "/lda-logo.jpg", width: 520, height: 300, alt: "L Driving Academy" }],
+    type: "website"
+  },
   other: {
     google: "notranslate"
   }
