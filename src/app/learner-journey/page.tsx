@@ -84,40 +84,40 @@ const actionSections = [
     id: "practical-test",
     title: "Practical test booking",
     icon: Target,
-    description: "Use progress evidence before paying for a test slot.",
+    description: "Check readiness, routes, instructor confidence, and official booking links before paying for a test slot.",
     actions: [
-      "Mock-test readiness checklist",
-      "Instructor sign-off notes",
-      "Manoeuvres and route confidence",
-      "Official DVSA practical booking placeholder"
+      "Mock-ready checklist",
+      "Instructor sign-off from lesson notes",
+      "Local route and manoeuvre confidence",
+      "Official GOV.UK practical test handoff"
     ],
-    href: "/progress-tracker"
+    href: "/practical-test"
   },
   {
     id: "first-car",
     title: "First car guidance",
     icon: CarFront,
-    description: "Help new drivers choose a sensible first car after passing.",
+    description: "Shortlist sensible first cars using safety, running cost, insurance, and trusted-seller signals.",
     actions: [
-      "Budget and running-cost checklist",
-      "Used-car inspection prompts",
-      "Insurance group guidance",
-      "Safety and maintenance reminders"
+      "Licence and pass-date profile",
+      "First-car shortlist engine",
+      "Trusted dealer and review signals",
+      "Viewing and test-drive checklist"
     ],
-    href: "/support/learner"
+    href: "/first-car-guidance"
   },
   {
     id: "insurance",
     title: "Insurance quote support",
     icon: BadgePoundSterling,
-    description: "Keep learners aware of what affects quote prices.",
+    description: "Prepare a quote pack and compare policy types, risk factors, and learner-friendly insurer options.",
     actions: [
-      "Black-box policy considerations",
-      "Named driver and ownership reminders",
-      "Annual mileage planning",
-      "Quote comparison checklist placeholder"
+      "Third-party vs comprehensive guidance",
+      "Black-box and telematics options",
+      "Quote readiness checklist",
+      "Partner API-ready results table"
     ],
-    href: "/support/learner"
+    href: "/insurance-support"
   },
   {
     id: "progress",
