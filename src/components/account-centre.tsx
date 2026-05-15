@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ArrowLeft, KeyRound, LogOut, MapPin, ShieldAlert, Trash2, UserRound } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
 
+const LOCATION_PREF_KEY = "lda-location-sharing-enabled";
+
 type LoginActivity = {
   device: string;
   browser: string;
@@ -15,6 +17,8 @@ type LoginActivity = {
 export function AccountCentre() {
   const [deletionRequested, setDeletionRequested] = useState(false);
   const [activity, setActivity] = useState<LoginActivity[]>([]);
+  const [locationSharingEnabled, setLocationSharingEnabled] = useState(true);
+  const [locationStatus, setLocationStatus] = useState("Location sharing is on for live tracking and nearby instructor sorting.");
 
   useEffect(() => {
     const currentActivity: LoginActivity = {
@@ -24,26 +28,75 @@ export function AccountCentre() {
       location: "Location permission not shared"
     };
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const located = {
-            ...currentActivity,
-            location: `${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`
-          };
-          setActivity([located]);
-          localStorage.setItem("lda-login-activity", JSON.stringify([located]));
-        },
-        () => {
+    const storedPreference = localStorage.getItem(LOCATION_PREF_KEY);
+    const enabled = storedPreference !== "false";
+    setLocationSharingEnabled(enabled);
+
+    if (storedPreference === null) {
+      localStorage.setItem(LOCATION_PREF_KEY, "true");
+    }
+
+    if (!enabled) {
+      setLocationStatus("Location sharing is off. Live tracking and nearby instructor sorting will use your postcode until it is turned back on.");
+      setActivity([currentActivity]);
+      localStorage.setItem("lda-login-activity", JSON.stringify([currentActivity]));
+      return;
+    }
+
+    if (navigator.geolocation && navigator.permissions) {
+      navigator.permissions
+        .query({ name: "geolocation" as PermissionName })
+        .then((permission) => {
+          if (permission.state !== "granted") {
+            setLocationStatus("Location sharing is on. Your browser still controls whether LDA can access GPS location.");
+            setActivity([currentActivity]);
+            localStorage.setItem("lda-login-activity", JSON.stringify([currentActivity]));
+            return;
+          }
+
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const located = {
+                ...currentActivity,
+                location: `${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`
+              };
+              setActivity([located]);
+              setLocationStatus("Location sharing is on and this browser has approved location access.");
+              localStorage.setItem("lda-login-activity", JSON.stringify([located]));
+            },
+            () => {
+              setActivity([currentActivity]);
+              setLocationStatus("Location sharing is on, but this browser did not share its location.");
+              localStorage.setItem("lda-login-activity", JSON.stringify([currentActivity]));
+            },
+            { enableHighAccuracy: false, timeout: 6000 }
+          );
+        })
+        .catch(() => {
           setActivity([currentActivity]);
           localStorage.setItem("lda-login-activity", JSON.stringify([currentActivity]));
-        },
-        { enableHighAccuracy: false, timeout: 6000 }
-      );
+        });
+    } else if (navigator.geolocation) {
+      setLocationStatus("Location sharing is on. Use the dashboard location button once if this browser needs approval.");
+      setActivity([currentActivity]);
+      localStorage.setItem("lda-login-activity", JSON.stringify([currentActivity]));
     } else {
+      setLocationStatus("Location is not supported on this device.");
       setActivity([currentActivity]);
     }
   }, []);
+
+  function updateLocationPreference(enabled: boolean) {
+    setLocationSharingEnabled(enabled);
+    localStorage.setItem(LOCATION_PREF_KEY, String(enabled));
+
+    if (enabled) {
+      setLocationStatus("Location sharing is on. Browser permission is only requested from the dashboard when needed.");
+      return;
+    }
+
+    setLocationStatus("Location sharing is off. Live tracking and nearby instructor sorting will use your postcode until it is turned back on.");
+  }
 
   return (
     <main className="min-h-screen bg-white text-black">
@@ -100,7 +153,22 @@ export function AccountCentre() {
         <article id="settings" className="rounded border border-zinc-200 bg-white p-5 shadow-sm lg:col-span-2">
           <ShieldAlert className="text-brand" />
           <h2 className="mt-4 text-2xl font-black">Settings</h2>
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+          <div className="mt-5 grid gap-4 lg:grid-cols-3">
+            <div className="rounded border border-zinc-200 bg-zinc-50 p-4">
+              <MapPin className="text-brand" />
+              <div className="mt-3 flex items-center justify-between gap-4">
+                <h3 className="text-xl font-black">Use my location</h3>
+                <button
+                  type="button"
+                  aria-pressed={locationSharingEnabled}
+                  onClick={() => updateLocationPreference(!locationSharingEnabled)}
+                  className={`relative h-8 w-14 rounded-full transition ${locationSharingEnabled ? "bg-brand" : "bg-zinc-300"}`}
+                >
+                  <span className={`absolute top-1 h-6 w-6 rounded-full bg-white transition ${locationSharingEnabled ? "left-7" : "left-1"}`} />
+                </button>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">{locationStatus}</p>
+            </div>
             <div className="rounded border border-red-200 bg-red-50 p-4">
               <Trash2 className="text-brand" />
               <h3 className="mt-3 text-xl font-black">Account Deletion</h3>
