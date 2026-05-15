@@ -15,6 +15,9 @@ import {
 import { demoInstructors } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
 
+const LOCATION_PREF_KEY = "lda-location-sharing-enabled";
+const LOCATION_REQUESTED_KEY = "lda-location-browser-requested";
+
 type Instructor = (typeof demoInstructors)[number] & {
   id: string;
   distanceMiles: number;
@@ -113,6 +116,11 @@ function todayIso() {
 
 export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learnerEmail?: string | null; learnerPhone?: string | null }) {
   const postcodeRef = useRef<HTMLInputElement>(null);
+  const checkoutRequestRef = useRef<{
+    signature: string;
+    reference: string;
+    promise: Promise<{ checkoutUrl?: string; error?: string; message?: string }>;
+  } | null>(null);
   const [postcode, setPostcode] = useState("EN5 5XY");
   const [distance, setDistance] = useState("5");
   const [transmission, setTransmission] = useState("any");
@@ -126,7 +134,8 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const [confirmationRef, setConfirmationRef] = useState("");
   const [bookingRecords, setBookingRecords] = useState<BookingRecord[]>([]);
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
-  const [locationStatus, setLocationStatus] = useState("Use your location to show nearby instructors on the map.");
+  const [locationSharingEnabled, setLocationSharingEnabled] = useState(true);
+  const [locationStatus, setLocationStatus] = useState("Location sharing is on for live tracking and nearby instructor sorting.");
 
   useEffect(() => {
     const resetStickyCheckoutState = () => {
@@ -150,6 +159,22 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
     } else {
       setBookingRecords(demoBookingRecords);
       localStorage.setItem("lda-learner-bookings", JSON.stringify(demoBookingRecords));
+    }
+  }, []);
+
+  useEffect(() => {
+    const storedPreference = localStorage.getItem(LOCATION_PREF_KEY);
+    const enabled = storedPreference !== "false";
+    setLocationSharingEnabled(enabled);
+
+    if (storedPreference === null) {
+      localStorage.setItem(LOCATION_PREF_KEY, "true");
+    }
+
+    if (enabled) {
+      void updateLocationFromBrowser({ allowPrompt: false });
+    } else {
+      setLocationStatus("Location sharing is off. Turn it back on in Account settings when you want live tracking.");
     }
   }, []);
 
@@ -278,29 +303,65 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const lessonSummary = `${availabilityDate} at ${selectedSlot || "selected time"} from ${postcode}. ${selectedInstructor.car}, ${selectedInstructor.transmission}.`;
   const canPay = Boolean(selectedInstructor && selectedSlot && postcode);
 
-  function useCurrentLocation() {
+  async function updateLocationFromBrowser({ allowPrompt }: { allowPrompt: boolean }) {
     if (!navigator.geolocation) {
       setLocationStatus("Location is not supported on this device.");
       return;
     }
 
-    setLocationStatus("Finding your current location...");
+    if (localStorage.getItem(LOCATION_PREF_KEY) === "false") {
+      setLocationSharingEnabled(false);
+      setLocationStatus("Location sharing is off. Turn it back on in Account settings when you want live tracking.");
+      return;
+    }
+
+    const permission = await navigator.permissions
+      ?.query({ name: "geolocation" as PermissionName })
+      .catch(() => null);
+
+    if (permission?.state === "denied") {
+      setLocationStatus("Location is blocked in this browser. Update browser site permissions if you want live tracking.");
+      return;
+    }
+
+    if (permission?.state !== "granted" && !allowPrompt) {
+      setLocationStatus("Location sharing is on. Select Use my location once if this browser has not been approved yet.");
+      return;
+    }
+
+    if (permission?.state !== "granted" && localStorage.getItem(LOCATION_REQUESTED_KEY) === "true") {
+      setLocationStatus("Location sharing is on, but this browser has not granted permission yet. Check the browser location setting if it was dismissed.");
+      return;
+    }
+
+    if (permission?.state !== "granted") {
+      localStorage.setItem(LOCATION_REQUESTED_KEY, "true");
+    }
+
+    setLocationStatus(permission?.state === "granted" ? "Refreshing your approved location..." : "Approve location once in your browser to enable live tracking.");
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setUserPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
-        setLocationStatus("Live location enabled for nearby instructor sorting.");
+        localStorage.setItem(LOCATION_PREF_KEY, "true");
+        setLocationSharingEnabled(true);
+        setLocationStatus("Live location is enabled for nearby instructor sorting and lesson tracking.");
       },
       () => setLocationStatus("Location permission was not granted. Postcode search still works."),
       { enableHighAccuracy: true, timeout: 8000 }
     );
   }
 
-  async function startCheckout() {
-    if (!canPay) return;
-    setCheckoutState("loading");
-    setCheckoutError("");
-    const reference = makeBookingReference(selectedInstructor.id);
+  function checkoutSignature() {
+    return JSON.stringify({
+      instructorId: selectedInstructor.id,
+      instructorName: selectedInstructor.name,
+      lessonSummary,
+      amountPence: selectedInstructor.price,
+      stripeConnectedAccountId: selectedInstructor.stripeConnectedAccountId
+    });
+  }
 
+  function savePendingBooking(reference: string) {
     localStorage.setItem(
       `lda-booking-${reference}`,
       JSON.stringify({
@@ -316,10 +377,13 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
         learnerPhone
       })
     );
+  }
 
-    const response = await fetch("/api/bookings/checkout", {
+  function createCheckoutSession(reference: string) {
+    return fetch("/api/bookings/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      keepalive: false,
       body: JSON.stringify({
         bookingId: reference,
         instructorName: selectedInstructor.name,
@@ -328,10 +392,37 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
         stripeConnectedAccountId: selectedInstructor.stripeConnectedAccountId,
         paymentPreference: "checkout"
       })
-    });
-    const result = await response.json().catch(() => ({}));
+    }).then((response) => response.json().then((result) => (response.ok ? result : Promise.reject(result))));
+  }
 
-    if (!response.ok || !result.checkoutUrl) {
+  function warmCheckoutSession() {
+    if (!canPay || checkoutState === "loading") return;
+
+    const signature = checkoutSignature();
+    if (checkoutRequestRef.current?.signature === signature) return;
+
+    const reference = makeBookingReference(selectedInstructor.id);
+    savePendingBooking(reference);
+    checkoutRequestRef.current = {
+      signature,
+      reference,
+      promise: createCheckoutSession(reference)
+    };
+  }
+
+  async function startCheckout() {
+    if (!canPay) return;
+    setCheckoutState("loading");
+    setCheckoutError("");
+
+    const signature = checkoutSignature();
+    if (checkoutRequestRef.current?.signature !== signature) {
+      warmCheckoutSession();
+    }
+
+    const result = await checkoutRequestRef.current?.promise.catch((error) => error ?? {});
+
+    if (!result?.checkoutUrl) {
       setCheckoutError(result.error || result.message || "Checkout could not open. Check Stripe keys in Vercel.");
       setCheckoutState("error");
       return;
@@ -405,8 +496,8 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
               <p className="mt-2 text-sm leading-6 text-zinc-600">{locationStatus}</p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <button type="button" onClick={useCurrentLocation} className="lda-pill lda-pill-sm">
-                Use my location
+              <button type="button" onClick={() => updateLocationFromBrowser({ allowPrompt: true })} className="lda-pill lda-pill-sm">
+                {locationSharingEnabled ? "Use my location" : "Location off"}
               </button>
               <Link href="/tracking" className="lda-pill lda-pill-sm">
                 Live tracking
@@ -522,7 +613,14 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
             <p className="mt-3 text-xs leading-5 text-zinc-500">
               Stripe Checkout securely handles card entry and any eligible payment methods enabled on the LDA Stripe account.
             </p>
-            <button disabled={!canPay || checkoutState === "loading"} onClick={() => startCheckout()} className="lda-pill mt-5 w-full">
+            <button
+              disabled={!canPay || checkoutState === "loading"}
+              onPointerEnter={warmCheckoutSession}
+              onFocus={warmCheckoutSession}
+              onTouchStart={warmCheckoutSession}
+              onClick={() => startCheckout()}
+              className="lda-pill mt-5 w-full"
+            >
               <CreditCard size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : "Checkout"}
             </button>
             {checkoutState === "error" ? <p className="mt-3 text-sm font-bold text-brand">{checkoutError || "Checkout could not open. Check Stripe keys in Vercel."}</p> : null}
