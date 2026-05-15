@@ -65,7 +65,7 @@ const actionSections = [
       "Mock theory test targets",
       "Official DVSA booking link placeholder"
     ],
-    href: "/roadworthy"
+    href: "/theory-test"
   },
   {
     id: "driving-lessons",
@@ -170,7 +170,7 @@ export default function LearnerJourneyPage() {
           <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_440px] lg:px-8 lg:py-16">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-red-500/60 bg-red-500/15 px-4 py-2 text-sm font-black text-red-100">
-                <Route size={17} /> Learner journey progress
+                <Route size={17} /> LDA learner journey
               </div>
               <h1 className="mt-5 max-w-4xl text-5xl font-black tracking-normal sm:text-6xl">
                 Plan every step from first lesson to driving alone.
