@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import { BadgePoundSterling, CheckCircle2, FileText, ShieldCheck, Sparkles } from "lucide-react";
 
 const insurerRows = [
-  { provider: "Telematics starter policy", type: "Comprehensive", estimate: "£1,150-£1,650", strengths: ["Black-box discount", "Low mileage friendly", "Driving score coaching"], fit: "Best for careful new drivers" },
-  { provider: "Mainstream comprehensive", type: "Comprehensive", estimate: "£1,450-£2,100", strengths: ["Windscreen options", "Courtesy car options", "No black box"], fit: "Best for flexible daily use" },
-  { provider: "Third-party fire and theft", type: "TPFT", estimate: "£1,300-£1,950", strengths: ["Lower cover level", "May suit lower-value cars", "Check excess carefully"], fit: "Sometimes cheaper, not always" },
-  { provider: "Named-driver family policy", type: "Comprehensive", estimate: "£1,250-£1,900", strengths: ["Parent as named driver", "Shared vehicle option", "Ownership rules matter"], fit: "Best where family car use is genuine" }
+  { provider: "Demo telematics starter policy", type: "Comprehensive", estimate: "£1,150-£1,650", strengths: ["Black-box discount", "Low mileage friendly", "Driving score coaching"], fit: "Best for careful new drivers" },
+  { provider: "Demo mainstream comprehensive", type: "Comprehensive", estimate: "£1,450-£2,100", strengths: ["Windscreen options", "Courtesy car options", "No black box"], fit: "Best for flexible daily use" },
+  { provider: "Demo third-party fire and theft", type: "TPFT", estimate: "£1,300-£1,950", strengths: ["Lower cover level", "May suit lower-value cars", "Check excess carefully"], fit: "Sometimes cheaper, not always" },
+  { provider: "Demo named-driver family policy", type: "Comprehensive", estimate: "£1,250-£1,900", strengths: ["Parent as named driver", "Shared vehicle option", "Ownership rules matter"], fit: "Best where family car use is genuine" }
 ];
 
 const quoteFactors = ["Car insurance group", "Annual mileage", "Parking overnight location", "Occupation or student status", "Voluntary excess", "Named drivers", "Telematics willingness", "No-claims history"];
@@ -31,6 +31,9 @@ export function InsuranceSupport() {
         <aside className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
           <Sparkles className="text-brand" />
           <h2 className="mt-4 text-2xl font-black">Quote profile</h2>
+          <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm font-black leading-6 text-red-950">
+            Demo mode is active. LDA is showing sample quote paths until insurer, broker, or comparison partner APIs are approved.
+          </div>
           <label className="mt-5 grid gap-2 text-sm font-black text-zinc-700">
             Cover type
             <select value={coverType} onChange={(event) => setCoverType(event.target.value)} className="rounded border border-zinc-300 px-3 py-3 text-black">
@@ -48,7 +51,7 @@ export function InsuranceSupport() {
             <input type="checkbox" checked={telematics} onChange={(event) => setTelematics(event.target.checked)} className="accent-red-600" />
           </label>
           <p className="mt-5 text-sm font-semibold leading-6 text-zinc-600">
-            Real quotes need insurer, broker, or comparison-partner APIs. This MVP creates the LDA quote-pack structure so learners know what to compare.
+            These are not live prices. The page lets learners compare cover types, telematics, mileage, and quote readiness before live partner feeds are connected.
           </p>
         </aside>
 
