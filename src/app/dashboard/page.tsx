@@ -66,14 +66,15 @@ export default async function DashboardPage() {
             <div className="text-sm font-bold text-red-200">LDA dashboard</div>
             <div className="mt-1 flex flex-wrap items-center gap-3">
               <h1 className="text-2xl font-black">{profile?.full_name || user.email}</h1>
-              <span className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100">
-                {isInstructor ? "Instructor" : hasLearnerPlus ? "Learner Plus" : "Learner"}
-              </span>
-              {!isInstructor && !hasLearnerPlus ? (
+              {isInstructor ? (
+                <span className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100">
+                  Instructor
+                </span>
+              ) : (
                 <Link href="/learner-plus" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
-                  Upgrade to Plus
+                  {hasLearnerPlus ? "Learner Plus" : "Learner · Upgrade to Plus"}
                 </Link>
-              ) : null}
+              )}
             </div>
           </div>
           <div className="flex items-center gap-3">
