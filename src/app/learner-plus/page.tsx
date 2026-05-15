@@ -1,12 +1,42 @@
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, PlusCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, PlusCircle, Sparkles } from "lucide-react";
 import { Brand } from "@/components/brand";
 
-const plusFeatures = [
-  "Premium LDA SmartMatch weighting for support needs, lesson goals, and preferred teaching style",
-  "Priority learner support for booking or payment issues",
-  "Extra progress tracker insights and revision recommendations",
-  "Early access to lesson bundles, free-trial offers, and partner discounts"
+const packages = [
+  {
+    name: "Learner",
+    price: "Free",
+    label: "Core access",
+    features: [
+      "Search approved local instructors",
+      "Book and pay securely through LDA",
+      "Booking history and cancellation tools",
+      "Instructor ratings and written reviews"
+    ]
+  },
+  {
+    name: "Learner Plus",
+    price: "Coming soon",
+    label: "Most popular",
+    highlighted: true,
+    features: [
+      "Premium LDA SmartMatch weighting",
+      "Priority learner support for booking issues",
+      "Deeper progress tracker recommendations",
+      "Early access to lesson bundles and launch offers"
+    ]
+  },
+  {
+    name: "Learner Pro",
+    price: "Coming soon",
+    label: "Full support",
+    features: [
+      "Advanced theory and hazard practice plans",
+      "Practical test readiness checklist",
+      "First-car and insurance quote support",
+      "Personalised revision and confidence coaching"
+    ]
+  }
 ];
 
 export default function LearnerPlusPage() {
@@ -24,21 +54,34 @@ export default function LearnerPlusPage() {
           <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
             <PlusCircle size={16} /> Learner Plus
           </div>
-          <h1 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">Upgrade your LDA learner account.</h1>
+          <h1 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">Choose your LDA learner package.</h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-zinc-300">
-            Learner Plus is the premium layer for learners who want more guidance, smarter matching, deeper progress tools, and priority support. Stripe pricing can be connected when the final monthly or one-off package is confirmed.
+            These packages are ready for the subscription logic to be connected. For now they show the access levels and perks we can switch on as each paid feature goes live.
           </p>
-          <div className="mt-7 grid gap-3">
-            {plusFeatures.map((feature) => (
-              <div key={feature} className="flex items-start gap-3 rounded border border-zinc-800 bg-black p-4">
-                <CheckCircle2 className="mt-0.5 shrink-0 text-brand" />
-                <span className="font-bold leading-7 text-zinc-200">{feature}</span>
-              </div>
+          <div className="mt-7 grid gap-4 lg:grid-cols-3">
+            {packages.map((learnerPackage) => (
+              <article key={learnerPackage.name} className={`rounded border p-5 ${learnerPackage.highlighted ? "border-brand bg-red-950/30" : "border-zinc-800 bg-black"}`}>
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-2xl font-black">{learnerPackage.name}</h2>
+                  <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100">
+                    {learnerPackage.label}
+                  </span>
+                </div>
+                <p className="mt-3 text-lg font-black text-red-100">{learnerPackage.price}</p>
+                <div className="mt-5 grid gap-3">
+                  {learnerPackage.features.map((feature) => (
+                    <div key={feature} className="flex items-start gap-3 text-sm font-bold leading-6 text-zinc-200">
+                      {learnerPackage.highlighted ? <Sparkles className="mt-0.5 shrink-0 text-brand" size={18} /> : <CheckCircle2 className="mt-0.5 shrink-0 text-brand" size={18} />}
+                      <span>{feature}</span>
+                    </div>
+                  ))}
+                </div>
+                <button className="lda-pill lda-pill-sm mt-6 w-full" type="button">
+                  Select {learnerPackage.name}
+                </button>
+              </article>
             ))}
           </div>
-          <button className="lda-pill mt-7" type="button">
-            Upgrade checkout coming next
-          </button>
         </section>
       </div>
     </main>
