@@ -4,13 +4,14 @@ import { useMemo, useState } from "react";
 import { BadgePoundSterling, CheckCircle2, FileText, ShieldCheck, Sparkles } from "lucide-react";
 
 const insurerRows = [
-  { provider: "Demo telematics starter policy", type: "Comprehensive", estimate: "£1,150-£1,650", strengths: ["Black-box discount", "Low mileage friendly", "Driving score coaching"], fit: "Best for careful new drivers" },
-  { provider: "Demo mainstream comprehensive", type: "Comprehensive", estimate: "£1,450-£2,100", strengths: ["Windscreen options", "Courtesy car options", "No black box"], fit: "Best for flexible daily use" },
-  { provider: "Demo third-party fire and theft", type: "TPFT", estimate: "£1,300-£1,950", strengths: ["Lower cover level", "May suit lower-value cars", "Check excess carefully"], fit: "Sometimes cheaper, not always" },
-  { provider: "Demo named-driver family policy", type: "Comprehensive", estimate: "£1,250-£1,900", strengths: ["Parent as named driver", "Shared vehicle option", "Ownership rules matter"], fit: "Best where family car use is genuine" }
+  { provider: "Telematics starter pathway", type: "Comprehensive", estimate: "£1,150-£1,650", confidence: 93, strengths: ["Black-box discount", "Low mileage friendly", "Driving score coaching"], fit: "Best for careful new drivers" },
+  { provider: "Mainstream comprehensive pathway", type: "Comprehensive", estimate: "£1,450-£2,100", confidence: 86, strengths: ["Windscreen options", "Courtesy car options", "No black box"], fit: "Best for flexible daily use" },
+  { provider: "Third-party fire and theft pathway", type: "TPFT", estimate: "£1,300-£1,950", confidence: 74, strengths: ["Lower cover level", "May suit lower-value cars", "Check excess carefully"], fit: "Sometimes cheaper, not always" },
+  { provider: "Named-driver family pathway", type: "Comprehensive", estimate: "£1,250-£1,900", confidence: 81, strengths: ["Parent as named driver", "Shared vehicle option", "Ownership rules matter"], fit: "Best where family car use is genuine" }
 ];
 
 const quoteFactors = ["Car insurance group", "Annual mileage", "Parking overnight location", "Occupation or student status", "Voluntary excess", "Named drivers", "Telematics willingness", "No-claims history"];
+const quoteChecklist = ["Use the same car details on every quote", "Compare total annual cost, not monthly headline only", "Check compulsory and voluntary excess", "Confirm whether commuting is included", "Read black-box curfew and driving-score rules"];
 
 export function InsuranceSupport() {
   const [coverType, setCoverType] = useState("all");
@@ -32,7 +33,7 @@ export function InsuranceSupport() {
           <Sparkles className="text-brand" />
           <h2 className="mt-4 text-2xl font-black">Quote profile</h2>
           <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm font-black leading-6 text-red-950">
-            Demo mode is active. LDA is showing sample quote paths until insurer, broker, or comparison partner APIs are approved.
+            LDA quote guidance is active. Live insurer prices can be connected once broker or comparison partner access is approved.
           </div>
           <label className="mt-5 grid gap-2 text-sm font-black text-zinc-700">
             Cover type
@@ -51,8 +52,16 @@ export function InsuranceSupport() {
             <input type="checkbox" checked={telematics} onChange={(event) => setTelematics(event.target.checked)} className="accent-red-600" />
           </label>
           <p className="mt-5 text-sm font-semibold leading-6 text-zinc-600">
-            These are not live prices. The page lets learners compare cover types, telematics, mileage, and quote readiness before live partner feeds are connected.
+            These are planning ranges, not live quotes. They help learners understand which policy route to compare before entering personal data on insurer websites.
           </p>
+          <div className="mt-5 grid gap-2">
+            {quoteChecklist.map((check) => (
+              <div key={check} className="flex items-start gap-2 text-sm font-bold leading-6 text-zinc-700">
+                <CheckCircle2 className="mt-1 shrink-0 text-brand" size={16} />
+                {check}
+              </div>
+            ))}
+          </div>
         </aside>
 
         <div className="grid gap-5">
@@ -62,14 +71,15 @@ export function InsuranceSupport() {
               <h2 className="text-2xl font-black">Insurance quote support</h2>
             </div>
             <div className="mt-5 overflow-hidden rounded border border-zinc-200">
-              <div className="grid grid-cols-[1.2fr_0.8fr_0.9fr_1.4fr] bg-black px-4 py-3 text-xs font-black uppercase text-white">
+              <div className="grid grid-cols-[1.1fr_0.7fr_0.8fr_0.7fr_1.2fr] bg-black px-4 py-3 text-xs font-black uppercase text-white">
                 <span>Provider path</span>
                 <span>Cover</span>
                 <span>Estimate</span>
+                <span>Fit score</span>
                 <span>Best fit</span>
               </div>
               {filteredRows.map((row) => (
-                <div key={row.provider} className="grid gap-3 border-t border-zinc-200 px-4 py-4 text-sm font-bold text-zinc-700 md:grid-cols-[1.2fr_0.8fr_0.9fr_1.4fr]">
+                <div key={row.provider} className="grid gap-3 border-t border-zinc-200 px-4 py-4 text-sm font-bold text-zinc-700 md:grid-cols-[1.1fr_0.7fr_0.8fr_0.7fr_1.2fr]">
                   <div>
                     <div className="font-black text-black">{row.provider}</div>
                     <div className="mt-2 grid gap-1">
@@ -78,6 +88,7 @@ export function InsuranceSupport() {
                   </div>
                   <span>{row.type}</span>
                   <span className="font-black text-brand">{row.estimate}</span>
+                  <span className="font-black text-black">{row.confidence}%</span>
                   <span>{row.fit}</span>
                 </div>
               ))}
