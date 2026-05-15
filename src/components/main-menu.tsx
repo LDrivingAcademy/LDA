@@ -11,8 +11,8 @@ const menuLinks = [
   { href: "/auth/login?role=instructor", label: "Instructor log in" },
   { href: "/auth/sign-up?role=instructor", label: "Instructor sign up" },
   { href: "/instructor", label: "Become an Instructor" },
-  { href: "/about", label: "About" },
   { href: "/cancellation-policy", label: "Cancellation policy" },
+  { href: "/about", label: "About" },
   { href: "/contact", label: "Help" }
 ];
 
