@@ -20,6 +20,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en-GB" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://checkout.stripe.com" />
+        <link rel="preconnect" href="https://js.stripe.com" />
+        <link rel="dns-prefetch" href="https://checkout.stripe.com" />
+        <link rel="dns-prefetch" href="https://js.stripe.com" />
+      </head>
       <body>
         {children}
         <RoutePrefetcher />
