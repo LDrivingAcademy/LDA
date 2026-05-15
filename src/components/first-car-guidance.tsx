@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import { BadgePoundSterling, CarFront, CheckCircle2, ExternalLink, ShieldCheck, Sparkles, Star, Wrench } from "lucide-react";
 
 const carShortlist = [
-  { make: "Toyota", model: "Yaris", budget: "£6k-£11k", insurance: "Low-medium", safety: 5, seller: "Approved dealer friendly", why: "Reliable, easy to park, strong safety history, sensible first-car running costs." },
-  { make: "Hyundai", model: "i10", budget: "£5k-£10k", insurance: "Low", safety: 4, seller: "Franchise and independent", why: "Small, economical, good visibility, simple controls for new drivers." },
-  { make: "Volkswagen", model: "Polo", budget: "£7k-£13k", insurance: "Medium", safety: 5, seller: "Approved used common", why: "Stable motorway feel, strong build, broad parts support." },
-  { make: "Ford", model: "Fiesta", budget: "£5k-£12k", insurance: "Low-medium", safety: 4, seller: "Large UK used market", why: "Easy to source, familiar to many instructors, affordable servicing." }
+  { make: "Toyota", model: "Yaris", budget: "£6k-£11k", insurance: "Low-medium", safety: 5, seller: "Approved dealer friendly", source: "Demo listing", why: "Reliable, easy to park, strong safety history, sensible first-car running costs." },
+  { make: "Hyundai", model: "i10", budget: "£5k-£10k", insurance: "Low", safety: 4, seller: "Franchise and independent", source: "Demo listing", why: "Small, economical, good visibility, simple controls for new drivers." },
+  { make: "Volkswagen", model: "Polo", budget: "£7k-£13k", insurance: "Medium", safety: 5, seller: "Approved used common", source: "Demo listing", why: "Stable motorway feel, strong build, broad parts support." },
+  { make: "Ford", model: "Fiesta", budget: "£5k-£12k", insurance: "Low-medium", safety: 4, seller: "Large UK used market", source: "Demo listing", why: "Easy to source, familiar to many instructors, affordable servicing." }
 ];
 
 const viewingChecks = ["V5C logbook and MOT history", "Insurance group and annual tax", "Tyres, brakes, lights, and warning lights", "Service history and spare key", "Trusted seller reviews", "Test drive comfort and visibility"];
@@ -29,6 +29,9 @@ export function FirstCarGuidance() {
         <aside className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
           <Sparkles className="text-brand" />
           <h2 className="mt-4 text-2xl font-black">First-car profile</h2>
+          <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm font-black leading-6 text-red-950">
+            Demo mode is active. These results use LDA sample stock until Auto Trader or dealer partner APIs are connected.
+          </div>
           <label className="mt-5 grid gap-2 text-sm font-black text-zinc-700">
             Date you passed
             <input type="date" value={passDate} onChange={(event) => setPassDate(event.target.value)} className="rounded border border-zinc-300 px-3 py-3 text-black" />
@@ -46,7 +49,7 @@ export function FirstCarGuidance() {
             </select>
           </label>
           <p className="mt-5 text-sm font-semibold leading-6 text-zinc-600">
-            Live AutoTrader-style stock needs a vehicle marketplace API or affiliate feed. This page is ready to connect once LDA has supplier access.
+            This behaves like the future AutoTrader-style experience now, using realistic demo vehicles, safety signals, seller checks, and insurance pressure.
           </p>
           <a href="https://www.autotrader.co.uk/" target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 text-sm font-black text-brand underline decoration-brand decoration-2 underline-offset-4">
             Open AutoTrader <ExternalLink size={16} />
@@ -70,6 +73,7 @@ export function FirstCarGuidance() {
                     <div className="rounded bg-red-50 px-3 py-1 text-xs font-black text-brand">{car.budget}</div>
                   </div>
                   <div className="mt-4 grid gap-2 text-sm font-bold text-zinc-700">
+                    <span className="flex items-center gap-2"><Sparkles className="text-brand" size={16} /> Source: {car.source}</span>
                     <span className="flex items-center gap-2"><BadgePoundSterling className="text-brand" size={16} /> Insurance: {car.insurance}</span>
                     <span className="flex items-center gap-2"><ShieldCheck className="text-brand" size={16} /> Safety signal: {car.safety}/5</span>
                     <span className="flex items-center gap-2"><Star className="text-brand" size={16} /> Seller signal: {car.seller}</span>
