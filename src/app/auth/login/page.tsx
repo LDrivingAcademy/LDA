@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { ArrowLeft, CarFront, GraduationCap, KeyRound, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { LoginRememberHelper } from "@/components/auth/login-remember-helper";
 import { signIn } from "../actions";
 
 export default async function LoginPage({
@@ -59,7 +60,7 @@ export default async function LoginPage({
               <h2 className="mt-1 text-2xl font-black">Account login</h2>
             </div>
             {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-100">{message}</div> : null}
-            <form action={signIn} className="grid gap-3">
+            <form id="lda-account-login-form" action={signIn} className="grid gap-3">
               <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
               <input type="hidden" name="next" value={nextPath} />
               <label className="grid gap-1">
@@ -82,6 +83,7 @@ export default async function LoginPage({
               <button className="lda-pill mt-2">
                 <KeyRound size={18} /> Log in
               </button>
+              <LoginRememberHelper formId="lda-account-login-form" rememberedIdentifier={rememberedIdentifier} />
             </form>
             <p className="mt-4 text-xs leading-5 text-zinc-500">
               Verification is only used when you first sign up or reset your password. Returning accounts log in with the email or mobile number and password already linked to the account.
