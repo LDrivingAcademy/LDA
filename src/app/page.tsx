@@ -88,21 +88,20 @@ export default function HomePage() {
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-5 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-7">
             <Brand />
-            <nav className="hidden items-center gap-7 lg:flex">
+            <nav className="hidden items-center gap-7 xl:flex">
               <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
               <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
               <Link href="#safety" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
-              <Link href="/cancellation-policy" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Cancellation policy</Link>
               <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 About
               </Link>
             </nav>
           </div>
-          <div className="hidden items-center gap-6 md:flex">
+          <div className="hidden items-center gap-6 xl:flex">
             <LanguageSelector />
             <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
               <HelpCircle size={17} /> Help
@@ -110,7 +109,9 @@ export default function HomePage() {
               <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
             <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
           </div>
-          <div className="md:hidden">
+          <div className="flex items-center gap-3 xl:hidden">
+            <Link href="/auth/login?role=learner" className="hidden rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand sm:inline-flex">Log in</Link>
+            <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
             <MainMenu />
           </div>
         </div>
