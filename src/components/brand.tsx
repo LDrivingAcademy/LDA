@@ -1,10 +1,17 @@
 import Link from "next/link";
 
-export function Brand() {
+type BrandSize = "home" | "page";
+
+const brandSizes: Record<BrandSize, string> = {
+  home: "h-[53px] w-[114px] sm:h-[62px] sm:w-[134px] lg:h-[64px] lg:w-[139px]",
+  page: "h-[60px] w-[130px] sm:h-[70px] sm:w-[152px] lg:h-[73px] lg:w-[158px]"
+};
+
+export function Brand({ size = "page" }: { size?: BrandSize }) {
   return (
     <Link
       href="/"
-      className="flex h-[48px] w-[104px] shrink-0 items-center justify-start overflow-hidden bg-black focus-ring sm:h-[56px] sm:w-[122px] lg:h-[58px] lg:w-[126px]"
+      className={`flex ${brandSizes[size]} shrink-0 items-center justify-start overflow-hidden bg-black focus-ring`}
       aria-label="L Driving Academy home"
     >
       <img
