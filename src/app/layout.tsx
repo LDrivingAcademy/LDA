@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/lda-logo.jpg", type: "image/jpeg", sizes: "520x300" }
+      { url: "/lda-logo-transparent.svg", type: "image/svg+xml", sizes: "4096x2363" }
     ],
     shortcut: "/favicon.svg",
     apple: "/lda-logo.jpg"
