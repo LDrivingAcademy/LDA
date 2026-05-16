@@ -120,13 +120,16 @@ export default function HomePage() {
       <main className="bg-white text-black">
         <section className="bg-white">
           <div className="mx-auto grid max-w-7xl items-stretch gap-8 px-4 pb-0 pt-7 sm:px-6 lg:grid-cols-[560px_1fr] lg:px-8 lg:pb-0 lg:pt-10">
-            <div className="py-2 lg:py-8">
+            <div className="flex flex-col py-2 lg:pb-10 lg:pt-8">
               <h1 className="max-w-xl text-5xl font-black tracking-normal sm:text-6xl">
                 Learn to drive with LDA
               </h1>
               <p className="mt-5 max-w-lg text-lg leading-8 text-zinc-700">
                 Book verified local driving instructors, compare upfront prices, choose a lesson time, and pay online in a few clear steps.
               </p>
+              <div className="mt-auto hidden pt-8 lg:block">
+                <OnDemandLessonCard />
+              </div>
             </div>
 
             <section className="h-full overflow-hidden rounded bg-white text-white shadow-sm lg:mt-8">
@@ -161,26 +164,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-white px-4 pb-8 sm:px-6 lg:px-8">
-          <div className="mx-auto grid max-w-7xl gap-4 rounded border border-zinc-200 bg-zinc-50 p-5 shadow-sm md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 text-sm font-black uppercase text-brand">
-                <Clock3 size={17} /> On-demand lesson
-              </div>
-              <h2 className="mt-2 text-2xl font-black tracking-normal">Need a short-notice lesson?</h2>
-              <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-zinc-700">
-                Enter pickup details, verify your provisional licence, pay securely, then receive a booking reference and tracking link.
-              </p>
-            </div>
-            <div className="grid gap-3 justify-self-start md:justify-self-end">
-              <Link href="/lesson-now" className="lda-pill">
-                On-demand lesson
-              </Link>
-              <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm">
-                Book future lessons
-              </Link>
-            </div>
-          </div>
+        <section className="bg-white px-4 pb-8 sm:px-6 lg:hidden">
+          <OnDemandLessonCard className="mx-auto max-w-7xl md:grid-cols-[1fr_auto] md:items-center" />
         </section>
 
         <section id="discover" className="bg-white">
@@ -228,6 +213,30 @@ export default function HomePage() {
       <FeedbackButton />
       <SiteFooter />
     </>
+  );
+}
+
+function OnDemandLessonCard({ className = "" }: { className?: string }) {
+  return (
+    <div className={`grid gap-4 rounded border border-zinc-200 bg-zinc-50 p-5 shadow-sm ${className}`}>
+      <div>
+        <div className="inline-flex items-center gap-2 text-sm font-black uppercase text-brand">
+          <Clock3 size={17} /> On-demand lesson
+        </div>
+        <h2 className="mt-2 text-2xl font-black tracking-normal">Need an on-demand lesson?</h2>
+        <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-zinc-700">
+          Enter pickup details, verify your provisional licence, pay securely, then receive a booking reference and tracking link.
+        </p>
+      </div>
+      <div className="grid gap-3 justify-self-start">
+        <Link href="/lesson-now" className="lda-pill">
+          On-demand lesson
+        </Link>
+        <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm">
+          Book future lessons
+        </Link>
+      </div>
+    </div>
   );
 }
 
