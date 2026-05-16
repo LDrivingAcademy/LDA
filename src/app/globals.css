@@ -60,63 +60,52 @@ body {
 .focus-ring { outline: 2px solid transparent; outline-offset: 2px; }
 .focus-ring:focus-visible { outline-color: var(--brand); }
 
-main.bg-ink,
-main.bg-background {
+:is(main.bg-ink, main.bg-black, main.bg-background) {
   background: #ffffff !important;
   color: #000000 !important;
 }
 
-main.bg-ink :is(.bg-ink, .bg-black, .bg-zinc-950, .bg-zinc-900, .bg-card, .bg-background),
-main.bg-background :is(.bg-ink, .bg-black, .bg-zinc-950, .bg-zinc-900, .bg-card) {
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.bg-ink, .bg-black, .bg-zinc-950, .bg-zinc-900, .bg-card, .bg-background) {
   background: #ffffff !important;
   color: #000000 !important;
 }
 
-main.bg-ink :is(.bg-zinc-900\/70, .bg-zinc-950\/70, .bg-black\/70, .bg-black\/80),
-main.bg-background :is(.bg-zinc-900\/70, .bg-zinc-950\/70, .bg-black\/70, .bg-black\/80) {
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.bg-zinc-900\/70, .bg-zinc-950\/70, .bg-black\/70, .bg-black\/80) {
   background: rgba(255, 255, 255, 0.96) !important;
   color: #000000 !important;
 }
 
-main.bg-ink :is(.text-white, .text-foreground, .text-zinc-100, .text-zinc-200),
-main.bg-background :is(.text-white, .text-foreground, .text-zinc-100, .text-zinc-200) {
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.text-white, .text-foreground, .text-zinc-100, .text-zinc-200) {
   color: #000000 !important;
 }
 
-main.bg-ink :is(.text-zinc-300, .text-zinc-400, .text-zinc-500, .text-muted),
-main.bg-background :is(.text-zinc-300, .text-zinc-400, .text-zinc-500, .text-muted) {
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.text-zinc-300, .text-zinc-400, .text-zinc-500, .text-muted) {
   color: #52525b !important;
 }
 
-main.bg-ink :is(.text-red-100, .text-red-200),
-main.bg-background :is(.text-red-100, .text-red-200) {
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.text-red-100, .text-red-200) {
   color: #e30613 !important;
 }
 
-main.bg-ink :is(.border-zinc-700, .border-zinc-800, .border-zinc-900, .border-border),
-main.bg-background :is(.border-zinc-700, .border-zinc-800, .border-zinc-900, .border-border) {
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.border-zinc-700, .border-zinc-800, .border-zinc-900, .border-border) {
   border-color: #e4e4e7 !important;
 }
 
-main.bg-ink :is(input, select, textarea),
-main.bg-background :is(input, select, textarea) {
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(input, select, textarea) {
   background: #ffffff !important;
   color: #000000 !important;
   border-color: #d4d4d8 !important;
 }
 
-main.bg-ink :is(input, select, textarea)::placeholder,
-main.bg-background :is(input, select, textarea)::placeholder {
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(input, select, textarea)::placeholder {
   color: #71717a !important;
 }
 
-main.bg-ink :is(.lda-pill, button.lda-pill, a.lda-pill),
-main.bg-background :is(.lda-pill, button.lda-pill, a.lda-pill) {
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.lda-pill, button.lda-pill, a.lda-pill) {
   color: #ffffff !important;
 }
 
-main.bg-ink :is(header, footer, nav),
-main.bg-background :is(header, footer, nav) {
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(header, footer, nav) {
   color: inherit;
 }
 
