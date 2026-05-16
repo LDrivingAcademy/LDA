@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { ArrowLeft, CarFront, GraduationCap, KeyRound, ShieldCheck } from "lucide-react";
-import { Brand } from "@/components/brand";
+import { CarFront, GraduationCap, KeyRound, ShieldCheck } from "lucide-react";
 import { LoginRememberHelper } from "@/components/auth/login-remember-helper";
+import { PageTopBar } from "@/components/page-top-bar";
 import { signIn } from "../actions";
 
 export default async function LoginPage({
@@ -16,23 +16,18 @@ export default async function LoginPage({
   const rememberedIdentifier = (await cookies()).get("lda_remember_identifier")?.value ?? "";
 
   return (
-    <main className="min-h-screen bg-ink px-4 py-8 text-white">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex items-center justify-between gap-4">
-          <Brand />
-          <Link href="/" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-zinc-300 hover:text-white hover:ring-2 hover:ring-brand">
-            <ArrowLeft size={16} /> Back to homepage
-          </Link>
-        </div>
+    <main className="min-h-screen bg-white text-black">
+      <PageTopBar />
+      <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_460px]">
           <section>
-            <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
+            <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-brand">
               <ShieldCheck size={16} /> LDA secure access
             </div>
             <h1 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">
               {isInstructor ? "Log in to your instructor account." : "Log in to your learner account."}
             </h1>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-300">
+            <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-700">
               {isInstructor
                 ? "Use the email or mobile number you used when you signed up, then continue managing onboarding, availability, and bookings."
                 : "Use the email or mobile number you used when you signed up, then continue booking, tracking, and lesson progress."}
@@ -41,37 +36,37 @@ export default async function LoginPage({
               New to LDA? Sign up
             </Link>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <Link href="/auth/login?role=learner" className={`rounded border p-4 ${!isInstructor ? "border-red-500 bg-red-500/10" : "border-zinc-800 bg-zinc-950"}`}>
+              <Link href="/auth/login?role=learner" className={`rounded border p-4 ${!isInstructor ? "border-red-500 bg-red-500/10" : "border-zinc-200 bg-white"}`}>
                 <GraduationCap className="mb-3 text-brand" />
                 <div className="font-black">Learner</div>
-                <p className="mt-1 text-sm leading-5 text-zinc-400">Search, compare, book, pay, and review.</p>
+                <p className="mt-1 text-sm leading-5 text-zinc-600">Search, compare, book, pay, and review.</p>
               </Link>
-              <Link href="/auth/login?role=instructor" className={`rounded border p-4 ${isInstructor ? "border-red-500 bg-red-500/10" : "border-zinc-800 bg-zinc-950"}`}>
+              <Link href="/auth/login?role=instructor" className={`rounded border p-4 ${isInstructor ? "border-red-500 bg-red-500/10" : "border-zinc-200 bg-white"}`}>
                 <CarFront className="mb-3 text-brand" />
                 <div className="font-black">Instructor</div>
-                <p className="mt-1 text-sm leading-5 text-zinc-400">Verify, publish availability, manage bookings.</p>
+                <p className="mt-1 text-sm leading-5 text-zinc-600">Verify, publish availability, manage bookings.</p>
               </Link>
             </div>
           </section>
 
-          <section className="rounded border border-zinc-800 bg-zinc-950 p-5 text-white shadow-2xl">
+          <section className="rounded border border-zinc-200 bg-white p-5 text-black shadow-2xl">
             <div className="mb-5">
               <div className="text-sm font-black uppercase text-brand">{isInstructor ? "Instructor access" : "Learner access"}</div>
               <h2 className="mt-1 text-2xl font-black">Account login</h2>
             </div>
-            {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-100">{message}</div> : null}
+            {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-brand">{message}</div> : null}
             <form id="lda-account-login-form" action={signIn} className="grid gap-3">
               <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
               <input type="hidden" name="next" value={nextPath} />
               <label className="grid gap-1">
-                <span className="text-sm font-bold text-zinc-400">Email or mobile number</span>
-                <input required name="identifier" autoComplete="username" defaultValue={rememberedIdentifier} className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="you@example.com or 07123 456789" />
+                <span className="text-sm font-bold text-zinc-600">Email or mobile number</span>
+                <input required name="identifier" autoComplete="username" defaultValue={rememberedIdentifier} className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="you@example.com or 07123 456789" />
               </label>
               <label className="grid gap-1">
-                <span className="text-sm font-bold text-zinc-400">Password</span>
-                <input required name="password" type="password" autoComplete="current-password" className="rounded border border-zinc-800 bg-black px-3 py-3 text-white placeholder:text-zinc-600" placeholder="Your password" />
+                <span className="text-sm font-bold text-zinc-600">Password</span>
+                <input required name="password" type="password" autoComplete="current-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Your password" />
               </label>
-              <label className="flex items-start gap-3 rounded border border-zinc-800 bg-black p-3 text-sm font-bold leading-6 text-zinc-300">
+              <label className="flex items-start gap-3 rounded border border-zinc-300 bg-white p-3 text-sm font-bold leading-6 text-zinc-700">
                 <input name="rememberMe" type="checkbox" defaultChecked={Boolean(rememberedIdentifier)} className="mt-1 accent-red-600" />
                 <span>
                   Remember me on this device
@@ -88,7 +83,7 @@ export default async function LoginPage({
             <p className="mt-4 text-xs leading-5 text-zinc-500">
               Verification is only used when you first sign up or reset your password. Returning accounts log in with the email or mobile number and password already linked to the account.
             </p>
-            <Link href={`/auth/forgot-password?role=${isInstructor ? "instructor" : "learner"}`} className="mt-4 inline-flex text-sm font-black text-red-100 underline decoration-brand decoration-2 underline-offset-4 hover:text-white">
+            <Link href={`/auth/forgot-password?role=${isInstructor ? "instructor" : "learner"}`} className="mt-4 inline-flex text-sm font-black text-brand underline decoration-brand decoration-2 underline-offset-4 hover:text-brand">
               Forgot password?
             </Link>
           </section>
