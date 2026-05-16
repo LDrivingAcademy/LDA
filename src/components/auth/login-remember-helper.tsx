@@ -8,6 +8,23 @@ const REMEMBERED_IDENTIFIER_KEY = "lda_remember_identifier";
 const AUTO_LOGIN_ATTEMPT_KEY = "lda_auto_login_attempted_at";
 const AUTO_LOGIN_WINDOW_MS = 15_000;
 
+type PasswordCredentialLike = Credential & {
+  id: string;
+  password?: string;
+  name?: string;
+};
+
+type PasswordCredentialRequestOptions = CredentialRequestOptions & {
+  password: boolean;
+  mediation?: CredentialMediationRequirement;
+};
+
+declare global {
+  interface Window {
+    PasswordCredential?: new (data: HTMLFormElement | { id: string; password: string; name?: string }) => Credential;
+  }
+}
+
 function currentDeviceName() {
   const platform = navigator.platform || "This device";
   const browser = navigator.userAgent.includes("Safari") && !navigator.userAgent.includes("Chrome") ? "Safari" : navigator.userAgent.includes("Chrome") ? "Chrome" : "Browser";
@@ -63,12 +80,59 @@ export function LoginRememberHelper({ formId, rememberedIdentifier }: { formId: 
       rememberInput.checked = true;
     }
 
-    function handleSubmit() {
-      if (rememberInput?.checked && identifierInput?.value) {
-        rememberCurrentDevice(identifierInput.value.trim());
+    async function requestSavedCredential() {
+      if (!("credentials" in navigator)) return;
+
+      try {
+        const credential = (await navigator.credentials.get({
+          password: true,
+          mediation: "optional"
+        } as PasswordCredentialRequestOptions)) as PasswordCredentialLike | null;
+
+        if (!credential) return;
+
+        if (identifierInput && credential.id && !identifierInput.value) {
+          identifierInput.value = credential.id;
+        }
+
+        if (passwordInput && credential.password && !passwordInput.value) {
+          passwordInput.value = credential.password;
+        }
+
+        if (rememberInput) {
+          rememberInput.checked = true;
+        }
+      } catch {
+        // Browsers may block silent credential reads; autocomplete still handles Face ID/Touch ID prompts.
       }
     }
 
+    async function storeSavedCredential() {
+      if (!rememberInput?.checked || !identifierInput?.value || !passwordInput?.value || !window.PasswordCredential || !("credentials" in navigator)) {
+        return;
+      }
+
+      try {
+        await navigator.credentials.store(
+          new window.PasswordCredential({
+            id: identifierInput.value.trim(),
+            password: passwordInput.value,
+            name: "L Driving Academy"
+          })
+        );
+      } catch {
+        // Password managers can decline storage; the login still proceeds normally.
+      }
+    }
+
+    function handleSubmit() {
+      if (rememberInput?.checked && identifierInput?.value) {
+        rememberCurrentDevice(identifierInput.value.trim());
+        void storeSavedCredential();
+      }
+    }
+
+    void requestSavedCredential();
     loginForm.addEventListener("submit", handleSubmit);
 
     const autoLoginStartedAt = Date.now();

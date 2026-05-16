@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CarFront, GraduationCap, MailCheck, ShieldCheck } from "lucide-react";
 import { PageTopBar } from "@/components/page-top-bar";
+import { SignUpPasswordHelper } from "@/components/auth/sign-up-password-helper";
 import { signUp } from "../actions";
 
 export default async function SignUpPage({
@@ -50,20 +51,21 @@ export default async function SignUpPage({
               <h2 className="mt-1 text-2xl font-black">Create and verify account</h2>
             </div>
             {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-brand">{message}</div> : null}
-            <form action={signUp} className="grid gap-3">
+            <form id="lda-account-signup-form" action={signUp} className="grid gap-3" autoComplete="on">
               <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
               <input type="hidden" name="next" value={nextPath} />
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">Email</span>
-                <input required name="email" type="email" autoComplete="email" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="you@example.com" />
+                <input id="lda-signup-email" required name="email" type="email" autoComplete="username email" inputMode="email" autoCapitalize="none" spellCheck={false} className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="you@example.com" />
               </label>
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">Create password</span>
-                <input required name="password" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
+                <input id="lda-signup-password" required name="password" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
               </label>
               <button className="lda-pill mt-2">
                 <MailCheck size={18} /> Create account by email
               </button>
+              <SignUpPasswordHelper formId="lda-account-signup-form" />
             </form>
             <p className="mt-4 text-xs leading-5 text-zinc-500">
               After you confirm the email link, LDA will ask for your first name, last name, optional phone number, and learner eligibility or instructor verification details. A phone number can be added later for lesson updates and can be used for returning login once linked to your account.

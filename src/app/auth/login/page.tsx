@@ -55,16 +55,16 @@ export default async function LoginPage({
               <h2 className="mt-1 text-2xl font-black">Account login</h2>
             </div>
             {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-brand">{message}</div> : null}
-            <form id="lda-account-login-form" action={signIn} className="grid gap-3">
+            <form id="lda-account-login-form" action={signIn} className="grid gap-3" autoComplete="on">
               <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
               <input type="hidden" name="next" value={nextPath} />
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">Email or mobile number</span>
-                <input required name="identifier" autoComplete="username" defaultValue={rememberedIdentifier} className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="you@example.com or 07123 456789" />
+                <input id="lda-login-identifier" required name="identifier" autoComplete="username" inputMode="email" autoCapitalize="none" spellCheck={false} defaultValue={rememberedIdentifier} className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="you@example.com or 07123 456789" />
               </label>
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">Password</span>
-                <input required name="password" type="password" autoComplete="current-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Your password" />
+                <input id="lda-login-password" required name="password" type="password" autoComplete="current-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Your password" />
               </label>
               <label className="flex items-start gap-3 rounded border border-zinc-300 bg-white p-3 text-sm font-bold leading-6 text-zinc-700">
                 <input name="rememberMe" type="checkbox" defaultChecked={Boolean(rememberedIdentifier)} className="mt-1 accent-red-600" />
