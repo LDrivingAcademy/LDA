@@ -1,3 +1,4 @@
 Redeploy trigger for the latest LDA app update.
 
-Last requested: 2026-05-12 Europe/London.
+Last requested: 2026-05-16 Europe/London.
+Reason: confirm Vercel Git integration is receiving main branch updates.
