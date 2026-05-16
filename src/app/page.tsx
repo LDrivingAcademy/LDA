@@ -90,7 +90,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-30 bg-black text-white">
         <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-5 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-7">
-            <Brand />
+            <Brand size="home" />
             <nav className="hidden items-center gap-7 xl:flex">
               <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
               <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
@@ -137,7 +137,7 @@ export default function HomePage() {
                   className="absolute inset-0 h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <Link href="/smart-match" className="lda-pill lda-pill-sm absolute left-7 top-7 sm:left-auto sm:right-8">
+                <Link href="/smart-match" className="lda-pill lda-pill-sm absolute left-7 top-7 z-20 pointer-events-auto sm:left-auto sm:right-8">
                   LDA Smart Match
                 </Link>
                 <div className="relative z-10 pt-24">
