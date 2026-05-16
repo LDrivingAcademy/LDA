@@ -13,7 +13,7 @@ export default async function ForgotPasswordPage({
     <main className="min-h-screen bg-white text-black">
       <PageTopBar backHref={`/auth/login?role=${isInstructor ? "instructor" : "learner"}`} backLabel="Back to login" />
       <div className="mx-auto max-w-5xl px-4 py-8">
-        <section className="mt-10 grid gap-8 lg:grid-cols-[1fr_460px] lg:items-start">
+        <section className="grid gap-8 lg:grid-cols-[1fr_460px] lg:items-start">
           <div>
             <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-brand">
               <RotateCcw size={16} /> Account recovery

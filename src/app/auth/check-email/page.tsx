@@ -14,7 +14,7 @@ export default async function CheckEmailPage({
     <main className="min-h-screen bg-white text-black">
       <PageTopBar backHref={`/auth/login?role=${safeRole}`} backLabel="Back to login" />
       <div className="mx-auto max-w-3xl px-4 py-8">
-        <section className="mt-10 rounded border border-zinc-200 bg-white p-6 shadow-2xl">
+        <section className="rounded border border-zinc-200 bg-white p-6 shadow-2xl">
           <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-brand">
             <MailCheck size={16} /> Secure email link sent
           </div>
