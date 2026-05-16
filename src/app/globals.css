@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
-  --muted: #a1a1aa;
-  --border: #27272a;
-  --card: #09090b;
+  --background: #ffffff;
+  --foreground: #000000;
+  --muted: #52525b;
+  --border: #e4e4e7;
+  --card: #ffffff;
   --brand: #e30613;
   --brand-strong: #b8000f;
   --ink: #000000;
@@ -29,9 +29,7 @@ html { min-width: 320px; background: var(--background); color: var(--foreground)
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background:
-    linear-gradient(180deg, rgba(227, 6, 19, 0.12), transparent 420px),
-    var(--background);
+  background: var(--background);
   color: var(--foreground);
 }
 a { color: inherit; text-decoration: none; }
@@ -61,6 +59,67 @@ body {
 }
 .focus-ring { outline: 2px solid transparent; outline-offset: 2px; }
 .focus-ring:focus-visible { outline-color: var(--brand); }
+
+main.bg-ink,
+main.bg-background {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+main.bg-ink :is(.bg-ink, .bg-black, .bg-zinc-950, .bg-zinc-900, .bg-card, .bg-background),
+main.bg-background :is(.bg-ink, .bg-black, .bg-zinc-950, .bg-zinc-900, .bg-card) {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+main.bg-ink :is(.bg-zinc-900\/70, .bg-zinc-950\/70, .bg-black\/70, .bg-black\/80),
+main.bg-background :is(.bg-zinc-900\/70, .bg-zinc-950\/70, .bg-black\/70, .bg-black\/80) {
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #000000 !important;
+}
+
+main.bg-ink :is(.text-white, .text-foreground, .text-zinc-100, .text-zinc-200),
+main.bg-background :is(.text-white, .text-foreground, .text-zinc-100, .text-zinc-200) {
+  color: #000000 !important;
+}
+
+main.bg-ink :is(.text-zinc-300, .text-zinc-400, .text-zinc-500, .text-muted),
+main.bg-background :is(.text-zinc-300, .text-zinc-400, .text-zinc-500, .text-muted) {
+  color: #52525b !important;
+}
+
+main.bg-ink :is(.text-red-100, .text-red-200),
+main.bg-background :is(.text-red-100, .text-red-200) {
+  color: #e30613 !important;
+}
+
+main.bg-ink :is(.border-zinc-700, .border-zinc-800, .border-zinc-900, .border-border),
+main.bg-background :is(.border-zinc-700, .border-zinc-800, .border-zinc-900, .border-border) {
+  border-color: #e4e4e7 !important;
+}
+
+main.bg-ink :is(input, select, textarea),
+main.bg-background :is(input, select, textarea) {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #d4d4d8 !important;
+}
+
+main.bg-ink :is(input, select, textarea)::placeholder,
+main.bg-background :is(input, select, textarea)::placeholder {
+  color: #71717a !important;
+}
+
+main.bg-ink :is(.lda-pill, button.lda-pill, a.lda-pill),
+main.bg-background :is(.lda-pill, button.lda-pill, a.lda-pill) {
+  color: #ffffff !important;
+}
+
+main.bg-ink :is(header, footer, nav),
+main.bg-background :is(header, footer, nav) {
+  color: inherit;
+}
+
 .lda-pill {
   display: inline-flex;
   align-items: center;
