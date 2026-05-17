@@ -7,6 +7,7 @@ const TRUSTED_DEVICES_KEY = "lda_trusted_devices";
 const REMEMBERED_IDENTIFIER_KEY = "lda_remember_identifier";
 const AUTO_LOGIN_ATTEMPT_KEY = "lda_auto_login_attempted_at";
 const AUTO_LOGIN_WINDOW_MS = 15_000;
+const SAVED_LOGIN_BUTTON_SELECTOR = "[data-lda-use-saved-login]";
 
 type PasswordCredentialLike = Credential & {
   id: string;
@@ -67,33 +68,53 @@ export function LoginRememberHelper({ formId, rememberedIdentifier }: { formId: 
     if (!form) return;
     const loginForm = form;
 
-    const identifierInput = loginForm.elements.namedItem("identifier") as HTMLInputElement | null;
+    const identifierInput = (loginForm.elements.namedItem("username") ?? loginForm.elements.namedItem("identifier")) as HTMLInputElement | null;
+    const identifierMirror = loginForm.querySelector<HTMLInputElement>("[data-lda-identifier-mirror]");
     const passwordInput = loginForm.elements.namedItem("password") as HTMLInputElement | null;
     const rememberInput = loginForm.elements.namedItem("rememberMe") as HTMLInputElement | null;
+    const savedLoginButton = loginForm.querySelector<HTMLButtonElement>(SAVED_LOGIN_BUTTON_SELECTOR);
     const localIdentifier = localStorage.getItem(REMEMBERED_IDENTIFIER_KEY);
+
+    function syncIdentifierMirror() {
+      if (identifierMirror && identifierInput) {
+        identifierMirror.value = identifierInput.value.trim();
+      }
+    }
 
     if (identifierInput && !identifierInput.value && (rememberedIdentifier || localIdentifier)) {
       identifierInput.value = rememberedIdentifier || localIdentifier || "";
     }
+    syncIdentifierMirror();
 
     if (rememberInput && isTrustedDevice()) {
       rememberInput.checked = true;
     }
 
-    async function requestSavedCredential() {
-      if (!("credentials" in navigator)) return;
+    if (identifierInput?.value && !passwordInput?.value) {
+      passwordInput?.focus({ preventScroll: true });
+    }
+
+    async function requestSavedCredential(mediation: CredentialMediationRequirement = "optional") {
+      if (!("credentials" in navigator)) {
+        passwordInput?.focus();
+        return;
+      }
 
       try {
         const credential = (await navigator.credentials.get({
           password: true,
-          mediation: "optional"
+          mediation
         } as PasswordCredentialRequestOptions)) as PasswordCredentialLike | null;
 
-        if (!credential) return;
+        if (!credential) {
+          passwordInput?.focus();
+          return;
+        }
 
         if (identifierInput && credential.id && !identifierInput.value) {
           identifierInput.value = credential.id;
         }
+        syncIdentifierMirror();
 
         if (passwordInput && credential.password && !passwordInput.value) {
           passwordInput.value = credential.password;
@@ -104,6 +125,7 @@ export function LoginRememberHelper({ formId, rememberedIdentifier }: { formId: 
         }
       } catch {
         // Browsers may block silent credential reads; autocomplete still handles Face ID/Touch ID prompts.
+        passwordInput?.focus();
       }
     }
 
@@ -126,14 +148,26 @@ export function LoginRememberHelper({ formId, rememberedIdentifier }: { formId: 
     }
 
     function handleSubmit() {
+      syncIdentifierMirror();
       if (rememberInput?.checked && identifierInput?.value) {
         rememberCurrentDevice(identifierInput.value.trim());
         void storeSavedCredential();
       }
     }
 
+    function handleSavedLoginClick() {
+      if (rememberInput) {
+        rememberInput.checked = true;
+      }
+      void requestSavedCredential("required");
+      passwordInput?.focus();
+    }
+
     void requestSavedCredential();
+    identifierInput?.addEventListener("input", syncIdentifierMirror);
+    identifierInput?.addEventListener("change", syncIdentifierMirror);
     loginForm.addEventListener("submit", handleSubmit);
+    savedLoginButton?.addEventListener("click", handleSavedLoginClick);
 
     const autoLoginStartedAt = Date.now();
     const timer = window.setInterval(() => {
@@ -161,7 +195,10 @@ export function LoginRememberHelper({ formId, rememberedIdentifier }: { formId: 
 
     return () => {
       window.clearInterval(timer);
+      identifierInput?.removeEventListener("input", syncIdentifierMirror);
+      identifierInput?.removeEventListener("change", syncIdentifierMirror);
       loginForm.removeEventListener("submit", handleSubmit);
+      savedLoginButton?.removeEventListener("click", handleSavedLoginClick);
     };
   }, [formId, rememberedIdentifier]);
 
