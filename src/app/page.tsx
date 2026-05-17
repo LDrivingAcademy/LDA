@@ -164,7 +164,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <section className="overflow-hidden rounded bg-white text-white shadow-sm lg:mt-8 lg:h-[calc(100%-2.5rem)] lg:self-stretch">
+            <section className="overflow-hidden rounded bg-white text-white shadow-sm lg:mt-8 lg:h-[620px] lg:self-start">
               <div className="relative flex h-full min-h-[430px] flex-col justify-end p-7 sm:p-10 lg:min-h-0">
                 <img
                   src="/learner-instructor.jpg"

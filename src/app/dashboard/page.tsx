@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, Sparkles } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
+import { Brand } from "@/components/brand";
 import { LearnerBookingDashboard } from "@/components/learner-booking-dashboard";
 import { LearnerDashboardMenu } from "@/components/learner-dashboard-menu";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
@@ -62,10 +63,12 @@ export default async function DashboardPage() {
     <main className="min-h-screen bg-white text-black">
       <header className="border-b border-zinc-800 bg-ink text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <div>
-            <div className="text-sm font-bold text-red-200">LDA dashboard</div>
-            <div className="mt-1 flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-black">{profile?.full_name || user.email}</h1>
+          <div className="flex min-w-0 items-center gap-5">
+            <Brand size="home" />
+            <div className="min-w-0">
+              <div className="text-sm font-bold text-red-200">Learner account</div>
+              <div className="mt-1 flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl font-black">LDA Dashboard, {profile?.full_name || user.email}</h1>
               {isInstructor ? (
                 <span className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100">
                   Instructor
@@ -75,6 +78,7 @@ export default async function DashboardPage() {
                   {hasLearnerPlus ? "Learner Plus" : "Learner · Upgrade to Plus"}
                 </Link>
               )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -87,7 +91,7 @@ export default async function DashboardPage() {
       </header>
 
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
+        <article className="flex flex-col rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <CalendarCheck className="text-brand" />
           <h2 className="mt-4 text-xl font-black">Learner journey</h2>
           <p className="mt-2 text-zinc-600">Plan the full route from first lesson to getting on the road after passing.</p>
@@ -99,7 +103,7 @@ export default async function DashboardPage() {
             <span>Insurance quote support</span>
             <span>Progress and revision</span>
           </div>
-          <Link href="/learner-journey" className="lda-pill lda-pill-sm mt-5">
+          <Link href="/learner-journey" className="lda-pill lda-pill-sm mt-auto self-start">
             LDA learner journey <ArrowRight size={16} />
           </Link>
         </article>
@@ -112,13 +116,13 @@ export default async function DashboardPage() {
             </p>
           </article>
         ) : (
-          <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
+          <article className="flex flex-col rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
             <Sparkles className="text-brand" />
             <h2 className="mt-4 text-xl font-black">LDA SmartMatch</h2>
             <p className="mt-2 text-zinc-600">
               Compare instructor skills, support needs, availability, price, reviews, and lesson goals.
             </p>
-            <Link href="/smart-match?from=dashboard" className="lda-pill lda-pill-sm mt-5">
+            <Link href="/smart-match?from=dashboard" className="lda-pill lda-pill-sm mt-auto self-start">
               Open SmartMatch <ArrowRight size={16} />
             </Link>
           </article>
