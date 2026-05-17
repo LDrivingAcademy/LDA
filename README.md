@@ -78,6 +78,13 @@ Stripe Connect is the intended marketplace model:
 - Platform commission is recorded with `platform_fee_pence`.
 - Instructor payout is tracked with `instructor_net_pence`.
 - Stripe webhook handling should update `payments`, `bookings.payment_status`, refunds, disputes, and payout states.
+- Lesson checkout uses Stripe Checkout dynamic payment methods by default. Keep `STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES` blank so Stripe can show card/manual card entry, Link, Apple Pay, PayPal, and other eligible methods from the Stripe Dashboard.
+- If Stripe support asks you to force methods while debugging, set `STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES=card,paypal`; otherwise leave it blank.
+
+Apple Pay and PayPal are controlled by Stripe eligibility:
+
+- Apple Pay appears only on supported devices/browsers when Apple Pay is enabled and the live domain is registered/verified for wallets in Stripe.
+- PayPal appears only when PayPal is enabled for the Stripe account, the currency and customer location are eligible, and the account has completed Stripe's PayPal setup.
 
 ## Live Map Tracking
 

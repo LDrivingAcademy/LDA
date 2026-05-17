@@ -7,6 +7,7 @@ import {
   safeEmail,
   safeText
 } from "@/lib/security";
+import { applyStripeCheckoutPaymentMethods } from "@/lib/stripe-checkout";
 
 type InstantCheckoutRequest = {
   fullName?: string;
@@ -120,12 +121,7 @@ export async function POST(request: Request) {
     "customer_email": learnerEmail
   });
 
-  if (paymentPreference === "paypal" || process.env.STRIPE_ENABLE_PAYPAL === "true") {
-    params.set("payment_method_types[0]", "card");
-    params.set("payment_method_types[1]", "paypal");
-  } else if (paymentPreference) {
-    params.set("payment_method_types[0]", "card");
-  }
+  applyStripeCheckoutPaymentMethods(params);
 
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",

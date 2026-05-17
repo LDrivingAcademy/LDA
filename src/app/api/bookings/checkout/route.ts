@@ -4,8 +4,10 @@ import {
   rateLimitResponse,
   safeAmountPence,
   safeCurrency,
+  safeEmail,
   safeText
 } from "@/lib/security";
+import { applyStripeCheckoutPaymentMethods } from "@/lib/stripe-checkout";
 
 type CheckoutRequest = {
   bookingId?: string;
@@ -14,6 +16,7 @@ type CheckoutRequest = {
   amountPence?: number;
   stripeConnectedAccountId?: string;
   paymentPreference?: string;
+  learnerEmail?: string | null;
 };
 
 function normalisePaymentPreference(value?: string) {
@@ -61,6 +64,7 @@ export async function POST(request: Request) {
   const instructorName = safeText(body.instructorName, "your driving instructor", 80);
   const bookingId = safeText(body.bookingId, "demo-booking", 80);
   const paymentPreference = normalisePaymentPreference(body.paymentPreference);
+  const learnerEmail = safeEmail(body.learnerEmail);
   const commissionPercent = Math.min(Math.max(Number(process.env.LDA_PLATFORM_COMMISSION_PERCENT ?? 10), 0), 30);
   const applicationFeeAmount = Math.round(amountPence * (commissionPercent / 100));
 
@@ -84,12 +88,11 @@ export async function POST(request: Request) {
     "line_items[0][price_data][product_data][name]": `LDA driving lesson with ${instructorName}`
   });
 
-  if (paymentPreference === "paypal" || process.env.STRIPE_ENABLE_PAYPAL === "true") {
-    params.set("payment_method_types[0]", "card");
-    params.set("payment_method_types[1]", "paypal");
-  } else if (paymentPreference) {
-    params.set("payment_method_types[0]", "card");
+  if (learnerEmail) {
+    params.set("customer_email", learnerEmail);
   }
+
+  applyStripeCheckoutPaymentMethods(params);
 
   if (body.stripeConnectedAccountId) {
     params.set("payment_intent_data[transfer_data][destination]", body.stripeConnectedAccountId);
