@@ -118,7 +118,7 @@ export default async function DashboardPage() {
             <p className="mt-2 text-zinc-600">
               Compare instructor skills, support needs, availability, price, reviews, and lesson goals.
             </p>
-            <Link href="/smart-match" className="lda-pill lda-pill-sm mt-5">
+            <Link href="/smart-match?from=dashboard" className="lda-pill lda-pill-sm mt-5">
               Open SmartMatch <ArrowRight size={16} />
             </Link>
           </article>
