@@ -164,7 +164,7 @@ export default async function HomePage() {
             <section className="h-full overflow-hidden rounded bg-white text-white shadow-sm lg:mt-8">
               <div className="relative flex h-full min-h-[430px] flex-col justify-end p-7 sm:p-10">
                 <img
-                  src="https://images.pexels.com/photos/4895404/pexels-photo-4895404.jpeg?auto=compress&cs=tinysrgb&w=1400"
+                  src="/learner-instructor.jpg"
                   alt="Learner driver behind the wheel with an instructor in the passenger seat"
                   className="absolute inset-0 h-full w-full object-cover"
                 />
