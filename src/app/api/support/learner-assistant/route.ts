@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { sendSupportEscalationEmail } from "@/lib/email";
+import { isRateLimited, jsonNoStore, rateLimitResponse, safeEmail, safeText } from "@/lib/security";
 
 type LearnerAssistantRequest = {
   name?: string;
@@ -45,13 +45,17 @@ function demoAnswer(message: string, urgent: boolean) {
 }
 
 export async function POST(request: Request) {
+  if (isRateLimited(request, "learner-assistant", 20)) {
+    return rateLimitResponse();
+  }
+
   const input = (await request.json()) as LearnerAssistantRequest;
 
   if (!isMeaningful(input.message)) {
-    return NextResponse.json({ error: "Enter a support question first." }, { status: 400 });
+    return jsonNoStore({ error: "Enter a support question first." }, { status: 400 });
   }
 
-  const message = input.message!.trim();
+  const message = safeText(input.message, "", 2000);
   const urgent = input.urgency === "urgent" || urgentPattern.test(message);
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_SUPPORT_MODEL || "gpt-5.2";
@@ -76,7 +80,7 @@ export async function POST(request: Request) {
               content: [
                 {
                   type: "input_text",
-                  text: `Learner name: ${input.name || "Not provided"}\nLearner email: ${input.email || "Not provided"}\nBooking reference: ${input.bookingReference || "Not provided"}\nUrgent: ${urgent ? "yes" : "no"}\nQuestion: ${message}`
+                  text: `Learner name: ${safeText(input.name, "Not provided", 120)}\nLearner email: ${safeEmail(input.email) || "Not provided"}\nBooking reference: ${safeText(input.bookingReference, "Not provided", 80)}\nUrgent: ${urgent ? "yes" : "no"}\nQuestion: ${message}`
                 }
               ]
             }
@@ -102,9 +106,9 @@ export async function POST(request: Request) {
     try {
       await sendSupportEscalationEmail({
         role: "learner",
-        name: input.name,
-        email: input.email,
-        bookingReference: input.bookingReference,
+        name: safeText(input.name, "", 120),
+        email: safeEmail(input.email),
+        bookingReference: safeText(input.bookingReference, "", 80),
         subject: "Learner support escalation",
         message,
         assistantSummary: answer,
@@ -116,7 +120,7 @@ export async function POST(request: Request) {
     escalation = "sent-or-queued";
   }
 
-  return NextResponse.json({
+  return jsonNoStore({
     answer,
     urgent,
     escalation,

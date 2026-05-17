@@ -1,7 +1,8 @@
 import { type EmailOtpType, createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { HANDOFF_COOKIE_NAME, hashHandoffSecret, parseHandoffCookie } from "@/lib/auth-handoff";
+import { isRateLimited, jsonNoStore, rateLimitResponse } from "@/lib/security";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
 
@@ -18,12 +19,7 @@ type HandoffRecord = {
 };
 
 function jsonResponse(body: Record<string, unknown>, status = 200) {
-  return NextResponse.json(body, {
-    status,
-    headers: {
-      "Cache-Control": "no-store"
-    }
-  });
+  return jsonNoStore(body, { status });
 }
 
 function safeRole(role: string) {
@@ -39,6 +35,10 @@ function safeNextPath(value?: string) {
 }
 
 export async function GET(request: NextRequest) {
+  if (isRateLimited(request, "auth-handoff", 60)) {
+    return rateLimitResponse();
+  }
+
   const requestId = request.nextUrl.searchParams.get("request");
   const cookieHandoff = parseHandoffCookie(request.cookies.get(HANDOFF_COOKIE_NAME)?.value);
 

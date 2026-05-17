@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { isRateLimited, jsonNoStore, rateLimitResponse } from "@/lib/security";
 
 type DvlaVerifyRequest = {
   drivingLicenceNumber?: string;
@@ -10,18 +10,22 @@ function normaliseLicence(value?: string) {
 }
 
 export async function POST(request: Request) {
+  if (isRateLimited(request, "dvla-verify", 10)) {
+    return rateLimitResponse();
+  }
+
   const body = (await request.json()) as DvlaVerifyRequest;
   const drivingLicenceNumber = normaliseLicence(body.drivingLicenceNumber);
 
   if (!body.permissionConfirmed) {
-    return NextResponse.json(
+    return jsonNoStore(
       { valid: false, message: "Permission is required before checking DVLA data." },
       { status: 400 }
     );
   }
 
   if (!/^[A-Z0-9]{16}$/.test(drivingLicenceNumber)) {
-    return NextResponse.json(
+    return jsonNoStore(
       { valid: false, message: "Enter a valid 16-character GB photocard driving licence number." },
       { status: 400 }
     );
@@ -34,7 +38,7 @@ export async function POST(request: Request) {
     "https://driver-vehicle-licensing.api.gov.uk/full-driver-enquiry/v1/driving-licences/retrieve";
 
   if (!dvlaApiKey || !dvlaJwt) {
-    return NextResponse.json({
+    return jsonNoStore({
       valid: true,
       mode: "demo",
       message:
@@ -58,13 +62,13 @@ export async function POST(request: Request) {
   });
 
   if (!response.ok) {
-    return NextResponse.json(
+    return jsonNoStore(
       { valid: false, mode: "live", message: "DVLA could not verify that licence number." },
       { status: 400 }
     );
   }
 
-  return NextResponse.json({
+  return jsonNoStore({
     valid: true,
     mode: "live",
     message: "DVLA live check passed."

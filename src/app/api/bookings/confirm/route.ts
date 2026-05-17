@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { sendBookingConfirmationEmails } from "@/lib/email";
+import { isRateLimited, jsonNoStore, rateLimitResponse, safeEmail, safeText } from "@/lib/security";
 import { sendSms } from "@/lib/sms";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -15,21 +15,32 @@ type ConfirmRequest = {
 };
 
 export async function POST(request: Request) {
+  if (isRateLimited(request, "booking-confirm", 20)) {
+    return rateLimitResponse();
+  }
+
   const input = (await request.json()) as ConfirmRequest;
+  const bookingId = safeText(input.bookingId, "", 80);
+  const instructorName = safeText(input.instructorName, "", 120);
+  const lessonSummary = safeText(input.lessonSummary, "", 180);
+  if (!bookingId || !instructorName || !lessonSummary) {
+    return jsonNoStore({ error: "Booking reference, instructor name, and lesson summary are required." }, { status: 400 });
+  }
+
   const manageUrl = `${process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk"}/dashboard`;
 
   await sendBookingConfirmationEmails({
-    bookingReference: input.bookingId,
-    learnerEmail: input.learnerEmail,
-    instructorEmail: input.instructorEmail,
-    instructorName: input.instructorName,
-    lessonSummary: input.lessonSummary,
+    bookingReference: bookingId,
+    learnerEmail: safeEmail(input.learnerEmail),
+    instructorEmail: safeEmail(input.instructorEmail),
+    instructorName,
+    lessonSummary,
     manageUrl
   });
 
   await sendSms({
     to: input.learnerPhone,
-    body: `LDA booking confirmed. Reference: ${input.bookingId}. Thank you for booking ${input.instructorName}. Only share this reference with your instructor when they arrive.`
+    body: `LDA booking confirmed. Reference: ${bookingId}. Thank you for booking ${instructorName}. Only share this reference with your instructor when they arrive.`
   });
 
   const supabase = createAdminClient();
@@ -37,14 +48,14 @@ export async function POST(request: Request) {
   if (supabase && input.instructorId) {
     await supabase.from("notifications").insert({
       user_id: input.instructorId,
-      booking_id: input.bookingId,
+      booking_id: bookingId,
       title: "New paid LDA booking",
-      body: input.lessonSummary,
+      body: lessonSummary,
       notification_type: "booking_paid"
     });
   }
 
-  return NextResponse.json({
+  return jsonNoStore({
     ok: true,
     message: "Learner email, text confirmation, instructor email, and instructor notification flow completed or queued."
   });

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { isRateLimited, jsonNoStore, rateLimitResponse } from "@/lib/security";
 import {
   type BillingInterval,
   type LearnerPackageId,
@@ -37,6 +37,10 @@ function normaliseAppUrl(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (isRateLimited(request, "learner-package-checkout", 15)) {
+    return rateLimitResponse();
+  }
+
   const body = (await request.json()) as LearnerPackageCheckoutRequest;
   const packageId = body.packageId ?? "learner-plus";
   const billingInterval = body.billingInterval ?? "monthly";
@@ -44,11 +48,11 @@ export async function POST(request: Request) {
   const appUrl = normaliseAppUrl(request);
 
   if (!learnerPackage) {
-    return NextResponse.json({ error: "LDA learner package was not found." }, { status: 404 });
+    return jsonNoStore({ error: "LDA learner package was not found." }, { status: 404 });
   }
 
   if (learnerPackage.id === "learner") {
-    return NextResponse.json({
+    return jsonNoStore({
       checkoutUrl: `${appUrl}/learner-dashboard?plan=learner`
     });
   }
@@ -58,14 +62,14 @@ export async function POST(request: Request) {
   const priceId = priceEnvName ? process.env[priceEnvName] : undefined;
 
   if (!stripeSecretKey) {
-    return NextResponse.json(
+    return jsonNoStore(
       { error: "Stripe subscriptions are not configured yet. Add STRIPE_SECRET_KEY in Vercel." },
       { status: 400 }
     );
   }
 
   if (!priceEnvName || !priceId) {
-    return NextResponse.json(
+    return jsonNoStore(
       { error: `Add ${priceEnvName ?? "the Stripe Price ID"} in Vercel to enable this subscription.` },
       { status: 400 }
     );
@@ -96,10 +100,10 @@ export async function POST(request: Request) {
   const session = await response.json();
 
   if (!response.ok) {
-    return NextResponse.json({ error: session.error?.message ?? "Stripe subscription checkout failed" }, { status: 400 });
+    return jsonNoStore({ error: session.error?.message ?? "Stripe subscription checkout failed" }, { status: 400 });
   }
 
-  return NextResponse.json({
+  return jsonNoStore({
     checkoutUrl: session.url,
     checkoutSessionId: session.id
   });

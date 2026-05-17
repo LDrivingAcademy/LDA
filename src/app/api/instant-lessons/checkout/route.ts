@@ -1,4 +1,12 @@
-import { NextResponse } from "next/server";
+import {
+  isRateLimited,
+  jsonNoStore,
+  rateLimitResponse,
+  safeAmountPence,
+  safeCurrency,
+  safeEmail,
+  safeText
+} from "@/lib/security";
 
 type InstantCheckoutRequest = {
   fullName?: string;
@@ -55,25 +63,31 @@ function normaliseAppUrl(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as InstantCheckoutRequest;
+  if (isRateLimited(request, "instant-checkout", 15)) {
+    return rateLimitResponse();
+  }
 
-  if (!required(body.fullName) || !required(body.learnerEmail) || !required(body.provisionalLicenceNumber)) {
-    return NextResponse.json({ error: "Name, email, and provisional licence number are required." }, { status: 400 });
+  const body = (await request.json()) as InstantCheckoutRequest;
+  const learnerEmail = safeEmail(body.learnerEmail);
+  const provisionalLicenceNumber = safeText(body.provisionalLicenceNumber, "", 32).replace(/\s/g, "");
+
+  if (!required(body.fullName) || !learnerEmail || provisionalLicenceNumber.length < 10) {
+    return jsonNoStore({ error: "Name, valid email, and provisional licence number are required." }, { status: 400 });
   }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   const appUrl = normaliseAppUrl(request);
-  const currency = process.env.STRIPE_DEFAULT_CURRENCY ?? "gbp";
-  const amountPence = body.amountPence ?? 6500;
-  const instructorName = body.instructorName ?? "your LDA instructor";
-  const lessonSummary = body.lessonSummary ?? `Instant LDA lesson with ${instructorName}`;
+  const currency = safeCurrency(process.env.STRIPE_DEFAULT_CURRENCY, "gbp");
+  const amountPence = safeAmountPence(body.amountPence, 6500, 2500, 50000);
+  const instructorName = safeText(body.instructorName, "your LDA instructor", 80);
+  const lessonSummary = safeText(body.lessonSummary, `Instant LDA lesson with ${instructorName}`, 180);
   const paymentPreference = normalisePaymentPreference(body.paymentPreference);
   const reference = createReference();
   const successParams = new URLSearchParams({
     reference,
-    email: body.learnerEmail ?? "",
-    phone: body.learnerPhone ?? "",
-    name: body.fullName ?? "",
+    email: learnerEmail,
+    phone: safeText(body.learnerPhone, "", 30),
+    name: safeText(body.fullName, "", 100),
     instructor: instructorName,
     summary: lessonSummary
   });
@@ -81,7 +95,7 @@ export async function POST(request: Request) {
   const cancelUrl = `${appUrl}/lesson-now?payment=cancelled`;
 
   if (!stripeSecretKey) {
-    return NextResponse.json({
+    return jsonNoStore({
       mode: "demo",
       reference,
       message: "Stripe is not configured yet. Add STRIPE_SECRET_KEY for live payment collection.",
@@ -94,8 +108,8 @@ export async function POST(request: Request) {
     success_url: successUrl,
     cancel_url: cancelUrl,
     "metadata[booking_reference]": reference,
-    "metadata[learner_email]": body.learnerEmail ?? "",
-    "metadata[learner_phone]": body.learnerPhone ?? "",
+    "metadata[learner_email]": learnerEmail,
+    "metadata[learner_phone]": safeText(body.learnerPhone, "", 30),
     "metadata[instructor_name]": instructorName,
     "metadata[payment_preference]": paymentPreference,
     "line_items[0][quantity]": "1",
@@ -103,7 +117,7 @@ export async function POST(request: Request) {
     "line_items[0][price_data][unit_amount]": String(amountPence),
     "line_items[0][price_data][product_data][name]": `Instant LDA driving lesson with ${instructorName}`,
     "line_items[0][price_data][product_data][description]": lessonSummary,
-    "customer_email": body.learnerEmail ?? ""
+    "customer_email": learnerEmail
   });
 
   if (paymentPreference === "paypal" || process.env.STRIPE_ENABLE_PAYPAL === "true") {
@@ -124,10 +138,10 @@ export async function POST(request: Request) {
   const session = await response.json();
 
   if (!response.ok) {
-    return NextResponse.json({ error: session.error?.message ?? "Stripe checkout failed" }, { status: 400 });
+    return jsonNoStore({ error: session.error?.message ?? "Stripe checkout failed" }, { status: 400 });
   }
 
-  return NextResponse.json({
+  return jsonNoStore({
     reference,
     checkoutUrl: session.url,
     checkoutSessionId: session.id

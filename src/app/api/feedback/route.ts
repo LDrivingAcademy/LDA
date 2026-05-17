@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { sendProductFeedbackEmail } from "@/lib/email";
+import { isRateLimited, jsonNoStore, rateLimitResponse, safeEmail, safeText } from "@/lib/security";
 
 type FeedbackRequest = {
   name?: string;
@@ -10,23 +10,27 @@ type FeedbackRequest = {
 };
 
 export async function POST(request: Request) {
+  if (isRateLimited(request, "feedback", 10)) {
+    return rateLimitResponse();
+  }
+
   const input = (await request.json()) as FeedbackRequest;
-  const issue = String(input.issue ?? "").trim();
-  const details = String(input.details ?? "").trim();
+  const issue = safeText(input.issue, "", 120);
+  const details = safeText(input.details, "", 4000);
 
   if (!issue || !details) {
-    return NextResponse.json({ error: "Feedback issue and information are required." }, { status: 400 });
+    return jsonNoStore({ error: "Feedback issue and information are required." }, { status: 400 });
   }
 
   await sendProductFeedbackEmail({
-    name: String(input.name ?? "").trim(),
-    email: String(input.email ?? "").trim(),
+    name: safeText(input.name, "", 120),
+    email: safeEmail(input.email),
     issue,
     details,
-    pageUrl: String(input.pageUrl ?? "").trim()
+    pageUrl: safeText(input.pageUrl, "", 300)
   });
 
-  return NextResponse.json({
+  return jsonNoStore({
     ok: true,
     message: "Thank you for the feedback."
   });

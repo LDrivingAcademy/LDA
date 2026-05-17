@@ -1,4 +1,11 @@
-import { NextResponse } from "next/server";
+import {
+  isRateLimited,
+  jsonNoStore,
+  rateLimitResponse,
+  safeAmountPence,
+  safeCurrency,
+  safeText
+} from "@/lib/security";
 
 type CheckoutRequest = {
   bookingId?: string;
@@ -42,19 +49,23 @@ function normaliseAppUrl(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (isRateLimited(request, "booking-checkout", 20)) {
+    return rateLimitResponse();
+  }
+
   const body = (await request.json()) as CheckoutRequest;
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   const appUrl = normaliseAppUrl(request);
-  const currency = process.env.STRIPE_DEFAULT_CURRENCY ?? "gbp";
-  const amountPence = body.amountPence ?? 4200;
-  const instructorName = body.instructorName ?? "your driving instructor";
-  const bookingId = body.bookingId ?? "demo-booking";
+  const currency = safeCurrency(process.env.STRIPE_DEFAULT_CURRENCY, "gbp");
+  const amountPence = safeAmountPence(body.amountPence, 4200, 1000, 30000);
+  const instructorName = safeText(body.instructorName, "your driving instructor", 80);
+  const bookingId = safeText(body.bookingId, "demo-booking", 80);
   const paymentPreference = normalisePaymentPreference(body.paymentPreference);
-  const commissionPercent = Number(process.env.LDA_PLATFORM_COMMISSION_PERCENT ?? 10);
+  const commissionPercent = Math.min(Math.max(Number(process.env.LDA_PLATFORM_COMMISSION_PERCENT ?? 10), 0), 30);
   const applicationFeeAmount = Math.round(amountPence * (commissionPercent / 100));
 
   if (!stripeSecretKey) {
-    return NextResponse.json({
+    return jsonNoStore({
       mode: "demo",
       message: "Stripe is not configured yet. Add STRIPE_SECRET_KEY to create live Checkout sessions.",
       checkoutUrl: `${appUrl}/learner-dashboard?demoCheckout=1&booking=${encodeURIComponent(bookingId)}`
@@ -97,10 +108,10 @@ export async function POST(request: Request) {
   const session = await response.json();
 
   if (!response.ok) {
-    return NextResponse.json({ error: session.error?.message ?? "Stripe checkout failed" }, { status: 400 });
+    return jsonNoStore({ error: session.error?.message ?? "Stripe checkout failed" }, { status: 400 });
   }
 
-  return NextResponse.json({
+  return jsonNoStore({
     checkoutUrl: session.url,
     checkoutSessionId: session.id
   });

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { sendBookingCancellationEmails } from "@/lib/email";
+import { isRateLimited, jsonNoStore, rateLimitResponse, safeEmail, safeText } from "@/lib/security";
 import { sendSms } from "@/lib/sms";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -40,19 +40,28 @@ function getRefundSummary(startsAt: string) {
 }
 
 export async function POST(request: Request) {
+  if (isRateLimited(request, "booking-cancel", 12)) {
+    return rateLimitResponse();
+  }
+
   const input = (await request.json()) as CancelBookingRequest;
+  const bookingId = safeText(input.bookingId, "", 80);
+  if (!bookingId || !safeText(input.instructorName, "", 120) || !safeText(input.lessonSummary, "", 180)) {
+    return jsonNoStore({ error: "Booking reference, instructor name, and lesson summary are required." }, { status: 400 });
+  }
+
   const policyUrl = `${process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk"}/cancellation-policy`;
   const refundSummary = getRefundSummary(input.startsAt);
-  const learnerSms = `LDA lesson cancelled. Ref: ${input.bookingId}. ${refundSummary} Policy: ${policyUrl}`;
-  const instructorSms = `LDA lesson cancelled by learner. Ref: ${input.bookingId}. ${input.lessonSummary}`;
+  const learnerSms = `LDA lesson cancelled. Ref: ${bookingId}. ${refundSummary} Policy: ${policyUrl}`;
+  const instructorSms = `LDA lesson cancelled by learner. Ref: ${bookingId}. ${safeText(input.lessonSummary, "", 180)}`;
 
   await sendBookingCancellationEmails({
-    bookingReference: input.bookingId,
-    learnerEmail: input.learnerEmail,
-    instructorEmail: input.instructorEmail,
-    learnerName: input.learnerName,
-    instructorName: input.instructorName,
-    lessonSummary: input.lessonSummary,
+    bookingReference: bookingId,
+    learnerEmail: safeEmail(input.learnerEmail),
+    instructorEmail: safeEmail(input.instructorEmail),
+    learnerName: safeText(input.learnerName, "", 120),
+    instructorName: safeText(input.instructorName, "", 120),
+    lessonSummary: safeText(input.lessonSummary, "", 180),
     refundSummary,
     policyUrl
   });
@@ -64,14 +73,14 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient();
 
-  if (supabase && uuidPattern.test(input.bookingId)) {
+  if (supabase && uuidPattern.test(bookingId)) {
     await supabase
       .from("bookings")
       .update({
         status: "cancelled",
-        cancellation_reason: input.reason || "Learner cancelled from account centre"
+        cancellation_reason: safeText(input.reason, "Learner cancelled from account centre", 300)
       })
-      .eq("id", input.bookingId);
+      .eq("id", bookingId);
 
     const notifications: {
       user_id: string;
@@ -84,7 +93,7 @@ export async function POST(request: Request) {
     if (input.learnerId) {
       notifications.push({
         user_id: input.learnerId,
-        booking_id: input.bookingId,
+        booking_id: bookingId,
         title: "Lesson cancelled",
         body: refundSummary,
         notification_type: "booking_cancelled"
@@ -94,9 +103,9 @@ export async function POST(request: Request) {
     if (input.instructorId) {
       notifications.push({
         user_id: input.instructorId,
-        booking_id: input.bookingId,
+        booking_id: bookingId,
         title: "Learner cancelled lesson",
-        body: input.lessonSummary,
+        body: safeText(input.lessonSummary, "", 180),
         notification_type: "booking_cancelled"
       });
     }
@@ -106,7 +115,7 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({
+  return jsonNoStore({
     ok: true,
     refundSummary,
     message: "Cancellation confirmed. Learner and instructor notifications have been queued where contact details are available."
