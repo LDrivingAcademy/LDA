@@ -257,11 +257,11 @@ function OnDemandLessonCard({ className = "" }: { className?: string }) {
           Enter pickup details, verify your provisional licence, pay securely, then receive a booking reference and tracking link.
         </p>
       </div>
-      <div className="grid gap-3 justify-self-start">
-        <Link href="/lesson-now" className="lda-pill">
+      <div className="grid w-full gap-3 justify-self-start sm:w-80">
+        <Link href="/lesson-now" className="lda-pill w-full">
           On-demand lesson
         </Link>
-        <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm">
+        <Link href="/auth/sign-up?role=learner" className="lda-pill w-full">
           Book future lessons
         </Link>
       </div>
