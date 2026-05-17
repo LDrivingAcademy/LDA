@@ -16,6 +16,7 @@ import { FeedbackButton } from "@/components/feedback-button";
 import { LanguageSelector } from "@/components/language-selector";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
+import { getHeaderAccountSummary } from "@/lib/current-account";
 
 type CardVisualType = "car" | "calendar" | "match" | "instructor" | "tracking" | "social" | "progress";
 
@@ -84,7 +85,9 @@ const safetyItems = [
   "Secure payment and booking records for every lesson"
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const account = await getHeaderAccountSummary();
+
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
@@ -106,13 +109,39 @@ export default function HomePage() {
             <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
               <HelpCircle size={17} /> Help
             </Link>
-              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
-            <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
+            {account ? (
+              <>
+                <Link href={account.dashboardHref} className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
+                  {account.name}
+                </Link>
+                <Link href={account.subscriptionHref} className="lda-pill lda-pill-sm whitespace-nowrap">
+                  {account.subscriptionLabel}
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
+                <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3 xl:hidden">
-            <Link href="/auth/login?role=learner" className="hidden rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand sm:inline-flex">Log in</Link>
-            <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
-            <MainMenu />
+            {account ? (
+              <>
+                <Link href={account.dashboardHref} className="hidden rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand sm:inline-flex">
+                  {account.name}
+                </Link>
+                <Link href={account.subscriptionHref} className="lda-pill lda-pill-sm whitespace-nowrap">
+                  {account.subscriptionLabel}
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/login?role=learner" className="hidden rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand sm:inline-flex">Log in</Link>
+                <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
+              </>
+            )}
+            <MainMenu account={account} />
           </div>
         </div>
       </header>

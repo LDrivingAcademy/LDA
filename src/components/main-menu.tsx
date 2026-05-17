@@ -16,9 +16,26 @@ const menuLinks = [
   { href: "/contact", label: "Help" }
 ];
 
-export function MainMenu() {
+type MainMenuAccount = {
+  dashboardHref: string;
+  name: string;
+  subscriptionHref: string;
+  subscriptionLabel: string;
+};
+
+export function MainMenu({ account }: { account?: MainMenuAccount | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const activeLinks = account
+    ? [
+        { href: account.dashboardHref, label: account.name },
+        { href: account.subscriptionHref, label: account.subscriptionLabel },
+        { href: "/instructor", label: "Become an Instructor" },
+        { href: "/cancellation-policy", label: "Cancellation policy" },
+        { href: "/about", label: "About" },
+        { href: "/contact", label: "Help" }
+      ]
+    : menuLinks;
 
   useEffect(() => {
     if (!isOpen) {
@@ -62,7 +79,7 @@ export function MainMenu() {
           <div className="border-b border-zinc-800 px-4 py-3">
             <LanguageSelector />
           </div>
-          {menuLinks.map((link) => (
+          {activeLinks.map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} className="block px-4 py-3 text-sm font-black hover:bg-red-500/10 hover:text-brand">
               {link.label}
             </Link>
