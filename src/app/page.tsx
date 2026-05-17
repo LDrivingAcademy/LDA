@@ -121,7 +121,7 @@ export default async function HomePage() {
             ) : (
               <>
                 <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
-                <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
+                <Link href="/auth/sign-up?role=learner" className="rounded-full bg-brand px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-red-300">Sign up</Link>
               </>
             )}
           </div>
@@ -138,7 +138,7 @@ export default async function HomePage() {
             ) : (
               <>
                 <Link href="/auth/login?role=learner" className="hidden rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand sm:inline-flex">Log in</Link>
-                <Link href="/auth/sign-up?role=learner" className="lda-pill lda-pill-sm whitespace-nowrap">Sign up</Link>
+                <Link href="/auth/sign-up?role=learner" className="rounded-full bg-brand px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-red-300">Sign up</Link>
               </>
             )}
             <MainMenu account={account} />
