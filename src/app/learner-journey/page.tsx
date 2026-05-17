@@ -145,7 +145,7 @@ export default function LearnerJourneyPage() {
               <Link href="/learner-dashboard" className="rounded-full border border-red-500/60 bg-red-500/15 px-3 py-2 text-sm font-black text-white ring-2 ring-brand">
                 Learner
               </Link>
-              <Link href="/smart-match" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+              <Link href="/smart-match?from=dashboard" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 SmartMatch
               </Link>
               <Link href="/support/learner" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
@@ -225,7 +225,7 @@ export default function LearnerJourneyPage() {
               <div className="text-sm font-black uppercase text-brand">Journey sections</div>
               <h2 className="mt-2 text-3xl font-black">Open the area you want to work on.</h2>
             </div>
-            <Link href="/smart-match" className="lda-pill lda-pill-sm">
+            <Link href="/smart-match?from=dashboard" className="lda-pill lda-pill-sm">
               Use SmartMatch <ArrowRight size={17} />
             </Link>
           </div>
