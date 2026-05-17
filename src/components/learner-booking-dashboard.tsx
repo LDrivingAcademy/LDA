@@ -522,27 +522,27 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
             <p className="mt-2 text-sm leading-6 text-zinc-600">Adjust the filters first, then choose an instructor and a visible availability slot.</p>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-3">
+          <div className="grid items-stretch gap-4 xl:grid-cols-3">
             {filteredInstructors.map((instructor) => (
-              <article key={instructor.id} className={`rounded border p-5 shadow-sm ${selectedInstructor.id === instructor.id ? "border-brand bg-red-50" : "border-zinc-200 bg-white"}`}>
-                <div className="flex items-start justify-between gap-3">
+              <article key={instructor.id} className={`flex h-full min-h-[430px] flex-col rounded border p-5 shadow-sm ${selectedInstructor.id === instructor.id ? "border-brand bg-red-50" : "border-zinc-200 bg-white"}`}>
+                <div className="flex min-h-[122px] items-start justify-between gap-3">
                   <div>
                     <div className="grid h-16 w-16 place-items-center rounded bg-black text-xl font-black text-white">{instructor.name.slice(0, 1)}</div>
                     <h3 className="mt-4 text-xl font-black">{instructor.name}</h3>
                   </div>
                   <span className="rounded bg-red-500/10 px-2 py-1 text-xs font-black text-brand">Verified {instructor.type}</span>
                 </div>
-                <p className="mt-2 text-sm leading-6 text-zinc-600">{instructor.bio}</p>
-                <div className="mt-4 grid gap-2 text-sm text-zinc-700">
-                  <span className="inline-flex items-center gap-2"><Star size={16} className="text-brand" /> {instructor.rating} rating</span>
-                  <span className="inline-flex items-center gap-2"><MapPin size={16} className="text-brand" /> {instructor.distanceMiles} miles away</span>
-                  <span className="inline-flex items-center gap-2"><CarFront size={16} className="text-brand" /> {instructor.car} · {instructor.transmission}</span>
-                  <span className="inline-flex items-center gap-2"><Clock3 size={16} className="text-brand" /> Next: {instructor.next}</span>
+                <p className="mt-2 truncate text-sm leading-6 text-zinc-600" title={instructor.bio}>{instructor.bio}</p>
+                <div className="mt-4 grid min-h-[116px] grid-rows-4 gap-2 text-sm text-zinc-700">
+                  <span className="inline-flex min-w-0 items-center gap-2"><Star size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.rating} rating</span></span>
+                  <span className="inline-flex min-w-0 items-center gap-2"><MapPin size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.distanceMiles} miles away</span></span>
+                  <span className="inline-flex min-w-0 items-center gap-2"><CarFront size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.car} · {instructor.transmission}</span></span>
+                  <span className="inline-flex min-w-0 items-center gap-2"><Clock3 size={16} className="shrink-0 text-brand" /> <span className="truncate">Next: {instructor.next}</span></span>
                 </div>
-                <div className="mt-3 rounded border border-zinc-200 bg-zinc-50 p-3 text-xs font-bold leading-5 text-zinc-700">
-                  Covers {instructor.areas}. Hourly rate {formatMoney(instructor.price)}.
+                <div className="mt-3 min-h-[46px] rounded border border-zinc-200 bg-zinc-50 p-3 text-xs font-bold leading-5 text-zinc-700">
+                  <div className="truncate" title={`Covers ${instructor.areas}`}>Covers {instructor.areas}</div>
                 </div>
-                <div className="mt-5 flex items-center justify-between border-t border-zinc-200 pt-4">
+                <div className="mt-auto flex items-center justify-between border-t border-zinc-200 pt-4">
                   <div>
                     <div className="text-xs font-bold uppercase text-zinc-600">Price</div>
                     <div className="text-2xl font-black">{formatMoney(instructor.price)}/hr</div>
