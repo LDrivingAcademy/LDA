@@ -134,7 +134,7 @@ export function RoadworthyGuide() {
   return (
     <div className="grid gap-8">
       <section className="grid gap-4 lg:grid-cols-[360px_1fr]">
-        <aside className="rounded border border-zinc-800 bg-zinc-950 p-5 text-white">
+        <aside className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
             <SlidersHorizontal size={16} /> Skill fade selector
           </div>
@@ -153,12 +153,12 @@ export function RoadworthyGuide() {
           </div>
         </aside>
 
-        <section className="rounded border border-zinc-800 bg-black p-5 text-white">
+        <section className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
             <ShieldCheck size={16} /> Suggested refresh route
           </div>
           <h2 className="mt-3 text-3xl font-black">{selectedPlan.label}</h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-300">{selectedPlan.summary}</p>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-700">{selectedPlan.summary}</p>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             <Metric label="Recommended videos" value={`${selectedPlan.videoCount}`} />
             <Metric label="Instructor check" value={selectedPlan.practice} />
@@ -166,7 +166,7 @@ export function RoadworthyGuide() {
           </div>
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
             {selectedPlan.focus.map((item) => (
-              <div key={item} className="rounded border border-zinc-800 bg-zinc-950 p-3 text-sm font-bold text-zinc-200">
+              <div key={item} className="rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-bold text-zinc-800">
                 {item}
               </div>
             ))}
@@ -174,13 +174,13 @@ export function RoadworthyGuide() {
         </section>
       </section>
 
-      <section className="rounded border border-zinc-800 bg-zinc-950 p-5 text-white">
+      <section className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
         <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
           <Search size={16} /> Video search
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
           <input
-            className="rounded border border-zinc-800 bg-black px-4 py-4 text-white placeholder:text-zinc-600"
+            className="rounded border border-zinc-300 bg-white px-4 py-4 text-black placeholder:text-zinc-500"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search: roundabouts, parking, hazard perception, motorway..."
             value={query}
@@ -191,10 +191,10 @@ export function RoadworthyGuide() {
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           {(query ? filteredTopics : recommendedTopics.length ? recommendedTopics : videoTopics).map((topic) => (
-            <article key={topic.title} className="rounded border border-zinc-800 bg-black p-4">
+            <article key={topic.title} className="rounded border border-zinc-200 bg-zinc-50 p-4">
               <div className="text-xs font-black uppercase text-brand">{topic.category}</div>
               <h3 className="mt-2 text-xl font-black">{topic.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-400">{topic.reason}</p>
+              <p className="mt-2 text-sm leading-6 text-zinc-700">{topic.reason}</p>
               <a
                 className="lda-pill lda-pill-sm mt-4"
                 href={`https://www.youtube.com/results?search_query=${encodeURIComponent(topic.query)}`}
@@ -209,7 +209,7 @@ export function RoadworthyGuide() {
       </section>
 
       <section className="grid gap-5 lg:grid-cols-[1fr_420px]">
-        <div className="rounded border border-zinc-800 bg-zinc-950 p-5 text-white">
+        <div className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
             <CarFront size={16} /> What fades first
           </div>
@@ -221,21 +221,21 @@ export function RoadworthyGuide() {
               "Parking and reversing, because they combine observation, steering, spacing, and low-speed control.",
               "Rule memory, because Highway Code updates can happen while a driver is away from the road."
             ].map((item) => (
-              <div key={item} className="flex gap-3 rounded border border-zinc-800 bg-black p-4">
+              <div key={item} className="flex gap-3 rounded border border-zinc-200 bg-zinc-50 p-4">
                 <BookOpenCheck className="mt-0.5 shrink-0 text-brand" size={18} />
-                <p className="text-sm leading-6 text-zinc-300">{item}</p>
+                <p className="text-sm leading-6 text-zinc-700">{item}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <aside className="rounded border border-zinc-800 bg-black p-5 text-white">
+        <aside className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
             <Clock3 size={16} /> Rule refresh
           </div>
           <div className="mt-4 grid gap-3">
             {ruleUpdates.map((update) => (
-              <div key={update} className="rounded bg-zinc-950 p-3 text-sm font-bold leading-6 text-zinc-300">
+              <div key={update} className="rounded bg-zinc-50 p-3 text-sm font-bold leading-6 text-zinc-700">
                 {update}
               </div>
             ))}
@@ -248,9 +248,9 @@ export function RoadworthyGuide() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded border border-zinc-800 bg-zinc-950 p-4">
+    <div className="rounded border border-zinc-200 bg-zinc-50 p-4">
       <div className="text-xs font-black uppercase text-zinc-500">{label}</div>
-      <div className="mt-2 text-sm font-black leading-6 text-white">{value}</div>
+      <div className="mt-2 text-sm font-black leading-6 text-black">{value}</div>
     </div>
   );
 }
