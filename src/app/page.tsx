@@ -175,7 +175,7 @@ export default function HomePage() {
               {suggestionCards.map((card) => {
                 const stretchTitle = card.title === "Progress Tracker" || card.title === "Subscribe & Socials";
                 return (
-                <Link key={card.title} href={card.href} className={`group grid min-h-[210px] grid-cols-[1fr_150px] overflow-hidden rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200 ${card.title === "Subscribe & Socials" ? "xl:col-start-2" : ""}`}>
+                <Link key={card.title} href={card.href} className={`group grid min-h-[210px] grid-cols-[1fr_150px] overflow-hidden rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200 ${card.title === "Subscribe & Socials" ? "md:col-span-2 xl:col-span-3" : ""}`}>
                   {stretchTitle ? <h3 className="col-span-2 text-2xl font-black">{card.title}</h3> : null}
                   <div className="flex flex-col items-start">
                     {!stretchTitle ? <h3 className="text-2xl font-black">{card.title}</h3> : null}
