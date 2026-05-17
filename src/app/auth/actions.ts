@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { headers } from "next/headers";
 import { canSendTransactionalEmail, sendAuthMagicLinkEmail } from "@/lib/email";
 import { createHandoffSecret, hashHandoffSecret, setHandoffCookie } from "@/lib/auth-handoff";
-import { ensureEmailCanUseRole, ensureEmailDoesNotHaveDifferentRole, ensureUserCanUseRole, getMarketplaceRolesForUser, roleConflictMessage, type MarketplaceRole } from "@/lib/account-role-guard";
+import { ensureEmailCanUseRole, ensureEmailDoesNotHaveDifferentRole, ensureUserCanUseRole, getMarketplaceRolesForUser, isDualMarketplaceRoleTestEmail, roleConflictMessage, type MarketplaceRole } from "@/lib/account-role-guard";
 import { isAtLeast17 } from "@/lib/learner-eligibility";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -23,6 +23,10 @@ function safeNextPath(value: FormDataEntryValue | null) {
 function safeRole(value: FormDataEntryValue | null): MarketplaceRole {
   const role = String(value ?? "learner");
   return role === "instructor" ? "instructor" : "learner";
+}
+
+function isAlreadyRegisteredAuthError(error: { message?: string } | null) {
+  return /already|registered|exists/i.test(error?.message ?? "");
 }
 
 function getSubmittedFullName(formData: FormData) {
@@ -411,7 +415,7 @@ export async function signUp(formData: FormData) {
     signUpRedirect(`LDA could not start email verification. Run the latest Supabase migration, then try again. ${handoffError.message}`, role);
   }
 
-  const { data, error } = await adminClient.auth.admin.generateLink({
+  let { data, error } = await adminClient.auth.admin.generateLink({
     type: "signup",
     options: {
       redirectTo: redirectTo.toString(),
@@ -421,8 +425,26 @@ export async function signUp(formData: FormData) {
     password
   });
 
+  if (error && isDualMarketplaceRoleTestEmail(email) && isAlreadyRegisteredAuthError(error)) {
+    const fallbackLink = await adminClient.auth.admin.generateLink({
+      type: "magiclink",
+      options: {
+        redirectTo: redirectTo.toString(),
+        data: { account_intent: accountIntent }
+      },
+      email
+    });
+
+    data = fallbackLink.data;
+    error = fallbackLink.error;
+  }
+
   if (error) {
     signUpRedirect(error.message, role);
+  }
+
+  if (!data?.properties?.hashed_token) {
+    signUpRedirect("LDA could not create the secure email confirmation. Please try again.", role);
   }
 
   const confirmUrl = new URL("/auth/confirm", appOrigin);

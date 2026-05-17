@@ -8,7 +8,18 @@ type AccountRoleRow = {
 
 type ProfileRow = {
   id: string;
+  email?: string | null;
 };
+
+const DUAL_MARKETPLACE_ROLE_TEST_EMAILS = new Set(["joshuamn1@hotmail.com"]);
+
+export function normalizeAccountEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+export function isDualMarketplaceRoleTestEmail(email: string) {
+  return DUAL_MARKETPLACE_ROLE_TEST_EMAILS.has(normalizeAccountEmail(email));
+}
 
 export function oppositeMarketplaceRole(role: MarketplaceRole): MarketplaceRole {
   return role === "learner" ? "instructor" : "learner";
@@ -42,7 +53,7 @@ export async function getMarketplaceRolesForUser(client: SupabaseClient, userId:
 }
 
 export async function getMarketplaceRolesForEmail(client: SupabaseClient, email: string) {
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = normalizeAccountEmail(email);
   const { data: profiles, error: profileError } = await client
     .from("profiles")
     .select("id")
@@ -62,16 +73,41 @@ export async function getMarketplaceRolesForEmail(client: SupabaseClient, email:
   return getMarketplaceRolesForUser(client, profile.id);
 }
 
+export async function isDualMarketplaceRoleTestUser(client: SupabaseClient, userId: string) {
+  const { data: profiles, error } = await client
+    .from("profiles")
+    .select("email")
+    .eq("id", userId)
+    .limit(1)
+    .returns<ProfileRow[]>();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const email = profiles?.[0]?.email;
+  return email ? isDualMarketplaceRoleTestEmail(email) : false;
+}
+
 export async function ensureEmailCanUseRole(client: SupabaseClient, email: string, requestedRole: MarketplaceRole) {
   const existingRoles = await getMarketplaceRolesForEmail(client, email);
-  const existingMarketplaceRole = existingRoles.find((role) => role === requestedRole) ?? existingRoles[0];
+  const matchingRole = existingRoles.find((role) => role === requestedRole);
+  const conflictingRole = existingRoles.find((role) => role !== requestedRole);
 
-  if (existingMarketplaceRole) {
-    throw new Error(roleConflictMessage(existingMarketplaceRole, requestedRole));
+  if (matchingRole) {
+    throw new Error(roleConflictMessage(matchingRole, requestedRole));
+  }
+
+  if (conflictingRole && !isDualMarketplaceRoleTestEmail(email)) {
+    throw new Error(roleConflictMessage(conflictingRole, requestedRole));
   }
 }
 
 export async function ensureEmailDoesNotHaveDifferentRole(client: SupabaseClient, email: string, requestedRole: MarketplaceRole) {
+  if (isDualMarketplaceRoleTestEmail(email)) {
+    return;
+  }
+
   const existingRoles = await getMarketplaceRolesForEmail(client, email);
   const conflictingRole = existingRoles.find((role) => role !== requestedRole);
 
@@ -84,7 +120,7 @@ export async function ensureUserCanUseRole(client: SupabaseClient, userId: strin
   const existingRoles = await getMarketplaceRolesForUser(client, userId);
   const conflictingRole = existingRoles.find((role) => role !== requestedRole);
 
-  if (conflictingRole) {
+  if (conflictingRole && !(await isDualMarketplaceRoleTestUser(client, userId))) {
     throw new Error(roleConflictMessage(conflictingRole, requestedRole));
   }
 }
