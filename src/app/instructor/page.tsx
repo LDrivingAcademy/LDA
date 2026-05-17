@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, CarFront, FileUp, MapPinned, ShieldCheck, WalletCards } from "lucide-react";
+import { ArrowRight, BadgeCheck, CalendarDays, CarFront, FileUp, MapPinned, ShieldCheck, WalletCards } from "lucide-react";
+import { PageTopBar } from "@/components/page-top-bar";
 import { SiteFooter } from "@/components/site-footer";
 import { instructorJourneyStages, instructorSteps } from "@/lib/marketplace-content";
 
@@ -13,19 +14,17 @@ const onboardingBlocks = [
 export default function InstructorPage() {
   return (
     <>
-      <main className="min-h-screen bg-black">
-        <section className="bg-ink px-4 py-8 text-white sm:px-6 lg:px-8">
+      <PageTopBar />
+      <main className="min-h-screen bg-white text-black">
+        <section className="px-4 py-10 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-zinc-300 hover:text-white">
-              <ArrowLeft size={16} /> Back to homepage
-            </Link>
-            <div className="grid gap-8 py-10 lg:grid-cols-[1fr_460px]">
+            <div className="grid gap-8 lg:grid-cols-[1fr_460px]">
               <div>
-                <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
+                <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-brand">
                   <ShieldCheck size={16} /> Instructor onboarding
                 </div>
                 <h1 className="mt-5 max-w-4xl text-4xl font-black tracking-normal sm:text-6xl">Join LDA as a verified driving instructor.</h1>
-                <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-300">
+                <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-700">
                   Instructors have a separate route from learners. Submit verification, set your profile and pricing, publish availability, then wait for admin approval before appearing in search.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
@@ -37,12 +36,12 @@ export default function InstructorPage() {
                   </Link>
                 </div>
               </div>
-              <div className="rounded border border-zinc-800 bg-zinc-950 p-5 text-white shadow-2xl">
+              <div className="rounded border border-zinc-200 bg-white p-5 text-black shadow-2xl">
                 <div className="text-sm font-black uppercase text-brand">Approval checklist</div>
                 <div className="mt-4 grid gap-3">
                   {instructorSteps.map((step, index) => (
-                    <div key={step} className="flex gap-3 rounded border border-zinc-800 bg-black p-3">
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded bg-ink text-xs font-black text-white">{index + 1}</span>
+                    <div key={step} className="flex gap-3 rounded border border-zinc-200 bg-white p-3">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded bg-black text-xs font-black text-white">{index + 1}</span>
                       <span className="text-sm font-bold leading-6">{step}</span>
                     </div>
                   ))}
@@ -59,10 +58,10 @@ export default function InstructorPage() {
           </div>
           <div className="mb-10 grid gap-3 md:grid-cols-3">
             {instructorJourneyStages.map((stage, index) => (
-              <article key={stage.title} className="rounded border border-zinc-800 bg-zinc-950 p-4 shadow-sm">
+              <article key={stage.title} className="rounded border border-zinc-200 bg-white p-4 shadow-sm">
                 <div className="text-xs font-black text-brand">Stage {index + 1}</div>
                 <h3 className="mt-2 font-black">{stage.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-zinc-400">{stage.detail}</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-700">{stage.detail}</p>
               </article>
             ))}
           </div>
@@ -70,30 +69,30 @@ export default function InstructorPage() {
             {onboardingBlocks.map((block) => {
               const Icon = block.icon;
               return (
-                <article key={block.title} className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
+                <article key={block.title} className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
                   <Icon className="text-brand" />
                   <h2 className="mt-4 text-xl font-black">{block.title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-zinc-400">{block.detail}</p>
+                  <p className="mt-2 text-sm leading-6 text-zinc-700">{block.detail}</p>
                 </article>
               );
             })}
           </div>
         </section>
 
-        <section className="border-y border-zinc-800 bg-zinc-950">
+        <section className="border-y border-zinc-200 bg-zinc-50">
           <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[360px_1fr] lg:px-8">
             <div>
               <div className="inline-flex items-center gap-2 rounded bg-red-500/10 px-3 py-2 text-sm font-black text-brand">
                 <BadgeCheck size={16} /> Search visibility
               </div>
               <h2 className="mt-4 text-3xl font-black">No approval, no listing.</h2>
-              <p className="mt-3 text-sm leading-6 text-zinc-400">
+              <p className="mt-3 text-sm leading-6 text-zinc-700">
                 This protects learners and keeps the marketplace professional. Admin must approve an instructor before they appear in postcode search or receive bookings.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               {["Verification pending", "Approved profile", "Live availability"].map((item) => (
-                <div key={item} className="rounded border border-zinc-800 bg-zinc-950 p-4">
+                <div key={item} className="rounded border border-zinc-200 bg-white p-4 shadow-sm">
                   <MapPinned className="mb-3 text-brand" size={20} />
                   <div className="font-black">{item}</div>
                 </div>
