@@ -18,6 +18,8 @@ import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
 import { getHeaderAccountSummary } from "@/lib/current-account";
 
+export const dynamic = "force-dynamic";
+
 type CardVisualType = "car" | "calendar" | "match" | "instructor" | "tracking" | "social" | "progress";
 
 const suggestionCards: {
@@ -117,6 +119,7 @@ export default async function HomePage() {
                 <Link href={account.subscriptionHref} className="lda-pill lda-pill-sm whitespace-nowrap">
                   {account.subscriptionLabel}
                 </Link>
+                <MainMenu account={account} />
               </>
             ) : (
               <>
