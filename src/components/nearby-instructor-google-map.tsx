@@ -105,8 +105,27 @@ function pointFromDistance(center: LatLng, distanceMiles: number, bearingDegrees
 }
 
 function markerIcon(label: string, isSelected: boolean, isLearner = false) {
-  const fill = isLearner ? "#000000" : isSelected ? "#e50914" : "#111111";
   const google = googleWindow().google;
+
+  if (isLearner) {
+    return {
+      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="116" height="72" viewBox="0 0 116 72">
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity=".28"/>
+          </filter>
+          <path filter="url(#shadow)" d="M30 4c14.4 0 26 11.6 26 26 0 18.5-26 38-26 38S4 48.5 4 30C4 15.6 15.6 4 30 4Z" fill="#e50914" stroke="#fff" stroke-width="5"/>
+          <rect filter="url(#shadow)" x="48" y="14" width="60" height="34" rx="17" fill="#fff" stroke="#e5e7eb" stroke-width="2"/>
+          <text x="30" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#fff">•</text>
+          <text x="78" y="37" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#111">You</text>
+        </svg>
+      `)}`,
+      scaledSize: new google.maps.Size(92, 58),
+      anchor: new google.maps.Point(24, 56)
+    };
+  }
+
+  const fill = isSelected ? "#e50914" : "#111111";
 
   return {
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
@@ -134,6 +153,7 @@ export function NearbyInstructorGoogleMap({
   const mapRef = useRef<any>(null);
   const learnerMarkerRef = useRef<any>(null);
   const instructorMarkersRef = useRef<any[]>([]);
+  const distanceLinesRef = useRef<any[]>([]);
   const radiusRef = useRef<any>(null);
   const infoWindowRef = useRef<any>(null);
   const [mapState, setMapState] = useState<"loading" | "ready" | "missing-key" | "error">("loading");
@@ -196,9 +216,9 @@ export function NearbyInstructorGoogleMap({
       learnerMarkerRef.current = new google.maps.Marker({
         map: mapRef.current,
         position: center,
-        title: "Your live location",
+        title: "You / pickup point",
         icon: markerIcon("You", true, true),
-        zIndex: 20
+        zIndex: 100
       });
     } else {
       learnerMarkerRef.current.setPosition(center);
@@ -226,8 +246,26 @@ export function NearbyInstructorGoogleMap({
     if (!mapRef.current || !google?.maps) return;
 
     instructorMarkersRef.current.forEach((marker) => marker.setMap(null));
+    distanceLinesRef.current.forEach((line) => line.setMap(null));
+    distanceLinesRef.current = [];
+
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend(center);
+
     instructorMarkersRef.current = instructorPositions.map(({ instructor, position }) => {
       const isSelected = instructor.id === selectedInstructorId;
+      bounds.extend(position);
+
+      const line = new google.maps.Polyline({
+        map: mapRef.current,
+        path: [center, position],
+        strokeColor: isSelected ? "#e50914" : "#111111",
+        strokeOpacity: isSelected ? 0.55 : 0.18,
+        strokeWeight: isSelected ? 3 : 2,
+        zIndex: isSelected ? 5 : 1
+      });
+      distanceLinesRef.current.push(line);
+
       const marker = new google.maps.Marker({
         map: mapRef.current,
         position,
@@ -251,7 +289,11 @@ export function NearbyInstructorGoogleMap({
 
       return marker;
     });
-  }, [instructorPositions, onSelectInstructor, selectedInstructorId]);
+
+    if (!bounds.isEmpty()) {
+      mapRef.current.fitBounds(bounds, 72);
+    }
+  }, [center, instructorPositions, onSelectInstructor, selectedInstructorId]);
 
   return (
     <div className="relative mt-5 h-[420px] overflow-hidden rounded border border-zinc-200 bg-[#eef2ef] shadow-inner">
