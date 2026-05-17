@@ -393,6 +393,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
         lessonSummary,
         amountPence: selectedInstructor.price,
         stripeConnectedAccountId: selectedInstructor.stripeConnectedAccountId,
+        learnerEmail,
         paymentPreference: "checkout"
       })
     }).then((response) => response.json().then((result) => (response.ok ? result : Promise.reject(result))));

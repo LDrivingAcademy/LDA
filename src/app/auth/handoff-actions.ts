@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createHandoffSecret, hashHandoffSecret, setHandoffCookie } from "@/lib/auth-handoff";
+import { ensureEmailDoesNotHaveDifferentRole, type MarketplaceRole } from "@/lib/account-role-guard";
 import { canSendTransactionalEmail, sendAuthMagicLinkEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -10,7 +11,7 @@ function authError(message: string): never {
   redirect(`/auth/login?message=${encodeURIComponent(message)}`);
 }
 
-function safeRole(value: FormDataEntryValue | null) {
+function safeRole(value: FormDataEntryValue | null): MarketplaceRole {
   const role = String(value ?? "learner");
   return role === "instructor" ? "instructor" : "learner";
 }
@@ -58,6 +59,12 @@ export async function sendMagicLink(formData: FormData) {
 
   if (!adminClient) {
     authError("Cross-device email login is not fully configured. Add SUPABASE_SERVICE_ROLE_KEY in Vercel, then redeploy.");
+  }
+
+  try {
+    await ensureEmailDoesNotHaveDifferentRole(adminClient, email, role);
+  } catch (error) {
+    authError(error instanceof Error ? error.message : "This email is already linked to another LDA account type.");
   }
 
   const appOrigin = await getAppOrigin();

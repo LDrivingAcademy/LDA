@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { headers } from "next/headers";
 import { canSendTransactionalEmail, sendAuthMagicLinkEmail } from "@/lib/email";
 import { createHandoffSecret, hashHandoffSecret, setHandoffCookie } from "@/lib/auth-handoff";
+import { ensureEmailCanUseRole, ensureEmailDoesNotHaveDifferentRole, ensureUserCanUseRole, getMarketplaceRolesForUser, roleConflictMessage, type MarketplaceRole } from "@/lib/account-role-guard";
 import { isAtLeast17 } from "@/lib/learner-eligibility";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -19,7 +20,7 @@ function safeNextPath(value: FormDataEntryValue | null) {
   return nextPath.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/dashboard";
 }
 
-function safeRole(value: FormDataEntryValue | null) {
+function safeRole(value: FormDataEntryValue | null): MarketplaceRole {
   const role = String(value ?? "learner");
   return role === "instructor" ? "instructor" : "learner";
 }
@@ -104,6 +105,12 @@ export async function sendMagicLink(formData: FormData) {
 
   if (!adminClient) {
     authError("Cross-device email login is not fully configured. Add SUPABASE_SERVICE_ROLE_KEY in Vercel, then redeploy.");
+  }
+
+  try {
+    await ensureEmailDoesNotHaveDifferentRole(adminClient, email, role);
+  } catch (error) {
+    authError(error instanceof Error ? error.message : "This email is already linked to another LDA account type.");
   }
 
   const handoffId = crypto.randomUUID();
@@ -215,6 +222,12 @@ export async function completeVerification(formData: FormData) {
     marketing_opt_in: marketingOptIn
   });
 
+  try {
+    await ensureUserCanUseRole(writeClient, user.id, role);
+  } catch (error) {
+    verifyRedirect(role, error instanceof Error ? error.message : "This account is already linked to another LDA account type.");
+  }
+
   await writeClient.from("account_roles").upsert({
     user_id: user.id,
     role
@@ -287,6 +300,32 @@ export async function signIn(formData: FormData) {
     passwordRedirect(error.message, role);
   }
 
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    let needsVerification = false;
+
+    try {
+      const marketplaceRoles = await getMarketplaceRolesForUser(supabase, user.id);
+
+      if (marketplaceRoles.length === 0) {
+        needsVerification = true;
+      } else if (!marketplaceRoles.includes(role)) {
+        await supabase.auth.signOut();
+        passwordRedirect(roleConflictMessage(marketplaceRoles[0], role), role);
+      }
+    } catch (roleError) {
+      await supabase.auth.signOut();
+      passwordRedirect(roleError instanceof Error ? roleError.message : "LDA could not confirm your account role.", role);
+    }
+
+    if (needsVerification) {
+      redirect(`/auth/verify?role=${role}&message=${encodeURIComponent("Finish your LDA account setup before continuing.")}`);
+    }
+  }
+
   const cookieStore = await cookies();
   if (rememberMe) {
     const rememberedIdentifier = identifier.includes("@") ? identifier.toLowerCase() : normalizePhone(identifier);
@@ -341,6 +380,12 @@ export async function signUp(formData: FormData) {
 
   if (!adminClient) {
     signUpRedirect("Cross-device email sign-up is not fully configured. Add SUPABASE_SERVICE_ROLE_KEY in Vercel, then redeploy.", role);
+  }
+
+  try {
+    await ensureEmailCanUseRole(adminClient, email, role);
+  } catch (error) {
+    signUpRedirect(error instanceof Error ? error.message : "This email is already linked to another LDA account type.", role);
   }
 
   const appOrigin = await getAppOrigin();
