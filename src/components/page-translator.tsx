@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { googleCodeForLanguage, isRtlLanguage } from "@/lib/languages";
 
 type TranslatorWindow = Window & {
@@ -94,17 +95,26 @@ function suppressGoogleTranslateUi() {
 }
 
 export function PageTranslator() {
+  const pathname = usePathname();
   const ready = useRef(false);
   const lastApplied = useRef("");
+  const retryTimer = useRef<number | null>(null);
+  const mutationTimer = useRef<number | null>(null);
 
-  const applyLanguage = useCallback(() => {
+  const applyLanguage = useCallback((options: { force?: boolean } = {}) => {
     const { selected, custom } = getStoredLanguage();
     const targetLanguage = googleCodeForLanguage(selected, custom) || sourceLanguage;
     const htmlLanguage = selected === "custom" && custom ? custom : selected;
     const previousTranslateCookie = hasTranslateCookie();
+    const force = Boolean(options.force);
 
     document.documentElement.lang = htmlLanguage;
     document.documentElement.dir = isRtlLanguage(selected, custom) ? "rtl" : "ltr";
+
+    if (retryTimer.current) {
+      window.clearTimeout(retryTimer.current);
+      retryTimer.current = null;
+    }
 
     if (targetLanguage === sourceLanguage) {
       lastApplied.current = sourceLanguage;
@@ -125,20 +135,33 @@ export function PageTranslator() {
       return;
     }
 
-    if (!targetLanguage || lastApplied.current === targetLanguage) {
+    if (!targetLanguage || (!force && lastApplied.current === targetLanguage && hasTranslatedDom())) {
       return;
     }
 
-    lastApplied.current = targetLanguage;
     setTranslateCookie(targetLanguage);
 
     const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
     if (!combo) {
+      retryTimer.current = window.setTimeout(() => {
+        const delayedCombo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+
+        if (delayedCombo) {
+          delayedCombo.value = targetLanguage;
+          delayedCombo.dispatchEvent(new Event("change", { bubbles: true }));
+          lastApplied.current = targetLanguage;
+          suppressGoogleTranslateUi();
+          return;
+        }
+
+        reloadOnce(targetLanguage);
+      }, ready.current ? 700 : 1400);
       return;
     }
 
     combo.value = targetLanguage === sourceLanguage ? "" : targetLanguage;
     combo.dispatchEvent(new Event("change", { bubbles: true }));
+    lastApplied.current = targetLanguage;
   }, []);
 
   useEffect(() => {
@@ -155,7 +178,7 @@ export function PageTranslator() {
       );
       ready.current = true;
       suppressGoogleTranslateUi();
-      window.setTimeout(applyLanguage, 400);
+      window.setTimeout(() => applyLanguage({ force: true }), 400);
     };
 
     if (!document.getElementById(translatorScriptId)) {
@@ -168,22 +191,51 @@ export function PageTranslator() {
 
     const onLanguageChange = () => {
       lastApplied.current = "";
-      window.setTimeout(applyLanguage, ready.current ? 150 : 500);
+      window.setTimeout(() => applyLanguage({ force: true }), ready.current ? 150 : 500);
     };
 
     window.addEventListener("lda-language-change", onLanguageChange);
     window.addEventListener("storage", onLanguageChange);
-    const observer = new MutationObserver(suppressGoogleTranslateUi);
+    const observer = new MutationObserver(() => {
+      suppressGoogleTranslateUi();
+
+      const { selected, custom } = getStoredLanguage();
+      const targetLanguage = googleCodeForLanguage(selected, custom) || sourceLanguage;
+      if (targetLanguage === sourceLanguage || (lastApplied.current === targetLanguage && hasTranslatedDom())) {
+        return;
+      }
+
+      if (mutationTimer.current) {
+        window.clearTimeout(mutationTimer.current);
+      }
+
+      mutationTimer.current = window.setTimeout(() => {
+        applyLanguage({ force: true });
+      }, 600);
+    });
     observer.observe(document.documentElement, { childList: true, subtree: true });
     suppressGoogleTranslateUi();
-    applyLanguage();
+    applyLanguage({ force: true });
 
     return () => {
       window.removeEventListener("lda-language-change", onLanguageChange);
       window.removeEventListener("storage", onLanguageChange);
       observer.disconnect();
+      if (retryTimer.current) {
+        window.clearTimeout(retryTimer.current);
+      }
+      if (mutationTimer.current) {
+        window.clearTimeout(mutationTimer.current);
+      }
     };
   }, [applyLanguage]);
+
+  useEffect(() => {
+    window.setTimeout(() => {
+      suppressGoogleTranslateUi();
+      applyLanguage({ force: true });
+    }, 250);
+  }, [applyLanguage, pathname]);
 
   return <div id="google_translate_element" className="notranslate" aria-hidden="true" />;
 }
