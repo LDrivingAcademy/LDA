@@ -14,8 +14,10 @@ import {
 } from "lucide-react";
 import { demoInstructors } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
+import { NearbyInstructorGoogleMap } from "@/components/nearby-instructor-google-map";
 
 const LOCATION_PREF_KEY = "lda-location-sharing-enabled";
+const LOCATION_PERMISSION_REQUESTED_KEY = "lda-location-permission-requested";
 
 type Instructor = (typeof demoInstructors)[number] & {
   id: string;
@@ -331,8 +333,12 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
     }
 
     if (permission?.state !== "granted") {
-      setLocationStatus("Location sharing is enabled for this account. Once this browser has location permission, LDA refreshes your location every 5 seconds.");
-      return;
+      if (localStorage.getItem(LOCATION_PERMISSION_REQUESTED_KEY) === "true") {
+        setLocationStatus("Location sharing is enabled. This browser still needs location permission before LDA can show your exact live position.");
+        return;
+      }
+
+      localStorage.setItem(LOCATION_PERMISSION_REQUESTED_KEY, "true");
     }
 
     setLocationStatus("Refreshing your approved location...");
@@ -340,9 +346,10 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
       (position) => {
         setUserPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
         localStorage.setItem(LOCATION_PREF_KEY, "true");
+        localStorage.setItem(LOCATION_PERMISSION_REQUESTED_KEY, "true");
         setLocationStatus("Live location is enabled for nearby instructor sorting and lesson tracking.");
       },
-      () => setLocationStatus("Location permission was not granted. Postcode search still works."),
+      () => setLocationStatus("Location permission was not granted. Postcode search still works, and you can change this later in Account settings."),
       { enableHighAccuracy: true, timeout: 8000 }
     );
   }
@@ -497,46 +504,13 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
               </Link>
             </div>
           </div>
-          <div className="relative mt-5 h-[420px] overflow-hidden rounded border border-zinc-200 bg-[#eef2ef] shadow-inner">
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,.55)_1px,transparent_1px),linear-gradient(0deg,rgba(255,255,255,.55)_1px,transparent_1px)] bg-[size:80px_80px]" />
-            <div className="absolute left-[-8%] top-[47%] h-8 w-[120%] -rotate-6 rounded-full bg-white shadow-sm" />
-            <div className="absolute left-[22%] top-[-20%] h-[140%] w-7 rotate-12 rounded-full bg-white shadow-sm" />
-            <div className="absolute left-[58%] top-[-15%] h-[125%] w-6 -rotate-12 rounded-full bg-white shadow-sm" />
-            <div className="absolute left-[4%] top-[20%] h-5 w-[90%] rotate-2 rounded-full bg-white/90 shadow-sm" />
-            <div className="absolute bottom-4 right-4 rounded border border-zinc-300 bg-white/95 px-3 py-2 text-xs font-black text-zinc-700 shadow-sm">
-              5 mile local radius · demo instructor locations
-            </div>
-            <div className="absolute left-8 top-8 rounded-full border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-zinc-700 shadow-sm">
-              {userPosition ? `You: ${userPosition.lat.toFixed(3)}, ${userPosition.lng.toFixed(3)}` : postcode}
-            </div>
-            <div className="absolute left-[18%] top-[28%] grid h-10 w-10 place-items-center rounded-full border-4 border-white bg-black text-sm font-black text-white shadow-lg">
-              You
-            </div>
-            {filteredInstructors.map((instructor, index) => {
-              const positions = [
-                { left: "34%", top: "56%" },
-                { left: "61%", top: "34%" },
-                { left: "75%", top: "64%" }
-              ];
-              const position = positions[index % positions.length];
-
-              return (
-                <div key={instructor.id} className="absolute -translate-x-1/2 -translate-y-1/2" style={position}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedInstructorId(instructor.id)}
-                    className={`grid h-11 w-11 place-items-center rounded-full border-4 border-white text-sm font-black shadow-xl ${selectedInstructor.id === instructor.id ? "bg-brand text-white" : "bg-black text-white"}`}
-                    aria-label={`Choose ${instructor.name}`}
-                  >
-                    {instructor.name.slice(0, 1)}
-                  </button>
-                  <div className={`mt-2 whitespace-nowrap rounded-full border px-3 py-2 text-xs font-black shadow-sm ${selectedInstructor.id === instructor.id ? "border-brand bg-brand text-white" : "border-zinc-300 bg-white text-black"}`}>
-                    {instructor.name.split(" ")[0]} · {instructor.distanceMiles} mi
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <NearbyInstructorGoogleMap
+            postcode={postcode}
+            instructors={filteredInstructors}
+            selectedInstructorId={selectedInstructor.id}
+            userPosition={userPosition}
+            onSelectInstructor={setSelectedInstructorId}
+          />
         </article>
       </section>
 
