@@ -152,7 +152,7 @@ export default async function HomePage() {
       <main className="bg-white text-black">
         <section className="bg-white">
           <div className="mx-auto grid max-w-7xl items-stretch gap-8 px-4 pb-0 pt-7 sm:px-6 lg:grid-cols-[560px_1fr] lg:px-8 lg:pb-0 lg:pt-10">
-            <div className="flex flex-col py-2 lg:pb-10 lg:pt-8">
+            <div className="flex flex-col py-2 lg:pt-8">
               <h1 className="max-w-xl text-5xl font-black tracking-normal sm:text-6xl">
                 Learn to drive with LDA
               </h1>
@@ -164,7 +164,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <section className="overflow-hidden rounded bg-white text-white shadow-sm lg:mt-8 lg:h-[620px] lg:self-start">
+            <section className="overflow-hidden rounded bg-white text-white shadow-sm lg:h-full lg:self-stretch">
               <div className="relative flex h-full min-h-[430px] flex-col justify-end p-7 sm:p-10 lg:min-h-0">
                 <img
                   src="/learner-instructor.jpg"
