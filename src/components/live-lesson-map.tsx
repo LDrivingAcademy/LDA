@@ -11,14 +11,7 @@ type Point = {
 
 declare global {
   interface Window {
-    google?: {
-      maps: {
-        Map: new (element: HTMLElement, options: Record<string, unknown>) => GoogleMap;
-        Marker: new (options: Record<string, unknown>) => GoogleMarker;
-        Polyline: new (options: Record<string, unknown>) => GooglePolyline;
-        LatLngBounds: new () => GoogleLatLngBounds;
-      };
-    };
+    google?: any;
     __ldaGoogleMapsPromise?: Promise<void>;
   }
 }
@@ -80,7 +73,7 @@ function loadGoogleMaps(apiKey: string) {
   }
 
   if (!window.__ldaGoogleMapsPromise) {
-    window.__ldaGoogleMapsPromise = new Promise((resolve, reject) => {
+    window.__ldaGoogleMapsPromise = new Promise<void>((resolve, reject) => {
       const existing = document.getElementById("lda-google-maps-script");
       if (existing) {
         existing.addEventListener("load", () => resolve(), { once: true });
@@ -185,7 +178,7 @@ export function LiveLessonMap() {
         bounds.extend(instructorStart);
         bounds.extend(learnerPickup);
 
-        mapInstance.current = new maps.Map(mapRef.current, {
+        const map = new maps.Map(mapRef.current, {
           center: learnerPickup,
           clickableIcons: false,
           disableDefaultUI: true,
@@ -193,11 +186,12 @@ export function LiveLessonMap() {
           streetViewControl: false,
           zoom: 13
         });
-        mapInstance.current.fitBounds(bounds, 80);
+        mapInstance.current = map;
+        map.fitBounds(bounds, 80);
 
         routeLine.current = new maps.Polyline({
           geodesic: true,
-          map: mapInstance.current,
+          map,
           path: [initialInstructorLocation, learnerPickup],
           strokeColor: "#e30613",
           strokeOpacity: 0.9,
@@ -206,14 +200,14 @@ export function LiveLessonMap() {
 
         instructorMarker.current = new maps.Marker({
           label: "I",
-          map: mapInstance.current,
+          map,
           position: initialInstructorLocation,
           title: "Instructor live location"
         });
 
         new maps.Marker({
           label: "S",
-          map: mapInstance.current,
+          map,
           position: learnerPickup,
           title: learnerPickup.label
         });
