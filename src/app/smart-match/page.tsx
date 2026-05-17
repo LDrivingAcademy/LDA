@@ -6,19 +6,30 @@ import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
 import { SmartMatchExperience } from "@/components/smart-match-experience";
 
-export default function SmartMatchPage() {
+type SmartMatchPageProps = {
+  searchParams?: Promise<{
+    from?: string;
+  }>;
+};
+
+export default async function SmartMatchPage({ searchParams }: SmartMatchPageProps) {
+  const params = await searchParams;
+  const fromDashboard = params?.from === "dashboard";
+  const backHref = fromDashboard ? "/learner-dashboard" : "/";
+  const backLabel = fromDashboard ? "Back to dashboard" : "Back to homepage";
+
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-4 py-4 sm:px-6 lg:px-8">
           <Brand size="page" />
-          <div className="hidden items-center gap-6 md:flex">
+          <div className="flex items-center gap-3 sm:gap-6">
             <LanguageSelector />
-            <Link href="/" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
-              <ArrowLeft size={17} /> Back to homepage
+            <Link href={backHref} className="lda-pill lda-pill-sm">
+              <ArrowLeft size={17} /> {backLabel}
             </Link>
           </div>
-          <div className="md:hidden">
+          <div className="hidden">
             <MainMenu />
           </div>
         </div>
