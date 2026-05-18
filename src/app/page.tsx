@@ -85,31 +85,31 @@ export default async function HomePage() {
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
-        <div className="flex w-full items-center justify-between gap-5 px-[15px] py-4">
-          <div className="flex items-center gap-7">
+        <div className="flex w-full items-center justify-between gap-8 px-[15px] py-4">
+          <div className="flex min-w-0 items-center gap-5">
             <Brand size="home" />
-            <nav className="hidden items-center gap-7 xl:flex">
-              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
-              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
-              <Link href="#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
-              <Link href="#safety" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
-              <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+            <nav className="hidden items-center gap-4 xl:flex">
+              <Link href="/auth/login?role=learner" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
+              <Link href="/instructor" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
+              <Link href="#discover" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
+              <Link href="#safety" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
+              <Link href="/about" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 About
               </Link>
             </nav>
           </div>
-          <div className="hidden items-center gap-6 xl:flex">
+          <div className="ml-auto hidden items-center justify-end gap-7 xl:flex">
             <LanguageSelector />
             <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
               <HelpCircle size={17} /> Help
             </Link>
             {account ? (
               <>
-                <div className="flex items-center gap-2">
-                  <Link href={account.dashboardHref} className="rounded-full border border-red-500/60 bg-transparent px-3 py-1.5 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
+                <div className="flex items-center gap-1">
+                  <Link href={account.dashboardHref} className="rounded-full border border-red-500/60 bg-transparent px-2.5 py-1.5 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
                     {account.name}
                   </Link>
-                  <Link href={account.subscriptionHref} className="rounded-full border border-red-500/60 bg-transparent px-3 py-1.5 whitespace-nowrap text-sm font-black uppercase text-white hover:ring-2 hover:ring-brand">
+                  <Link href={account.subscriptionHref} className="rounded-full border border-red-500/60 bg-transparent px-2.5 py-1.5 whitespace-nowrap text-sm font-black uppercase text-white hover:ring-2 hover:ring-brand">
                     {account.subscriptionLabel}
                   </Link>
                 </div>
