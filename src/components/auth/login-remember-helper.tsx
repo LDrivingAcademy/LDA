@@ -5,8 +5,6 @@ import { useEffect } from "react";
 const TRUSTED_DEVICE_KEY = "lda_trusted_device";
 const TRUSTED_DEVICES_KEY = "lda_trusted_devices";
 const REMEMBERED_IDENTIFIER_KEY = "lda_remember_identifier";
-const AUTO_LOGIN_ATTEMPT_KEY = "lda_auto_login_attempted_at";
-const AUTO_LOGIN_WINDOW_MS = 15_000;
 const SAVED_LOGIN_BUTTON_SELECTOR = "[data-lda-use-saved-login]";
 
 type PasswordCredentialLike = Credential & {
@@ -147,8 +145,18 @@ export function LoginRememberHelper({ formId, rememberedIdentifier }: { formId: 
       }
     }
 
-    function handleSubmit() {
+    function handleSubmit(event: SubmitEvent) {
       syncIdentifierMirror();
+      if (!identifierInput?.value.trim() || !passwordInput?.value) {
+        event.preventDefault();
+        if (!identifierInput?.value.trim()) {
+          identifierInput?.focus();
+        } else {
+          passwordInput?.focus();
+        }
+        return;
+      }
+
       if (rememberInput?.checked && identifierInput?.value) {
         rememberCurrentDevice(identifierInput.value.trim());
         void storeSavedCredential();
@@ -169,32 +177,7 @@ export function LoginRememberHelper({ formId, rememberedIdentifier }: { formId: 
     loginForm.addEventListener("submit", handleSubmit);
     savedLoginButton?.addEventListener("click", handleSavedLoginClick);
 
-    const autoLoginStartedAt = Date.now();
-    const timer = window.setInterval(() => {
-      const attemptedAt = Number(localStorage.getItem(AUTO_LOGIN_ATTEMPT_KEY) ?? "0");
-      const hasRecentlyTried = Date.now() - attemptedAt < 60_000;
-      const timedOut = Date.now() - autoLoginStartedAt > AUTO_LOGIN_WINDOW_MS;
-
-      if (timedOut) {
-        window.clearInterval(timer);
-        return;
-      }
-
-      if (
-        isTrustedDevice() &&
-        rememberInput?.checked &&
-        identifierInput?.value &&
-        passwordInput?.value &&
-        !hasRecentlyTried
-      ) {
-        localStorage.setItem(AUTO_LOGIN_ATTEMPT_KEY, String(Date.now()));
-        window.clearInterval(timer);
-        loginForm.requestSubmit();
-      }
-    }, 500);
-
     return () => {
-      window.clearInterval(timer);
       identifierInput?.removeEventListener("input", syncIdentifierMirror);
       identifierInput?.removeEventListener("change", syncIdentifierMirror);
       loginForm.removeEventListener("submit", handleSubmit);
