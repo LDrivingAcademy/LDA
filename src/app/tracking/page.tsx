@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, RadioTower } from "lucide-react";
 import { Brand } from "@/components/brand";
-import { LanguageSelector } from "@/components/language-selector";
 import { LiveLessonMap } from "@/components/live-lesson-map";
 import { MainMenu } from "@/components/main-menu";
 
@@ -12,7 +11,6 @@ export default function TrackingPage() {
         <div className="flex w-full items-center justify-between gap-5 px-[15px] py-4">
           <Brand />
           <div className="hidden items-center gap-6 md:flex">
-            <LanguageSelector />
             <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
               <ArrowLeft size={17} /> Back to dashboard
             </Link>
