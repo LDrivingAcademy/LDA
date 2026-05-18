@@ -9,8 +9,8 @@ type PageTopBarProps = {
 
 export function PageTopBar({ backHref = "/", backLabel = "Back to homepage" }: PageTopBarProps) {
   return (
-    <header className="w-full bg-black px-4 py-4 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+    <header className="w-full bg-black py-4 text-white">
+      <div className="flex w-full items-center justify-between gap-4 px-[15px]">
         <Brand size="home" />
         <Link
           href={backHref}

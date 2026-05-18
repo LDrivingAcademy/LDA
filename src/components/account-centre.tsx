@@ -143,7 +143,7 @@ export function AccountCentre() {
   return (
     <main className="min-h-screen bg-white text-black">
       <header className="border-b border-zinc-200 bg-black text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+        <div className="flex w-full items-center justify-between px-[15px] py-5">
           <div>
             <div className="text-sm font-black uppercase text-red-200">LDA Account</div>
             <h1 className="mt-1 text-3xl font-black">Account centre</h1>

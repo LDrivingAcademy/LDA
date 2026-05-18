@@ -85,7 +85,7 @@ export default async function HomePage() {
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
-        <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-5 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex w-full items-center justify-between gap-5 px-[15px] py-4">
           <div className="flex items-center gap-7">
             <Brand size="home" />
             <nav className="hidden items-center gap-7 xl:flex">

@@ -1,17 +1,15 @@
-import Link from "next/link";
-import { ArrowLeft, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
+import { PageTopBar } from "@/components/page-top-bar";
 import { SiteFooter } from "@/components/site-footer";
 import type { LegalPageContent } from "@/lib/legal-content";
 
 export function LegalPage({ content }: { content: LegalPageContent }) {
   return (
     <>
+      <PageTopBar />
       <main className="min-h-screen bg-background">
         <section className="bg-ink px-4 py-8 text-white sm:px-6 lg:px-8">
           <div className="mx-auto max-w-5xl">
-            <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-zinc-300 hover:text-white">
-              <ArrowLeft size={16} /> Back to homepage
-            </Link>
             <div className="py-10">
               <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
                 <FileText size={16} /> Compliance

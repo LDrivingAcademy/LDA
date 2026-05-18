@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft, BadgeCheck, Mail } from "lucide-react";
+import { BadgeCheck, Mail } from "lucide-react";
 import { InstantConfirmationEmail } from "@/components/instant-confirmation-email";
+import { PageTopBar } from "@/components/page-top-bar";
 
 export default async function InstantLessonConfirmedPage({
   searchParams
@@ -23,12 +24,10 @@ export default async function InstantLessonConfirmedPage({
   const lessonSummary = params.summary ?? `Instant lesson with ${instructorName}`;
 
   return (
-    <main className="min-h-screen bg-white text-black">
-      <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-black text-zinc-700 hover:text-brand">
-          <ArrowLeft size={17} /> Back to homepage
-        </Link>
-
+    <>
+      <PageTopBar />
+      <main className="min-h-screen bg-white text-black">
+        <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mt-8 rounded bg-zinc-100 p-6 text-center sm:p-10">
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-white text-brand">
             <BadgeCheck size={34} />
@@ -71,7 +70,8 @@ export default async function InstantLessonConfirmedPage({
             Open live tracking preview
           </Link>
         </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </>
   );
 }

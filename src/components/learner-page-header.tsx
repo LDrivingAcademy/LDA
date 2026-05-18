@@ -6,7 +6,7 @@ export function LearnerPageHeader({ eyebrow, title, body }: { eyebrow: string; t
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex w-full items-center justify-between gap-5 px-[15px] py-4">
           <Brand />
           <Link href="/dashboard" className="lda-pill lda-pill-sm">
             <ArrowLeft size={17} /> Back to dashboard

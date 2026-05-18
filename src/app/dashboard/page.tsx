@@ -62,7 +62,7 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-white text-black">
       <header className="border-b border-zinc-800 bg-ink text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex w-full items-center justify-between gap-4 px-[15px] py-4">
           <div className="flex min-w-0 items-center gap-5">
             <Brand size="home" />
             <div className="min-w-0">

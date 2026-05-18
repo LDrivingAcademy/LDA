@@ -7,7 +7,7 @@ export default function InsuranceSupportPage() {
   return (
     <main className="min-h-screen bg-white text-black">
       <header className="sticky top-0 z-30 border-b border-zinc-900 bg-black text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex w-full items-center justify-between gap-4 px-[15px] py-4">
           <Brand />
           <Link href="/learner-journey" className="lda-pill lda-pill-sm">
             <ArrowLeft size={16} /> LDA learner journey
