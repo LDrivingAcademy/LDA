@@ -95,7 +95,7 @@ export default async function DashboardPage() {
           <CalendarCheck className="text-brand" />
           <h2 className="mt-4 text-xl font-black">Learner journey</h2>
           <p className="mt-2 text-zinc-600">Plan the full route from first lesson to getting on the road after passing.</p>
-          <div className="mt-4 grid gap-2 text-sm font-bold text-zinc-700 sm:grid-cols-2">
+          <div className="mb-8 mt-3 grid gap-2 text-sm font-bold text-zinc-700 sm:grid-cols-2">
             <span>Theory test booking</span>
             <span>Driving lessons</span>
             <span>Practical test booking</span>
