@@ -34,10 +34,8 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
-#google_translate_element,
 .goog-te-banner-frame,
 .goog-te-balloon-frame,
-.goog-te-gadget,
 .goog-te-menu-frame,
 .goog-te-ftab-frame,
 .goog-tooltip,
@@ -49,6 +47,17 @@ iframe.skiptranslate {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
+}
+#google_translate_element {
+  position: fixed !important;
+  top: 0 !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
 }
 body {
   top: 0 !important;

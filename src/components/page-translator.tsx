@@ -11,6 +11,7 @@ type TranslatorWindow = Window & {
     };
   };
   googleTranslateElementInit?: () => void;
+  __ldaGoogleTranslateInitialised?: boolean;
 };
 
 const sourceLanguage = "en";
@@ -94,6 +95,23 @@ function suppressGoogleTranslateUi() {
   document.body.style.setProperty("top", "0", "important");
 }
 
+function getTranslateCombo() {
+  return document.querySelector<HTMLSelectElement>(".goog-te-combo");
+}
+
+function dispatchTranslateCombo(targetLanguage: string) {
+  const combo = getTranslateCombo();
+
+  if (!combo) {
+    return false;
+  }
+
+  combo.value = targetLanguage === sourceLanguage ? "" : targetLanguage;
+  combo.dispatchEvent(new Event("input", { bubbles: true }));
+  combo.dispatchEvent(new Event("change", { bubbles: true }));
+  return true;
+}
+
 export function PageTranslator() {
   const pathname = usePathname();
   const ready = useRef(false);
@@ -120,11 +138,7 @@ export function PageTranslator() {
       lastApplied.current = sourceLanguage;
       setTranslateCookie(sourceLanguage);
 
-      const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
-      if (combo) {
-        combo.value = "";
-        combo.dispatchEvent(new Event("change", { bubbles: true }));
-      }
+      dispatchTranslateCombo(sourceLanguage);
 
       if (previousTranslateCookie || hasTranslatedDom()) {
         window.setTimeout(() => reloadOnce(sourceLanguage), 100);
@@ -141,14 +155,9 @@ export function PageTranslator() {
 
     setTranslateCookie(targetLanguage);
 
-    const combo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
-    if (!combo) {
+    if (!dispatchTranslateCombo(targetLanguage)) {
       retryTimer.current = window.setTimeout(() => {
-        const delayedCombo = document.querySelector<HTMLSelectElement>(".goog-te-combo");
-
-        if (delayedCombo) {
-          delayedCombo.value = targetLanguage;
-          delayedCombo.dispatchEvent(new Event("change", { bubbles: true }));
+        if (dispatchTranslateCombo(targetLanguage)) {
           lastApplied.current = targetLanguage;
           suppressGoogleTranslateUi();
           return;
@@ -159,8 +168,6 @@ export function PageTranslator() {
       return;
     }
 
-    combo.value = targetLanguage === sourceLanguage ? "" : targetLanguage;
-    combo.dispatchEvent(new Event("change", { bubbles: true }));
     lastApplied.current = targetLanguage;
   }, []);
 
@@ -172,21 +179,36 @@ export function PageTranslator() {
         return;
       }
 
-      new translatorWindow.google.translate.TranslateElement(
-        { pageLanguage: sourceLanguage, autoDisplay: false, multilanguagePage: true },
-        "google_translate_element"
-      );
+      if (!translatorWindow.__ldaGoogleTranslateInitialised && !getTranslateCombo()) {
+        new translatorWindow.google.translate.TranslateElement(
+          { pageLanguage: sourceLanguage, autoDisplay: false, multilanguagePage: true },
+          "google_translate_element"
+        );
+        translatorWindow.__ldaGoogleTranslateInitialised = true;
+      }
+
       ready.current = true;
       suppressGoogleTranslateUi();
       window.setTimeout(() => applyLanguage({ force: true }), 400);
     };
+
+    if (translatorWindow.google?.translate?.TranslateElement) {
+      translatorWindow.googleTranslateElementInit();
+    }
 
     if (!document.getElementById(translatorScriptId)) {
       const script = document.createElement("script");
       script.id = translatorScriptId;
       script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
       script.async = true;
+      script.onerror = () => {
+        ready.current = false;
+        window.setTimeout(() => applyLanguage({ force: true }), 1200);
+      };
       document.body.appendChild(script);
+    } else if (getTranslateCombo()) {
+      ready.current = true;
+      window.setTimeout(() => applyLanguage({ force: true }), 150);
     }
 
     const onLanguageChange = () => {

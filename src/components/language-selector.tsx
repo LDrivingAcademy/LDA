@@ -34,7 +34,7 @@ export function LanguageSelector() {
     if (selected === "custom") {
       window.localStorage.setItem("lda-custom-language", customLanguage);
     }
-    window.dispatchEvent(new CustomEvent("lda-language-change", { detail: { selected, customLanguage } }));
+    window.dispatchEvent(new CustomEvent("lda-language-change", { detail: { selected, customLanguage, force: true } }));
   }, [customLanguage, loaded, selected]);
 
   useEffect(() => {
@@ -66,7 +66,16 @@ export function LanguageSelector() {
 
   const handleSelection = (value: string) => {
     setSelected(value);
+    window.localStorage.setItem("lda-language", value);
+
     if (value !== "custom") {
+      document.documentElement.lang = value;
+      document.documentElement.dir = isRtlLanguage(value, "") ? "rtl" : "ltr";
+      window.dispatchEvent(
+        new CustomEvent("lda-language-change", {
+          detail: { selected: value, customLanguage: "", force: true }
+        })
+      );
       setOpen(false);
     }
   };
