@@ -99,17 +99,43 @@ function getTranslateCombo() {
   return document.querySelector<HTMLSelectElement>(".goog-te-combo");
 }
 
-function dispatchTranslateCombo(targetLanguage: string) {
+function dispatchTranslateCombo(targetLanguage: string, options: { force?: boolean } = {}) {
   const combo = getTranslateCombo();
 
   if (!combo) {
     return false;
   }
 
-  combo.value = targetLanguage === sourceLanguage ? "" : targetLanguage;
+  const nextValue = targetLanguage === sourceLanguage ? "" : targetLanguage;
+
+  if (options.force && nextValue && combo.value === nextValue) {
+    combo.value = "";
+    combo.dispatchEvent(new Event("input", { bubbles: true }));
+    combo.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  combo.value = nextValue;
   combo.dispatchEvent(new Event("input", { bubbles: true }));
   combo.dispatchEvent(new Event("change", { bubbles: true }));
   return true;
+}
+
+function verifyAppliedTranslation(targetLanguage: string) {
+  if (targetLanguage === sourceLanguage) {
+    return;
+  }
+
+  window.setTimeout(() => {
+    const { selected, custom } = getStoredLanguage();
+    const storedTarget = googleCodeForLanguage(selected, custom) || sourceLanguage;
+
+    if (storedTarget !== targetLanguage || hasTranslatedDom()) {
+      suppressGoogleTranslateUi();
+      return;
+    }
+
+    reloadOnce(targetLanguage);
+  }, 1200);
 }
 
 export function PageTranslator() {
@@ -138,7 +164,7 @@ export function PageTranslator() {
       lastApplied.current = sourceLanguage;
       setTranslateCookie(sourceLanguage);
 
-      dispatchTranslateCombo(sourceLanguage);
+      dispatchTranslateCombo(sourceLanguage, { force });
 
       if (previousTranslateCookie || hasTranslatedDom()) {
         window.setTimeout(() => reloadOnce(sourceLanguage), 100);
@@ -155,11 +181,12 @@ export function PageTranslator() {
 
     setTranslateCookie(targetLanguage);
 
-    if (!dispatchTranslateCombo(targetLanguage)) {
+    if (!dispatchTranslateCombo(targetLanguage, { force })) {
       retryTimer.current = window.setTimeout(() => {
-        if (dispatchTranslateCombo(targetLanguage)) {
+        if (dispatchTranslateCombo(targetLanguage, { force: true })) {
           lastApplied.current = targetLanguage;
           suppressGoogleTranslateUi();
+          verifyAppliedTranslation(targetLanguage);
           return;
         }
 
@@ -169,6 +196,7 @@ export function PageTranslator() {
     }
 
     lastApplied.current = targetLanguage;
+    verifyAppliedTranslation(targetLanguage);
   }, []);
 
   useEffect(() => {

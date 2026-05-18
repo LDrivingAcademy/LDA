@@ -69,6 +69,8 @@ export function LanguageSelector() {
     window.localStorage.setItem("lda-language", value);
 
     if (value !== "custom") {
+      setCustomLanguage("");
+      window.localStorage.removeItem("lda-custom-language");
       document.documentElement.lang = value;
       document.documentElement.dir = isRtlLanguage(value, "") ? "rtl" : "ltr";
       window.dispatchEvent(
