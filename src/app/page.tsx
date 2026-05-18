@@ -3,7 +3,6 @@ import {
   CalendarCheck,
   CarFront,
   CheckCircle2,
-  ClipboardCheck,
   Clock3,
   HelpCircle,
   RadioTower,
@@ -20,7 +19,7 @@ import { getHeaderAccountSummary } from "@/lib/current-account";
 
 export const dynamic = "force-dynamic";
 
-type CardVisualType = "car" | "calendar" | "match" | "instructor" | "tracking" | "social" | "progress";
+type CardVisualType = "car" | "calendar" | "match" | "instructor" | "tracking" | "social";
 
 const suggestionCards: {
   title: string;
@@ -63,13 +62,6 @@ const suggestionCards: {
     href: "/tracking",
     image: "tracking",
     cta: "Open tracking"
-  },
-  {
-    title: "Progress Tracker",
-    body: "Instructors can send lesson feedback, update completed skills, and share videos before the next lesson.",
-    href: "/progress-tracker",
-    image: "progress",
-    cta: "Open tracker"
   },
   {
     title: "Subscribe & Socials",
@@ -204,13 +196,10 @@ export default async function HomePage() {
           <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-black tracking-normal sm:text-5xl">Discover what you can do with LDA</h2>
             <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {suggestionCards.map((card) => {
-                const stretchTitle = card.title === "Progress Tracker" || card.title === "Subscribe & Socials";
-                return (
-                <Link key={card.title} href={card.href} className={`group grid min-h-[210px] grid-cols-[1fr_150px] overflow-hidden rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200 ${card.title === "Subscribe & Socials" ? "md:col-span-2 xl:col-span-3" : ""}`}>
-                  {stretchTitle ? <h3 className="col-span-2 text-2xl font-black">{card.title}</h3> : null}
+              {suggestionCards.map((card) => (
+                <Link key={card.title} href={card.href} className="group grid min-h-[210px] grid-cols-[1fr_150px] overflow-hidden rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200">
                   <div className="flex flex-col items-start">
-                    {!stretchTitle ? <h3 className="text-2xl font-black">{card.title}</h3> : null}
+                    <h3 className="text-2xl font-black">{card.title}</h3>
                     <p className="mt-4 max-w-xs text-base leading-7 text-zinc-800">{card.body}</p>
                     <span className="lda-pill lda-pill-sm mt-auto">
                       {card.cta}
@@ -218,7 +207,7 @@ export default async function HomePage() {
                   </div>
                   <CardVisual type={card.image} />
                 </Link>
-              );})}
+              ))}
             </div>
           </div>
         </section>
@@ -279,8 +268,7 @@ function CardVisual({ type }: { type: CardVisualType }) {
     match: <Sparkles size={68} />,
     instructor: <UsersRound size={68} />,
     tracking: <RadioTower size={68} />,
-    social: <Share2 size={68} />,
-    progress: <ClipboardCheck size={68} />
+    social: <Share2 size={68} />
   }[type];
 
   return (
