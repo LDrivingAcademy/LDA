@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageTopBar } from "@/components/page-top-bar";
 import { SiteFooter } from "@/components/site-footer";
 
 const sitemapLinks = [
@@ -21,6 +22,7 @@ const sitemapLinks = [
 export default function SitemapPage() {
   return (
     <>
+      <PageTopBar />
       <main className="min-h-screen bg-white text-black">
         <section className="bg-black px-4 py-14 text-white sm:px-6 lg:px-8">
           <div className="mx-auto max-w-5xl">
