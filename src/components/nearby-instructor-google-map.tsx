@@ -152,23 +152,42 @@ export function NearbyInstructorGoogleMap({
   const mapElementRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const learnerMarkerRef = useRef<any>(null);
-  const instructorMarkersRef = useRef<any[]>([]);
-  const distanceLinesRef = useRef<any[]>([]);
+  const instructorMarkersRef = useRef<Array<{ id: string; marker: any; line: any }>>([]);
   const radiusRef = useRef<any>(null);
   const infoWindowRef = useRef<any>(null);
+  const hasFittedBoundsRef = useRef(false);
+  const userInteractedRef = useRef(false);
+  const onSelectInstructorRef = useRef(onSelectInstructor);
   const [mapState, setMapState] = useState<"loading" | "ready" | "missing-key" | "error">("loading");
   const center = userPosition ?? FALLBACK_CENTER;
+  const instructorSignature = useMemo(
+    () =>
+      instructors
+        .map(
+          (instructor) =>
+            `${instructor.id}:${instructor.name}:${instructor.distanceMiles}:${instructor.rating}:${instructor.car}:${instructor.transmission}:${instructor.price}`
+        )
+        .join("|"),
+    [instructors]
+  );
   const instructorPositions = useMemo(
     () =>
       instructors.map((instructor, index) => ({
         instructor,
         position: pointFromDistance(center, instructor.distanceMiles, INSTRUCTOR_BEARINGS[index % INSTRUCTOR_BEARINGS.length])
       })),
-    [center, instructors]
+    [center.lat, center.lng, instructorSignature]
   );
 
   useEffect(() => {
+    onSelectInstructorRef.current = onSelectInstructor;
+  }, [onSelectInstructor]);
+
+  useEffect(() => {
     let cancelled = false;
+    const markUserInteraction = () => {
+      userInteractedRef.current = true;
+    };
 
     loadGoogleMaps()
       .then(() => {
@@ -193,6 +212,10 @@ export function NearbyInstructorGoogleMap({
           ]
         });
         infoWindowRef.current = new google.maps.InfoWindow();
+        mapRef.current.addListener("dragstart", markUserInteraction);
+        mapElementRef.current.addEventListener("pointerdown", markUserInteraction, { passive: true });
+        mapElementRef.current.addEventListener("wheel", markUserInteraction, { passive: true });
+        mapElementRef.current.addEventListener("touchstart", markUserInteraction, { passive: true });
         setMapState("ready");
       })
       .catch((error: unknown) => {
@@ -202,6 +225,9 @@ export function NearbyInstructorGoogleMap({
 
     return () => {
       cancelled = true;
+      mapElementRef.current?.removeEventListener("pointerdown", markUserInteraction);
+      mapElementRef.current?.removeEventListener("wheel", markUserInteraction);
+      mapElementRef.current?.removeEventListener("touchstart", markUserInteraction);
     };
   }, []);
 
@@ -210,7 +236,9 @@ export function NearbyInstructorGoogleMap({
 
     if (!mapRef.current || !google?.maps) return;
 
-    mapRef.current.panTo(center);
+    if (!userInteractedRef.current) {
+      mapRef.current.panTo(center);
+    }
 
     if (!learnerMarkerRef.current) {
       learnerMarkerRef.current = new google.maps.Marker({
@@ -238,44 +266,44 @@ export function NearbyInstructorGoogleMap({
     } else {
       radiusRef.current.setCenter(center);
     }
-  }, [center]);
+  }, [center.lat, center.lng]);
 
   useEffect(() => {
     const google = googleWindow().google;
 
     if (!mapRef.current || !google?.maps) return;
 
-    instructorMarkersRef.current.forEach((marker) => marker.setMap(null));
-    distanceLinesRef.current.forEach((line) => line.setMap(null));
-    distanceLinesRef.current = [];
+    instructorMarkersRef.current.forEach(({ marker, line }) => {
+      marker.setMap(null);
+      line.setMap(null);
+    });
+    instructorMarkersRef.current = [];
 
     const bounds = new google.maps.LatLngBounds();
     bounds.extend(center);
 
     instructorMarkersRef.current = instructorPositions.map(({ instructor, position }) => {
-      const isSelected = instructor.id === selectedInstructorId;
       bounds.extend(position);
 
       const line = new google.maps.Polyline({
         map: mapRef.current,
         path: [center, position],
-        strokeColor: isSelected ? "#e50914" : "#111111",
-        strokeOpacity: isSelected ? 0.55 : 0.18,
-        strokeWeight: isSelected ? 3 : 2,
-        zIndex: isSelected ? 5 : 1
+        strokeColor: "#111111",
+        strokeOpacity: 0.18,
+        strokeWeight: 2,
+        zIndex: 1
       });
-      distanceLinesRef.current.push(line);
 
       const marker = new google.maps.Marker({
         map: mapRef.current,
         position,
         title: `${instructor.name} is ${instructor.distanceMiles} miles away`,
-        icon: markerIcon(instructor.name.slice(0, 1), isSelected),
-        zIndex: isSelected ? 15 : 10
+        icon: markerIcon(instructor.name.slice(0, 1), false),
+        zIndex: 10
       });
 
       marker.addListener("click", () => {
-        onSelectInstructor(instructor.id);
+        onSelectInstructorRef.current(instructor.id);
         infoWindowRef.current?.setContent(`
           <div style="font-family: Arial, sans-serif; max-width: 220px;">
             <strong style="font-size: 16px;">${instructor.name}</strong>
@@ -287,13 +315,30 @@ export function NearbyInstructorGoogleMap({
         infoWindowRef.current?.open({ map: mapRef.current, anchor: marker });
       });
 
-      return marker;
+      return { id: instructor.id, marker, line };
     });
 
-    if (!bounds.isEmpty()) {
+    if (!hasFittedBoundsRef.current && !bounds.isEmpty()) {
       mapRef.current.fitBounds(bounds, 72);
+      hasFittedBoundsRef.current = true;
     }
-  }, [center, instructorPositions, onSelectInstructor, selectedInstructorId]);
+  }, [center.lat, center.lng, instructorPositions]);
+
+  useEffect(() => {
+    instructorMarkersRef.current.forEach(({ id, marker, line }) => {
+      const isSelected = id === selectedInstructorId;
+      const label = instructors.find((instructor) => instructor.id === id)?.name.slice(0, 1) ?? "";
+
+      marker.setIcon(markerIcon(label, isSelected));
+      marker.setZIndex(isSelected ? 15 : 10);
+      line.setOptions({
+        strokeColor: isSelected ? "#e50914" : "#111111",
+        strokeOpacity: isSelected ? 0.55 : 0.18,
+        strokeWeight: isSelected ? 3 : 2,
+        zIndex: isSelected ? 5 : 1
+      });
+    });
+  }, [instructors, selectedInstructorId]);
 
   return (
     <div className="relative mt-5 h-[420px] overflow-hidden rounded border border-zinc-200 bg-[#eef2ef] shadow-inner">
