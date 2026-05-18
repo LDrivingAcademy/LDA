@@ -311,6 +311,13 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const availableSlots = selectedInstructor.slots[availabilityDate] ?? [];
   const lessonSummary = `${availabilityDate} at ${selectedSlot || "selected time"} from ${postcode}. ${selectedInstructor.car}, ${selectedInstructor.transmission}.`;
   const canPay = Boolean(selectedInstructor && selectedSlot && postcode);
+  const trackingBooking =
+    bookingRecords.find((record) => record.status === "upcoming" || record.status === "pending") ??
+    bookingRecords[0] ??
+    null;
+  const trackingHref = trackingBooking
+    ? `/tracking?from=learner-dashboard&booking=${encodeURIComponent(trackingBooking.id)}`
+    : "/tracking?from=learner-dashboard";
 
   async function updateLocationFromBrowser() {
     if (!navigator.geolocation) {
@@ -500,7 +507,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
               <p className="mt-2 text-sm leading-6 text-zinc-600">{locationStatus}</p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link href="/tracking?from=dashboard" className="lda-pill lda-pill-sm">
+              <Link href={trackingHref} className="lda-pill lda-pill-sm">
                 Live tracking
               </Link>
             </div>

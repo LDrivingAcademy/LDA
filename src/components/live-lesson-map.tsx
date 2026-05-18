@@ -166,7 +166,7 @@ export function LiveLessonMap({ mode = "demo" }: { mode?: TrackingMode }) {
     if (!googleMapsKey || !mapRef.current) {
       setMapStatus(
         isLive
-          ? "Live tracking preview active - add Google Maps key for real map tiles"
+          ? "Live tracking active - add Google Maps key for real map tiles"
           : "Demo tracking active - add Google Maps key for real map tiles"
       );
       setUseFallback(true);
@@ -224,7 +224,7 @@ export function LiveLessonMap({ mode = "demo" }: { mode?: TrackingMode }) {
         setUseFallback(false);
       })
       .catch(() => {
-        setMapStatus(isLive ? "Live tracking preview active - Google Maps could not load" : "Demo tracking active - Google Maps could not load");
+        setMapStatus(isLive ? "Live tracking active - Google Maps could not load" : "Demo tracking active - Google Maps could not load");
         setUseFallback(true);
       });
 

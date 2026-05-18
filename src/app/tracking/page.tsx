@@ -5,21 +5,27 @@ import { LiveLessonMap } from "@/components/live-lesson-map";
 import { MainMenu } from "@/components/main-menu";
 
 type TrackingPageProps = {
-  searchParams?: Promise<{ from?: string }>;
+  searchParams?: Promise<{ from?: string; booking?: string }>;
 };
 
 export default async function TrackingPage({ searchParams }: TrackingPageProps) {
   const params = await searchParams;
-  const isLearnerTracking = params?.from === "dashboard";
+  const bookingReference = params?.booking;
+  const isLearnerTracking =
+    params?.from === "dashboard" ||
+    params?.from === "learner-dashboard" ||
+    Boolean(bookingReference);
   const backHref = isLearnerTracking ? "/learner-dashboard" : "/";
   const backLabel = isLearnerTracking ? "Back to dashboard" : "Back to homepage";
-  const badge = isLearnerTracking ? "Live tracking" : "Live tracking demo";
+  const badge = bookingReference ? "Booked lesson tracking" : isLearnerTracking ? "Live tracking" : "Live tracking demo";
   const heading = isLearnerTracking
-    ? "Track your instructor to your pickup point."
+    ? "Track your booked instructor to your pickup point."
     : "Preview learner live tracking after booking.";
-  const description = isLearnerTracking
-    ? "This is the learner tracking view for accepted bookings. It shows your pickup location and the instructor's live location from roughly 15 minutes before lesson time."
-    : "This public demo shows how learners will see instructor distance, estimated arrival time, and route progress before a confirmed lesson.";
+  const description = bookingReference
+    ? `Tracking for booking ${bookingReference}. This learner view follows the confirmed instructor from roughly 15 minutes before lesson time until arrival at the pickup point.`
+    : isLearnerTracking
+      ? "This learner tracking view is reserved for accepted bookings. It shows your pickup location and the instructor's live location from roughly 15 minutes before lesson time."
+      : "This public demo shows how learners will see instructor distance, estimated arrival time, and route progress before a confirmed lesson.";
 
   return (
     <>
