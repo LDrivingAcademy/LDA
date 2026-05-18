@@ -54,6 +54,7 @@ export default async function DashboardPage() {
     !isInstructor &&
     Boolean(learnerProfile?.learner_plus_active) &&
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
+  const displayName = profile?.full_name || user.email || "Learner";
 
   if (!isInstructor && !hasCompletedLearnerEligibility(learnerProfile)) {
     redirect("/auth/verify?role=learner&message=Complete learner eligibility before booking. Your date of birth must show you are 17 or over, and you must accept the terms and provisional licence checks.");
@@ -67,17 +68,24 @@ export default async function DashboardPage() {
             <Brand size="home" />
             <div className="min-w-0">
               <div className="text-sm font-bold text-red-200">Learner account</div>
-              <div className="mt-1 flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-black">LDA Dashboard, {profile?.full_name || user.email}</h1>
-              {isInstructor ? (
-                <span className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100">
-                  Instructor
-                </span>
-              ) : (
-                <Link href="/learner-plus" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
-                  {hasLearnerPlus ? "Learner Plus" : "Learner · Upgrade to Plus"}
-                </Link>
-              )}
+              <div className="mt-1 truncate text-xl font-black">{displayName}</div>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                {isInstructor ? (
+                  <span className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100">
+                    Instructor
+                  </span>
+                ) : (
+                  <>
+                    <Link href="/learner-plus" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
+                      {hasLearnerPlus ? "Learner Plus" : "Learner"}
+                    </Link>
+                    {!hasLearnerPlus ? (
+                      <Link href="/learner-plus" className="rounded-full border border-red-500/40 bg-transparent px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
+                        Upgrade to Plus
+                      </Link>
+                    ) : null}
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -90,7 +98,11 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-black tracking-normal">{isInstructor ? "LDA instructor dashboard" : "LDA learner dashboard"}</h1>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-2 lg:px-8">
         <article className="flex flex-col rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <CalendarCheck className="text-brand" />
           <h2 className="mt-4 text-xl font-black">Learner journey</h2>
