@@ -105,12 +105,14 @@ export default async function HomePage() {
             </Link>
             {account ? (
               <>
-                <Link href={account.dashboardHref} className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
-                  {account.name}
-                </Link>
-                <Link href={account.subscriptionHref} className="lda-pill lda-pill-sm whitespace-nowrap">
-                  {account.subscriptionLabel}
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link href={account.dashboardHref} className="rounded-full border border-red-500/60 bg-transparent px-3 py-1.5 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
+                    {account.name}
+                  </Link>
+                  <Link href={account.subscriptionHref} className="rounded-full border border-red-500/60 bg-transparent px-3 py-1.5 whitespace-nowrap text-sm font-black uppercase text-white hover:ring-2 hover:ring-brand">
+                    {account.subscriptionLabel}
+                  </Link>
+                </div>
                 <MainMenu account={account} />
               </>
             ) : (
@@ -123,10 +125,15 @@ export default async function HomePage() {
           <div className="flex items-center gap-3 xl:hidden">
             {account ? (
               <>
-                <Link href={account.dashboardHref} className="hidden rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand sm:inline-flex">
-                  {account.name}
-                </Link>
-                <Link href={account.subscriptionHref} className="lda-pill lda-pill-sm whitespace-nowrap">
+                <div className="hidden items-center gap-2 sm:flex">
+                  <Link href={account.dashboardHref} className="rounded-full border border-red-500/60 bg-transparent px-3 py-1.5 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
+                    {account.name}
+                  </Link>
+                  <Link href={account.subscriptionHref} className="rounded-full border border-red-500/60 bg-transparent px-3 py-1.5 whitespace-nowrap text-sm font-black uppercase text-white hover:ring-2 hover:ring-brand">
+                    {account.subscriptionLabel}
+                  </Link>
+                </div>
+                <Link href={account.subscriptionHref} className="rounded-full border border-red-500/60 bg-transparent px-3 py-1.5 whitespace-nowrap text-sm font-black uppercase text-white hover:ring-2 hover:ring-brand sm:hidden">
                   {account.subscriptionLabel}
                 </Link>
               </>
