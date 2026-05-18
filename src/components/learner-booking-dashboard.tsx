@@ -500,7 +500,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
               <p className="mt-2 text-sm leading-6 text-zinc-600">{locationStatus}</p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link href="/tracking" className="lda-pill lda-pill-sm">
+              <Link href="/tracking?from=dashboard" className="lda-pill lda-pill-sm">
                 Live tracking
               </Link>
             </div>

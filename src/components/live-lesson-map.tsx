@@ -9,6 +9,8 @@ type Point = {
   label: string;
 };
 
+type TrackingMode = "demo" | "live";
+
 declare global {
   interface Window {
     google?: any;
@@ -94,7 +96,8 @@ function loadGoogleMaps(apiKey: string) {
   return window.__ldaGoogleMapsPromise;
 }
 
-function FallbackMap({ progress }: { progress: number }) {
+function FallbackMap({ progress, mode }: { progress: number; mode: TrackingMode }) {
+  const isLive = mode === "live";
   const carX = 18 + progress * 58;
   const carY = 70 - progress * 38;
 
@@ -122,7 +125,7 @@ function FallbackMap({ progress }: { progress: number }) {
         <circle cx={carX} cy={carY} fill="#ffffff" r="1.6" />
       </svg>
       <div className="absolute left-4 top-4 rounded bg-white px-3 py-2 text-sm font-black text-black shadow-sm">
-        Demo live map
+        {isLive ? "Learner pickup route" : "Demo live map"}
       </div>
       <div className="absolute bottom-4 left-4 right-4 rounded border border-red-200 bg-white/90 p-3 text-black backdrop-blur">
         <div className="flex items-center gap-2 text-sm font-bold">
@@ -133,14 +136,15 @@ function FallbackMap({ progress }: { progress: number }) {
   );
 }
 
-export function LiveLessonMap() {
+export function LiveLessonMap({ mode = "demo" }: { mode?: TrackingMode }) {
+  const isLive = mode === "live";
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<GoogleMap | null>(null);
   const instructorMarker = useRef<GoogleMarker | null>(null);
   const routeLine = useRef<GooglePolyline | null>(null);
   const googleMapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const [progress, setProgress] = useState(0.18);
-  const [mapStatus, setMapStatus] = useState("Demo tracking active");
+  const [mapStatus, setMapStatus] = useState(isLive ? "Live tracking active" : "Demo tracking active");
   const [useFallback, setUseFallback] = useState(!googleMapsKey);
 
   const instructorLocation = useMemo(
@@ -160,7 +164,11 @@ export function LiveLessonMap() {
 
   useEffect(() => {
     if (!googleMapsKey || !mapRef.current) {
-      setMapStatus("Demo tracking active - add Google Maps key for real map tiles");
+      setMapStatus(
+        isLive
+          ? "Live tracking preview active - add Google Maps key for real map tiles"
+          : "Demo tracking active - add Google Maps key for real map tiles"
+      );
       setUseFallback(true);
       return;
     }
@@ -212,18 +220,18 @@ export function LiveLessonMap() {
           title: learnerPickup.label
         });
 
-        setMapStatus("Google Maps live tracking preview");
+        setMapStatus(isLive ? "Google Maps live tracking active" : "Google Maps live tracking preview");
         setUseFallback(false);
       })
       .catch(() => {
-        setMapStatus("Demo tracking active - Google Maps could not load");
+        setMapStatus(isLive ? "Live tracking preview active - Google Maps could not load" : "Demo tracking active - Google Maps could not load");
         setUseFallback(true);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [googleMapsKey]);
+  }, [googleMapsKey, isLive]);
 
   useEffect(() => {
     instructorMarker.current?.setPosition(instructorLocation);
@@ -235,13 +243,15 @@ export function LiveLessonMap() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[420px_1fr] lg:px-8">
         <div>
           <div className="inline-flex items-center gap-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm font-black text-brand">
-            <Navigation size={16} /> Live lesson tracking
+            <Navigation size={16} /> {isLive ? "Active lesson tracking" : "Live lesson tracking demo"}
           </div>
           <h2 className="mt-4 text-3xl font-black tracking-normal sm:text-4xl">
-            Show how far the instructor is from the learner.
+            {isLive ? "See your instructor approaching your pickup point." : "Show how far the instructor is from the learner."}
           </h2>
           <p className="mt-3 text-base leading-7 text-zinc-700">
-            Learners can see the instructor approach the pickup postcode, estimated arrival time, and distance remaining. In production this connects to instructor GPS, booking status, and consent controls.
+            {isLive
+              ? "For accepted bookings, this page shows your pickup point, the instructor's live location, estimated arrival time, and distance remaining when the lesson is close to starting."
+              : "Learners can see the instructor approach the pickup postcode, estimated arrival time, and distance remaining. In production this connects to instructor GPS, booking status, and consent controls."}
           </p>
           <div className="mt-6 grid gap-3">
             <div className="rounded border border-zinc-200 bg-zinc-100 p-4">
@@ -274,7 +284,7 @@ export function LiveLessonMap() {
             ref={mapRef}
             className={`${useFallback ? "hidden" : "block"} h-[360px] overflow-hidden rounded border border-zinc-200 bg-zinc-100`}
           />
-          {useFallback ? <FallbackMap progress={progress} /> : null}
+          {useFallback ? <FallbackMap progress={progress} mode={mode} /> : null}
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <div className="rounded border border-zinc-200 bg-zinc-100 p-3">
               <div className="flex items-center gap-2 text-sm font-bold text-zinc-500"><CarFront size={16} /> Instructor</div>
