@@ -37,7 +37,7 @@ export function LegalPage({ content }: { content: LegalPageContent }) {
             </article>
           ))}
           <article className="rounded border border-red-200 bg-red-50 p-5 text-sm leading-7 text-brand">
-            TODO: Replace this placeholder with solicitor-reviewed wording and confirm the final operating model, company details, address, processor list, retention periods, cancellation rules, and customer communications before accepting live bookings.
+            Policy governance note: LDA should review this page whenever the service, suppliers, payment flow, data processing, cookie use, cancellation rules, or applicable law changes. For live trading, keep business details, processor lists, retention periods, and customer communications accurate and version-controlled.
           </article>
         </section>
       </main>
