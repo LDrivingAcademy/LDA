@@ -1,17 +1,13 @@
 import Link from "next/link";
 import {
-  ArrowLeft,
   BadgeCheck,
-  CircleHelp,
   CreditCard,
   MapPin,
   ShieldCheck,
   Sparkles,
   UsersRound
 } from "lucide-react";
-import { Brand } from "@/components/brand";
-import { LanguageSelector } from "@/components/language-selector";
-import { MainMenu } from "@/components/main-menu";
+import { PageTopBar } from "@/components/page-top-bar";
 import { SiteFooter } from "@/components/site-footer";
 
 const marketplaceCards = [
@@ -48,40 +44,13 @@ const standards = [
 export default function AboutPage() {
   return (
     <>
-      <header className="sticky top-0 z-30 bg-black text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-7">
-            <Brand />
-            <nav className="hidden items-center gap-7 lg:flex">
-              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
-              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
-              <Link href="/#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
-              <Link href="/#safety" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
-              <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white ring-2 ring-brand">About</Link>
-            </nav>
-          </div>
-          <div className="hidden items-center gap-6 md:flex">
-            <LanguageSelector />
-            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
-              <CircleHelp size={17} /> Help
-            </Link>
-            <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
-            <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm">Sign up</Link>
-          </div>
-          <div className="md:hidden">
-            <MainMenu />
-          </div>
-        </div>
-      </header>
+      <PageTopBar />
 
       <main className="bg-white text-black">
         <section className="bg-black text-white">
           <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_430px] lg:px-8 lg:py-16">
             <div>
-              <Link href="/" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-zinc-300 hover:text-white hover:ring-2 hover:ring-brand">
-                <ArrowLeft size={17} /> Back home
-              </Link>
-              <div className="mt-10 inline-flex items-center gap-2 rounded-full border border-red-500/60 bg-red-500/15 px-4 py-2 text-sm font-black text-red-100">
+              <div className="inline-flex items-center gap-2 rounded-full border border-red-500/60 bg-red-500/15 px-4 py-2 text-sm font-black text-red-100">
                 <Sparkles size={17} /> About LDA
               </div>
               <h1 className="mt-5 max-w-3xl text-5xl font-black tracking-normal sm:text-6xl">
