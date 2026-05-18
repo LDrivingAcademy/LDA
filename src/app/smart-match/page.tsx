@@ -1,8 +1,5 @@
-import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
-import { Brand } from "@/components/brand";
-import { LanguageSelector } from "@/components/language-selector";
-import { MainMenu } from "@/components/main-menu";
+import { Sparkles } from "lucide-react";
+import { PageTopBar } from "@/components/page-top-bar";
 import { SiteFooter } from "@/components/site-footer";
 import { SmartMatchExperience } from "@/components/smart-match-experience";
 
@@ -20,20 +17,7 @@ export default async function SmartMatchPage({ searchParams }: SmartMatchPagePro
 
   return (
     <>
-      <header className="sticky top-0 z-30 bg-black text-white">
-        <div className="flex w-full items-center justify-between gap-5 px-[15px] py-4">
-          <Brand size="page" />
-          <div className="flex items-center gap-3 sm:gap-6">
-            <LanguageSelector />
-            <Link href={backHref} className="lda-pill lda-pill-sm">
-              <ArrowLeft size={17} /> {backLabel}
-            </Link>
-          </div>
-          <div className="hidden">
-            <MainMenu />
-          </div>
-        </div>
-      </header>
+      <PageTopBar backHref={backHref} backLabel={backLabel} />
       <main className="min-h-screen bg-black text-white">
         <section className="border-b border-zinc-800 bg-black">
           <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
