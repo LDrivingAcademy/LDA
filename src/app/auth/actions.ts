@@ -279,7 +279,9 @@ export async function completeVerification(formData: FormData) {
 }
 
 export async function signIn(formData: FormData) {
-  const identifier = String(formData.get("identifier") ?? "").trim();
+  const visibleIdentifier = String(formData.get("username") ?? "").trim();
+  const mirroredIdentifier = String(formData.get("identifier") ?? "").trim();
+  const identifier = visibleIdentifier || mirroredIdentifier;
   const password = String(formData.get("password") ?? "");
   const role = safeRole(formData.get("accountIntent"));
   const nextPath = safeNextPath(formData.get("next") ?? dashboardPathForRole(role));

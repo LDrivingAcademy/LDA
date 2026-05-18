@@ -163,15 +163,18 @@ export function LoginRememberHelper({ formId, rememberedIdentifier }: { formId: 
       }
     }
 
-    function handleSavedLoginClick() {
+    async function handleSavedLoginClick() {
       if (rememberInput) {
         rememberInput.checked = true;
       }
-      void requestSavedCredential("required");
-      passwordInput?.focus();
+      await requestSavedCredential("required");
+      syncIdentifierMirror();
+
+      if (!passwordInput?.value) {
+        passwordInput?.focus();
+      }
     }
 
-    void requestSavedCredential();
     identifierInput?.addEventListener("input", syncIdentifierMirror);
     identifierInput?.addEventListener("change", syncIdentifierMirror);
     loginForm.addEventListener("submit", handleSubmit);
