@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { readStoredJsonOrNull } from "@/lib/browser-storage";
 
 type BookingRecord = {
   id: string;
@@ -66,9 +67,9 @@ export function BookingHistoryPanel() {
   const [cancelStatus, setCancelStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("lda-learner-bookings");
-    if (stored) {
-      setBookings(JSON.parse(stored) as BookingRecord[]);
+    const stored = readStoredJsonOrNull<BookingRecord[]>("lda-learner-bookings");
+    if (Array.isArray(stored)) {
+      setBookings(stored);
     } else {
       localStorage.setItem("lda-learner-bookings", JSON.stringify(fallbackBookings));
     }

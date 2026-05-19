@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { readStoredJson } from "@/lib/browser-storage";
 
 const TRUSTED_DEVICE_KEY = "lda_trusted_device";
 const TRUSTED_DEVICES_KEY = "lda_trusted_devices";
@@ -31,8 +32,7 @@ function rememberCurrentDevice(identifier: string) {
     identifier,
     addedAt: new Date().toISOString()
   };
-  const stored = localStorage.getItem(TRUSTED_DEVICES_KEY);
-  const devices = stored ? (JSON.parse(stored) as typeof device[]) : [];
+  const devices = readStoredJson<typeof device[]>(TRUSTED_DEVICES_KEY, []);
   const nextDevices = [device, ...devices.filter((item) => item.name !== device.name)].slice(0, 8);
 
   localStorage.setItem(TRUSTED_DEVICE_KEY, "true");

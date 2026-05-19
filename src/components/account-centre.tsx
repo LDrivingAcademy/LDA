@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, KeyRound, LogOut, MapPin, MonitorSmartphone, ShieldAlert, Trash2, UserRound } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
+import { readStoredJson } from "@/lib/browser-storage";
 
 const LOCATION_PREF_KEY = "lda-location-sharing-enabled";
 const TRUSTED_DEVICE_KEY = "lda_trusted_device";
@@ -39,8 +40,7 @@ export function AccountCentre() {
       location: "Location permission not shared"
     };
 
-    const storedDevices = localStorage.getItem(TRUSTED_DEVICES_KEY);
-    setTrustedDevices(storedDevices ? (JSON.parse(storedDevices) as TrustedDevice[]) : []);
+    setTrustedDevices(readStoredJson<TrustedDevice[]>(TRUSTED_DEVICES_KEY, []));
 
     const storedPreference = localStorage.getItem(LOCATION_PREF_KEY);
     const enabled = storedPreference !== "false";

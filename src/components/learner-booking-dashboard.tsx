@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { demoInstructors } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
+import { readStoredJsonOrNull } from "@/lib/browser-storage";
 import { NearbyInstructorGoogleMap } from "@/components/nearby-instructor-google-map";
 
 const LOCATION_PREF_KEY = "lda-location-sharing-enabled";
@@ -153,11 +154,11 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem("lda-learner-bookings");
-    if (stored) {
-      setBookingRecords(JSON.parse(stored) as BookingRecord[]);
-    } else {
-      setBookingRecords(demoBookingRecords);
+    const stored = readStoredJsonOrNull<BookingRecord[]>("lda-learner-bookings");
+    const initialBookings = Array.isArray(stored) ? stored : demoBookingRecords;
+    setBookingRecords(initialBookings);
+
+    if (!stored) {
       localStorage.setItem("lda-learner-bookings", JSON.stringify(demoBookingRecords));
     }
   }, []);
@@ -235,10 +236,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
 
     if (params.get("payment") !== "success" || !booking) return;
 
-    const stored = localStorage.getItem(`lda-booking-${booking}`);
-    if (!stored) return;
-
-    const bookingDetails = JSON.parse(stored) as {
+    const bookingDetails = readStoredJsonOrNull<{
       instructorName: string;
       instructorId: string;
       lessonSummary: string;
@@ -248,7 +246,10 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
       pickup?: string;
       pricePence?: number;
       car?: string;
-    };
+    }>(`lda-booking-${booking}`);
+
+    if (!bookingDetails) return;
+
     const bookedInstructor = instructors.find((instructor) => instructor.id === bookingDetails.instructorId) ?? instructors[0];
 
     setConfirmationRef(booking);

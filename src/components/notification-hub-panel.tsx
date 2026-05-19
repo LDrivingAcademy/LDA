@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { readStoredJsonOrNull } from "@/lib/browser-storage";
 
 const preferenceList = [
   ["lessonUpdates", "Lesson confirmations and changes"],
@@ -26,9 +27,9 @@ export function NotificationHubPanel() {
   const [prefs, setPrefs] = useState(defaultPrefs);
 
   useEffect(() => {
-    const stored = localStorage.getItem("lda-notification-preferences");
+    const stored = readStoredJsonOrNull<Partial<NotificationPrefs>>("lda-notification-preferences");
     if (stored) {
-      setPrefs({ ...defaultPrefs, ...JSON.parse(stored) });
+      setPrefs({ ...defaultPrefs, ...stored });
     }
   }, []);
 
