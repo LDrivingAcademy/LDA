@@ -3,8 +3,8 @@ import Link from "next/link";
 type BrandSize = "home" | "page";
 
 const brandSizes: Record<BrandSize, string> = {
-  home: "h-[53px] w-[114px] sm:h-[62px] sm:w-[134px] lg:h-[64px] lg:w-[139px]",
-  page: "h-[60px] w-[130px] sm:h-[70px] sm:w-[152px] lg:h-[73px] lg:w-[158px]"
+  home: "h-[62px] w-[108px] sm:h-[72px] sm:w-[125px] lg:h-[78px] lg:w-[135px]",
+  page: "h-[70px] w-[121px] sm:h-[82px] sm:w-[142px] lg:h-[88px] lg:w-[153px]"
 };
 
 export function Brand({ size = "page" }: { size?: BrandSize }) {
