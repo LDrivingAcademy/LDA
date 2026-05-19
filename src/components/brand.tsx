@@ -15,10 +15,10 @@ export function Brand({ size = "page" }: { size?: BrandSize }) {
       aria-label="L Driving Academy home"
     >
       <img
-        src="/lda-logo-transparent.svg"
+        src="/lda-logo-520.svg"
         alt="L Driving Academy"
-        width={4096}
-        height={2363}
+        width={520}
+        height={300}
         className="h-full w-full object-contain object-left"
       />
     </Link>
