@@ -311,20 +311,19 @@ export async function signIn(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (user) {
-    let needsVerification = false;
+    let marketplaceRoles: MarketplaceRole[] = [];
 
     try {
-      const marketplaceRoles = await getMarketplaceRolesForUser(supabase, user.id);
-
-      if (marketplaceRoles.length === 0) {
-        needsVerification = true;
-      } else if (!marketplaceRoles.includes(role)) {
-        await supabase.auth.signOut({ scope: "local" });
-        passwordRedirect(roleConflictMessage(marketplaceRoles[0], role), role);
-      }
+      marketplaceRoles = await getMarketplaceRolesForUser(supabase, user.id);
     } catch (roleError) {
       await supabase.auth.signOut({ scope: "local" });
       passwordRedirect(roleError instanceof Error ? roleError.message : "LDA could not confirm your account role.", role);
+    }
+
+    const needsVerification = marketplaceRoles.length === 0;
+    if (!needsVerification && !marketplaceRoles.includes(role)) {
+      await supabase.auth.signOut({ scope: "local" });
+      passwordRedirect(roleConflictMessage(marketplaceRoles[0], role), role);
     }
 
     if (needsVerification) {
