@@ -58,7 +58,6 @@ export default async function LoginPage({
             <form id="lda-account-login-form" action={signIn} className="grid gap-3" autoComplete="on">
               <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
               <input type="hidden" name="next" value={nextPath} />
-              <input type="hidden" name="identifier" value={rememberedIdentifier} data-lda-identifier-mirror />
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">Email or mobile number</span>
                 <input id="lda-login-identifier" required name="username" autoComplete="username" inputMode="email" autoCapitalize="none" spellCheck={false} defaultValue={rememberedIdentifier} className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="you@example.com or 07123 456789" />
@@ -72,20 +71,10 @@ export default async function LoginPage({
                 <span>
                   Remember me on this device
                   <span className="block text-xs font-medium leading-5 text-zinc-500">
-                    LDA remembers your email or phone only. Your browser can save the password securely.
+                    LDA remembers your email or phone on this browser. Your browser can fill the password if you saved it.
                   </span>
                 </span>
               </label>
-              <button
-                type="button"
-                data-lda-use-saved-login
-                className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3 text-left text-sm font-black text-brand transition hover:border-red-500 hover:bg-red-500/15"
-              >
-                Use saved login, Face ID, Touch ID, or fingerprint
-                <span className="block text-xs font-medium leading-5 text-zinc-600">
-                  Opens your browser or device password manager when available.
-                </span>
-              </button>
               <button className="lda-pill mt-2">
                 <KeyRound size={18} /> Log in
               </button>
