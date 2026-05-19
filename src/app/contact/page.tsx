@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   BadgeCheck,
   BookOpenCheck,
-  CircleHelp,
   Clock3,
   CreditCard,
   FileText,
@@ -13,9 +12,7 @@ import {
   UserRoundCheck,
   UsersRound
 } from "lucide-react";
-import { Brand } from "@/components/brand";
-import { LanguageSelector } from "@/components/language-selector";
-import { MainMenu } from "@/components/main-menu";
+import { PageTopBar } from "@/components/page-top-bar";
 import { SiteFooter } from "@/components/site-footer";
 
 const supportRoutes = [
@@ -59,75 +56,45 @@ const policyLinks = [
 export default function ContactPage() {
   return (
     <>
-      <header className="sticky top-0 z-30 bg-black text-white">
-        <div className="flex w-full items-center justify-between gap-5 px-[15px] py-4">
-          <div className="flex items-center gap-7">
-            <Brand />
-            <nav className="hidden items-center gap-7 lg:flex">
-              <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
-              <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
-              <Link href="/#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
-              <Link href="/#safety" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
-              <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">About</Link>
-            </nav>
-          </div>
-          <div className="hidden items-center gap-6 md:flex">
-            <LanguageSelector />
-            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white ring-2 ring-brand">
-              <CircleHelp size={17} /> Help
-            </Link>
-            <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
-            <Link href="/auth/login?role=learner" className="lda-pill lda-pill-sm">Sign up</Link>
-          </div>
-          <div className="md:hidden">
-            <MainMenu />
-          </div>
-        </div>
-      </header>
+      <PageTopBar />
 
       <main className="bg-white text-black">
-        <section className="bg-black text-white">
+        <section className="bg-white text-black">
           <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_430px] lg:px-8 lg:py-16">
             <div>
-              <Link href="/" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-zinc-300 hover:text-white hover:ring-2 hover:ring-brand">
-                <ArrowLeft size={17} /> Back home
-              </Link>
-              <div className="mt-10 inline-flex items-center gap-2 rounded-full border border-red-500/60 bg-red-500/15 px-4 py-2 text-sm font-black text-red-100">
+              <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-black text-brand">
                 <MessageSquare size={17} /> LDA support
               </div>
               <h1 className="mt-5 max-w-3xl text-5xl font-black tracking-normal sm:text-6xl">
                 Help that keeps your lesson moving.
               </h1>
-              <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-zinc-300">
+              <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-zinc-600">
                 Get clear support for learner bookings, instructor onboarding, payments, refunds, verification, and data requests.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <a href="mailto:info@ldrivingacademy.co.uk" className="lda-pill">
                   <Mail size={20} /> Email support
                 </a>
-                <Link href="/auth/login?role=learner" className="lda-pill">
-                  <BookOpenCheck size={20} /> Learner login
-                </Link>
               </div>
             </div>
 
-            <aside className="rounded border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+            <aside className="rounded border border-zinc-200 bg-white p-6 shadow-2xl">
               <div className="flex items-center gap-3">
                 <div className="grid h-12 w-12 place-items-center rounded bg-red-500/15 text-brand">
                   <Mail size={24} />
                 </div>
                 <div>
                   <div className="text-sm font-black uppercase text-zinc-500">Support email</div>
-                  <a href="mailto:info@ldrivingacademy.co.uk" className="mt-1 block text-xl font-black text-white hover:text-brand">
+                  <a href="mailto:info@ldrivingacademy.co.uk" className="mt-1 block text-xl font-black text-black hover:text-brand">
                     info@ldrivingacademy.co.uk
                   </a>
                 </div>
               </div>
-              <div className="mt-6 grid gap-3 text-sm font-semibold leading-6 text-zinc-300">
+              <div className="mt-6 grid gap-3 text-sm font-semibold leading-6 text-zinc-600">
                 <p>For faster support, include your booking reference, account email, instructor name, lesson date/time, and pickup postcode.</p>
                 <p>For instructor support, include your ADI/PDI status, verification stage, and payout or booking reference if relevant.</p>
               </div>
-              <div className="mt-6 rounded bg-white p-4 text-black">
+              <div className="mt-6 rounded bg-zinc-100 p-4 text-black">
                 <div className="text-xs font-black uppercase text-zinc-500">Response target</div>
                 <div className="mt-1 text-2xl font-black">1 business day</div>
                 <p className="mt-2 text-sm font-semibold leading-6 text-zinc-700">
