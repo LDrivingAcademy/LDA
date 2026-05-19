@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { demoInstructors } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
-import { readStoredJsonOrNull } from "@/lib/browser-storage";
+import { readStoredJsonOrNull, readStoredValue, writeStoredValue } from "@/lib/browser-storage";
 import { NearbyInstructorGoogleMap } from "@/components/nearby-instructor-google-map";
 
 const LOCATION_PREF_KEY = "lda-location-sharing-enabled";
@@ -159,16 +159,16 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
     setBookingRecords(initialBookings);
 
     if (!stored) {
-      localStorage.setItem("lda-learner-bookings", JSON.stringify(demoBookingRecords));
+      writeStoredValue("lda-learner-bookings", JSON.stringify(demoBookingRecords));
     }
   }, []);
 
   useEffect(() => {
-    const storedPreference = localStorage.getItem(LOCATION_PREF_KEY);
+    const storedPreference = readStoredValue(LOCATION_PREF_KEY);
     const enabled = storedPreference !== "false";
 
     if (storedPreference === null) {
-      localStorage.setItem(LOCATION_PREF_KEY, "true");
+      writeStoredValue(LOCATION_PREF_KEY, "true");
     }
 
     if (enabled) {
@@ -178,7 +178,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
     }
 
     const interval = window.setInterval(() => {
-      if (localStorage.getItem(LOCATION_PREF_KEY) !== "false") {
+      if (readStoredValue(LOCATION_PREF_KEY) !== "false") {
         void updateLocationFromBrowser();
       }
     }, 5000);
@@ -190,7 +190,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
 
   useEffect(() => {
     if (!bookingRecords.length) return;
-    localStorage.setItem("lda-learner-bookings", JSON.stringify(bookingRecords));
+    writeStoredValue("lda-learner-bookings", JSON.stringify(bookingRecords));
   }, [bookingRecords]);
 
   useEffect(() => {
@@ -212,9 +212,31 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
       return;
     }
 
+    const existingScript = document.querySelector<HTMLScriptElement>("script[data-lda-google-maps], script[src*='maps.googleapis.com/maps/api/js']");
+
+    if (existingScript) {
+      const initialiseAutocomplete = () => {
+        const loadedGoogle = (window as any).google;
+        if (!postcodeRef.current || !loadedGoogle?.maps?.places) return;
+        const autocomplete = new loadedGoogle.maps.places.Autocomplete(postcodeRef.current, {
+          componentRestrictions: { country: "gb" },
+          fields: ["formatted_address", "address_components"]
+        });
+        autocomplete.addListener("place_changed", () => {
+          const place = autocomplete.getPlace();
+          setPostcode(place.formatted_address || postcodeRef.current?.value || "");
+        });
+      };
+
+      existingScript.addEventListener("load", initialiseAutocomplete, { once: true });
+      window.setTimeout(initialiseAutocomplete, 350);
+      return;
+    }
+
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
     script.async = true;
+    script.dataset.ldaGoogleMaps = "true";
     script.onload = () => {
       const loadedGoogle = (window as any).google;
       if (!postcodeRef.current || !loadedGoogle?.maps?.places) return;
@@ -275,9 +297,13 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
     });
 
     if ("Notification" in window && Notification.permission === "granted") {
-      new Notification("LDA lesson booked", {
-        body: `Your lesson with ${bookingDetails.instructorName} is confirmed. Reference ${booking}.`
-      });
+      try {
+        new Notification("LDA lesson booked", {
+          body: `Your lesson with ${bookingDetails.instructorName} is confirmed. Reference ${booking}.`
+        });
+      } catch {
+        // Notification permissions can change between page load and checkout return.
+      }
     }
 
     fetch("/api/bookings/confirm", {
@@ -326,14 +352,12 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
       return;
     }
 
-    if (localStorage.getItem(LOCATION_PREF_KEY) === "false") {
+    if (readStoredValue(LOCATION_PREF_KEY) === "false") {
       setLocationStatus("Location sharing is off. Turn it back on in Account settings when you want live tracking.");
       return;
     }
 
-    const permission = await navigator.permissions
-      ?.query({ name: "geolocation" as PermissionName })
-      .catch(() => null);
+    const permission = await navigator.permissions?.query({ name: "geolocation" as PermissionName }).catch(() => null);
 
     if (permission?.state === "denied") {
       setLocationStatus("Location is blocked in this browser. Update browser site permissions if you want live tracking.");
@@ -341,20 +365,20 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
     }
 
     if (permission?.state !== "granted") {
-      if (localStorage.getItem(LOCATION_PERMISSION_REQUESTED_KEY) === "true") {
+      if (readStoredValue(LOCATION_PERMISSION_REQUESTED_KEY) === "true") {
         setLocationStatus("Location sharing is enabled. This browser still needs location permission before LDA can show your exact live position.");
         return;
       }
 
-      localStorage.setItem(LOCATION_PERMISSION_REQUESTED_KEY, "true");
+      writeStoredValue(LOCATION_PERMISSION_REQUESTED_KEY, "true");
     }
 
     setLocationStatus("Refreshing your approved location...");
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setUserPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
-        localStorage.setItem(LOCATION_PREF_KEY, "true");
-        localStorage.setItem(LOCATION_PERMISSION_REQUESTED_KEY, "true");
+        writeStoredValue(LOCATION_PREF_KEY, "true");
+        writeStoredValue(LOCATION_PERMISSION_REQUESTED_KEY, "true");
         setLocationStatus("Live location is enabled for nearby instructor sorting and lesson tracking.");
       },
       () => setLocationStatus("Location permission was not granted. Postcode search still works, and you can change this later in Account settings."),
@@ -373,7 +397,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   }
 
   function savePendingBooking(reference: string) {
-    localStorage.setItem(
+    writeStoredValue(
       `lda-booking-${reference}`,
       JSON.stringify({
         instructorName: selectedInstructor.name,

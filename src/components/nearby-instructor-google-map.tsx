@@ -30,6 +30,10 @@ const FIVE_MILES_IN_METRES = 8047;
 const INSTRUCTOR_BEARINGS = [210, 52, 126, 300, 15];
 
 function googleWindow() {
+  if (typeof window === "undefined") {
+    return {} as Record<string, any>;
+  }
+
   return window as unknown as Record<string, any>;
 }
 
@@ -58,9 +62,14 @@ function loadGoogleMaps() {
   }
 
   globalWindow.__ldaGoogleMapsPromise = new Promise<void>((resolve, reject) => {
-    const existingScript = document.querySelector<HTMLScriptElement>("script[data-lda-google-maps]");
+    const existingScript = document.querySelector<HTMLScriptElement>("script[data-lda-google-maps], script[src*='maps.googleapis.com/maps/api/js']");
 
     if (existingScript) {
+      if (googleWindow().google?.maps) {
+        resolve();
+        return;
+      }
+
       existingScript.addEventListener("load", () => resolve(), { once: true });
       existingScript.addEventListener("error", () => reject(new Error("Google Maps could not load.")), { once: true });
       return;
@@ -185,6 +194,7 @@ export function NearbyInstructorGoogleMap({
 
   useEffect(() => {
     let cancelled = false;
+    let mapElement: HTMLDivElement | null = null;
     const markUserInteraction = () => {
       userInteractedRef.current = true;
     };
@@ -213,9 +223,10 @@ export function NearbyInstructorGoogleMap({
         });
         infoWindowRef.current = new google.maps.InfoWindow();
         mapRef.current.addListener("dragstart", markUserInteraction);
-        mapElementRef.current.addEventListener("pointerdown", markUserInteraction, { passive: true });
-        mapElementRef.current.addEventListener("wheel", markUserInteraction, { passive: true });
-        mapElementRef.current.addEventListener("touchstart", markUserInteraction, { passive: true });
+        mapElement = mapElementRef.current;
+        mapElement.addEventListener("pointerdown", markUserInteraction, { passive: true });
+        mapElement.addEventListener("wheel", markUserInteraction, { passive: true });
+        mapElement.addEventListener("touchstart", markUserInteraction, { passive: true });
         setMapState("ready");
       })
       .catch((error: unknown) => {
@@ -225,9 +236,9 @@ export function NearbyInstructorGoogleMap({
 
     return () => {
       cancelled = true;
-      mapElementRef.current?.removeEventListener("pointerdown", markUserInteraction);
-      mapElementRef.current?.removeEventListener("wheel", markUserInteraction);
-      mapElementRef.current?.removeEventListener("touchstart", markUserInteraction);
+      mapElement?.removeEventListener("pointerdown", markUserInteraction);
+      mapElement?.removeEventListener("wheel", markUserInteraction);
+      mapElement?.removeEventListener("touchstart", markUserInteraction);
     };
   }, []);
 
@@ -318,7 +329,8 @@ export function NearbyInstructorGoogleMap({
       return { id: instructor.id, marker, line };
     });
 
-    if (!hasFittedBoundsRef.current && !bounds.isEmpty()) {
+    const hasBounds = typeof bounds.isEmpty === "function" ? !bounds.isEmpty() : true;
+    if (!hasFittedBoundsRef.current && hasBounds) {
       mapRef.current.fitBounds(bounds, 72);
       hasFittedBoundsRef.current = true;
     }
