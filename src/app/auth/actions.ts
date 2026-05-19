@@ -506,12 +506,17 @@ export async function requestPasswordReset(formData: FormData) {
 }
 
 export async function updatePassword(formData: FormData) {
+  const username = String(formData.get("username") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const supabase = await createClient();
 
   if (!supabase) {
     authError("Supabase environment variables are not configured yet.");
+  }
+
+  if (!username) {
+    redirect(`/auth/update-password?message=${encodeURIComponent("Enter your account username or email first.")}`);
   }
 
   if (password.length < 8) {
@@ -529,7 +534,7 @@ export async function updatePassword(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect(`/auth/login?message=${encodeURIComponent("Password updated. Log in with your new password.")}`);
+  redirect(`/auth/login?message=${encodeURIComponent("Password changed. Log in with your new password.")}`);
 }
 
 export async function signOut() {

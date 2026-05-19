@@ -63,7 +63,7 @@ async function sendPasswordResetEmail(to: string, role: "learner" | "instructor"
       <p>Click the button below to confirm your email and choose a new password for your ${roleLabel} account.</p>
       <p style="margin: 28px 0;">
         <a href="${safeUrl}" style="display:inline-block;background:#ed1b24;color:#fff;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:999px;">
-          Set a new password
+          Reset Password
         </a>
       </p>
       <p>This secure link can be opened on your phone, laptop, or tablet. It will take you straight to the LDA password reset page.</p>
@@ -133,10 +133,10 @@ export async function POST(request: NextRequest) {
     return redirectWithMessage(request, returnTo, error.message);
   }
 
-  const confirmUrl = new URL("/auth/confirm", appOrigin);
+  const confirmUrl = new URL("/auth/callback", appOrigin);
   confirmUrl.searchParams.set("token_hash", data.properties.hashed_token);
   confirmUrl.searchParams.set("type", data.properties.verification_type || "recovery");
-  confirmUrl.searchParams.set("redirect_to", data.properties.redirect_to || redirectTo.toString());
+  confirmUrl.searchParams.set("next", "/auth/update-password");
   confirmUrl.searchParams.set("role", role);
 
   try {
