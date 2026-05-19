@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { CookieConsent } from "@/components/cookie-consent";
-import { InactivitySignOut } from "@/components/inactivity-sign-out";
 import { PageTranslator } from "@/components/page-translator";
 import { RoutePrefetcher } from "@/components/route-prefetcher";
-import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -33,23 +31,7 @@ export const metadata: Metadata = {
   }
 };
 
-async function hasSignedInUser() {
-  const supabase = await createClient();
-
-  if (!supabase) {
-    return false;
-  }
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  return Boolean(user);
-}
-
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
-  const isSignedIn = await hasSignedInUser();
-
   return (
     <html lang="en-GB" className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
@@ -63,7 +45,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <RoutePrefetcher />
         <CookieConsent />
         <PageTranslator />
-        <InactivitySignOut enabled={isSignedIn} />
       </body>
     </html>
   );
