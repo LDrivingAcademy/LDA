@@ -9,7 +9,7 @@ export async function POST() {
   const supabase = await createClient();
 
   if (supabase) {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
   }
 
   return jsonNoStore({ ok: true });

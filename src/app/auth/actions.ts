@@ -319,11 +319,11 @@ export async function signIn(formData: FormData) {
       if (marketplaceRoles.length === 0) {
         needsVerification = true;
       } else if (!marketplaceRoles.includes(role)) {
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({ scope: "local" });
         passwordRedirect(roleConflictMessage(marketplaceRoles[0], role), role);
       }
     } catch (roleError) {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: "local" });
       passwordRedirect(roleError instanceof Error ? roleError.message : "LDA could not confirm your account role.", role);
     }
 
@@ -543,7 +543,7 @@ export async function signOut() {
 
   const supabase = await createClient();
   if (supabase) {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
   }
 
   revalidatePath("/", "layout");

@@ -4,6 +4,14 @@ import { useEffect, useRef } from "react";
 
 const INACTIVITY_LIMIT_MS = 30 * 60 * 1000;
 const LAST_ACTIVITY_KEY = "lda:last-activity-at";
+const EXCLUDED_PATHS = new Set([
+  "/auth/login",
+  "/auth/sign-up",
+  "/auth/forgot-password",
+  "/auth/update-password",
+  "/auth/callback",
+  "/auth/confirm"
+]);
 const SIGN_OUT_MESSAGE =
   "For your data protection, LDA signed you out after 30 minutes of inactivity.";
 
@@ -12,7 +20,7 @@ export function InactivitySignOut({ enabled }: { enabled: boolean }) {
   const signedOutRef = useRef(false);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || EXCLUDED_PATHS.has(window.location.pathname)) {
       return;
     }
 
@@ -43,7 +51,7 @@ export function InactivitySignOut({ enabled }: { enabled: boolean }) {
 
     function scheduleTimeout() {
       clearExistingTimer();
-      const lastActivityAt = Number(window.localStorage.getItem(LAST_ACTIVITY_KEY) ?? Date.now());
+      const lastActivityAt = Number(window.sessionStorage.getItem(LAST_ACTIVITY_KEY) ?? Date.now());
       const elapsed = Date.now() - lastActivityAt;
       const remaining = Math.max(INACTIVITY_LIMIT_MS - elapsed, 0);
 
@@ -55,29 +63,19 @@ export function InactivitySignOut({ enabled }: { enabled: boolean }) {
         return;
       }
 
-      window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
+      window.sessionStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
       scheduleTimeout();
     }
 
-    function handleStorage(event: StorageEvent) {
-      if (event.key === LAST_ACTIVITY_KEY) {
-        scheduleTimeout();
-      }
-    }
-
-    if (!window.localStorage.getItem(LAST_ACTIVITY_KEY)) {
-      window.localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
-    }
+    window.sessionStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
 
     const events: Array<keyof WindowEventMap> = ["pointerdown", "keydown", "scroll", "touchstart", "focus"];
     events.forEach((eventName) => window.addEventListener(eventName, recordActivity, { passive: true }));
-    window.addEventListener("storage", handleStorage);
     scheduleTimeout();
 
     return () => {
       clearExistingTimer();
       events.forEach((eventName) => window.removeEventListener(eventName, recordActivity));
-      window.removeEventListener("storage", handleStorage);
     };
   }, [enabled]);
 
