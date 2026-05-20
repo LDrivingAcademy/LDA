@@ -197,7 +197,7 @@ export function AccountCentre() {
           <ShieldAlert className="text-brand" />
           <h2 className="mt-4 text-2xl font-black">Settings</h2>
           <div className="mt-5 grid gap-4 lg:grid-cols-3">
-            <div className="rounded border border-zinc-200 bg-zinc-50 p-4">
+            <div className="flex h-full flex-col rounded border border-zinc-200 bg-zinc-50 p-4">
               <MapPin className="text-brand" />
               <div className="mt-3 flex items-center justify-between gap-4">
                 <h3 className="text-xl font-black">Use my location</h3>
@@ -212,23 +212,25 @@ export function AccountCentre() {
               </div>
               <p className="mt-2 text-sm leading-6 text-zinc-600">{locationStatus}</p>
             </div>
-            <div className="rounded border border-red-200 bg-red-50 p-4">
+            <div className="flex h-full flex-col rounded border border-red-200 bg-red-50 p-4">
               <Trash2 className="text-brand" />
               <h3 className="mt-3 text-xl font-black">Account Deletion</h3>
               <p className="mt-2 text-sm leading-6 text-red-950">
                 Deleting your account starts a recovery window before final removal. Booking and legal records may be retained where LDA has a lawful basis.
               </p>
-              <button type="button" onClick={() => setDeletionRequested(true)} className="lda-pill lda-pill-sm mt-4">
-                Request account deletion
-              </button>
-              {deletionRequested ? <p className="mt-3 text-sm font-black text-red-700">Deletion request noted. A final confirmation workflow will be added before live release.</p> : null}
+              <div className="mt-auto pt-4">
+                <button type="button" onClick={() => setDeletionRequested(true)} className="lda-pill lda-pill-sm">
+                  Request account deletion
+                </button>
+                {deletionRequested ? <p className="mt-3 text-sm font-black text-red-700">Deletion request noted. A final confirmation workflow will be added before live release.</p> : null}
+              </div>
             </div>
-            <div className="rounded border border-zinc-200 bg-zinc-50 p-4">
+            <div className="flex h-full flex-col rounded border border-zinc-200 bg-zinc-50 p-4">
               <LogOut className="text-brand" />
               <h3 className="mt-3 text-xl font-black">Sign Out</h3>
               <p className="mt-2 text-sm leading-6 text-zinc-600">Leave this device signed out of your LDA account.</p>
-              <form action={signOut}>
-                <button type="submit" className="lda-pill lda-pill-sm mt-4">
+              <form action={signOut} className="mt-auto pt-4">
+                <button type="submit" className="lda-pill lda-pill-sm">
                   Sign out
                 </button>
               </form>
