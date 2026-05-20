@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { HANDOFF_COOKIE_NAME, HANDOFF_TTL_SECONDS, createHandoffSecret, hashHandoffSecret } from "@/lib/auth-handoff";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -120,7 +121,30 @@ export async function POST(request: NextRequest) {
   }
 
   const appOrigin = process.env.APP_WEBSITE_URL?.trim() || request.nextUrl.origin;
-  const redirectTo = new URL("/auth/update-password", appOrigin);
+  const nextPath = `/auth/update-password?role=${role}&email=${encodeURIComponent(email)}`;
+  const redirectTo = new URL("/auth/callback", appOrigin);
+  redirectTo.searchParams.set("role", role);
+  redirectTo.searchParams.set("next", nextPath);
+
+  const handoffId = crypto.randomUUID();
+  const handoffSecret = createHandoffSecret();
+  const secretHash = await hashHandoffSecret(handoffSecret);
+  const expiresAt = new Date(Date.now() + HANDOFF_TTL_SECONDS * 1000).toISOString();
+
+  const { error: handoffError } = await adminClient.from("auth_handoff_requests").insert({
+    id: handoffId,
+    email,
+    full_name: null,
+    role,
+    next_path: nextPath,
+    secret_hash: secretHash,
+    expires_at: expiresAt
+  });
+
+  if (handoffError) {
+    return redirectWithMessage(request, returnTo, handoffError.message);
+  }
+
   const { data, error } = await adminClient.auth.admin.generateLink({
     type: "recovery",
     email,
@@ -133,12 +157,13 @@ export async function POST(request: NextRequest) {
     return redirectWithMessage(request, returnTo, error.message);
   }
 
-  const confirmUrl = new URL("/auth/callback", appOrigin);
+  const confirmUrl = new URL("/auth/confirm", appOrigin);
   confirmUrl.searchParams.set("token_hash", data.properties.hashed_token);
   confirmUrl.searchParams.set("type", data.properties.verification_type || "recovery");
-  confirmUrl.searchParams.set("next", "/auth/update-password");
+  confirmUrl.searchParams.set("redirect_to", data.properties.redirect_to || redirectTo.toString());
   confirmUrl.searchParams.set("role", role);
-  confirmUrl.searchParams.set("email", email);
+  confirmUrl.searchParams.set("handoff", handoffId);
+  confirmUrl.searchParams.set("handoff_secret", handoffSecret);
 
   try {
     await sendPasswordResetEmail(email, role, confirmUrl.toString());
@@ -146,5 +171,19 @@ export async function POST(request: NextRequest) {
     return redirectWithMessage(request, returnTo, sendError instanceof Error ? sendError.message : "LDA could not send the reset email. Check the Resend API key and domain verification.");
   }
 
-  return redirectWithMessage(request, returnTo, "Password reset email sent. Open the secure link and choose a new password.");
+  const waitingUrl = new URL("/auth/check-email", request.nextUrl.origin);
+  waitingUrl.searchParams.set("email", email);
+  waitingUrl.searchParams.set("role", role);
+  waitingUrl.searchParams.set("request", handoffId);
+  waitingUrl.searchParams.set("purpose", "reset");
+
+  const response = NextResponse.redirect(waitingUrl);
+  response.cookies.set(HANDOFF_COOKIE_NAME, `${handoffId}.${handoffSecret}`, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: HANDOFF_TTL_SECONDS
+  });
+  return response;
 }

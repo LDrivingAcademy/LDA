@@ -39,7 +39,7 @@ export default async function UpdatePasswordPage({
               <input type="hidden" name="role" value={accountRole} />
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">Email</span>
-                <input required name="identifier" type="email" autoComplete="username" defaultValue={accountEmail} className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="you@example.com" />
+                <input required readOnly aria-readonly="true" name="identifier" type="email" autoComplete="username" defaultValue={accountEmail} className="rounded border border-zinc-300 bg-zinc-100 px-3 py-3 text-zinc-700 placeholder:text-zinc-600" placeholder="you@example.com" />
               </label>
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">New password</span>
@@ -50,7 +50,7 @@ export default async function UpdatePasswordPage({
                 <input required name="confirmPassword" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Confirm password" />
               </label>
               <button className="lda-pill mt-2">
-                <KeyRound size={18} /> Reset Password
+                <KeyRound size={18} /> Change password
               </button>
             </form>
           </section>

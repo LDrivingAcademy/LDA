@@ -7,10 +7,12 @@ type HandoffState = "pending" | "authenticated" | "expired" | "error";
 
 export function AuthHandoffPoller({
   requestId,
-  role
+  role,
+  approvedMessage = "Approved. Taking you to your LDA verification page now."
 }: {
   requestId?: string;
   role: "learner" | "instructor";
+  approvedMessage?: string;
 }) {
   const [state, setState] = useState<HandoffState>(requestId ? "pending" : "error");
   const [message, setMessage] = useState(
@@ -41,7 +43,7 @@ export function AuthHandoffPoller({
 
         if (data.status === "authenticated") {
           setState("authenticated");
-          setMessage("Approved. Taking you to your LDA verification page now.");
+          setMessage(approvedMessage);
           window.location.assign(data.redirectTo || `/auth/verify?role=${role}`);
           return;
         }
@@ -72,7 +74,7 @@ export function AuthHandoffPoller({
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [requestId, role]);
+  }, [approvedMessage, requestId, role]);
 
   const Icon = state === "authenticated" ? CheckCircle2 : state === "pending" ? Loader2 : Smartphone;
 

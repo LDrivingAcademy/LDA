@@ -531,7 +531,7 @@ export async function updatePassword(formData: FormData) {
   }
 
   if (password !== confirmPassword) {
-    updateUrl("The passwords do not match.");
+    updateUrl("passwords do not match");
   }
 
   const { error } = await supabase.auth.updateUser({ password });
