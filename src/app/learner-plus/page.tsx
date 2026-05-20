@@ -14,7 +14,7 @@ export default function LearnerPlusPage() {
           </div>
           <h1 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">Choose your LDA learner package.</h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-zinc-700">
-            Your current package is Learner Plus. Each tile opens a full breakdown, and paid package buttons are wired to Stripe subscription Checkout once the monthly and yearly Price IDs are added in Vercel.
+            Your current package is Learner Plus. Each tile opens a full breakdown, and paid packages can be selected with monthly or yearly billing through secure Stripe Checkout.
           </p>
           <div className="mt-7 grid gap-4 lg:grid-cols-3">
             {learnerPackages.map((learnerPackage) => (

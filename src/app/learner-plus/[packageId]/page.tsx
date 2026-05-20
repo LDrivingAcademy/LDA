@@ -71,7 +71,7 @@ export default async function LearnerPackageDetailPage({ params, searchParams }:
               <p className="text-sm font-black uppercase text-zinc-500">Monthly</p>
               <p className="mt-2 text-2xl font-black text-brand">{learnerPackage.monthlyPrice}</p>
               <p className="mt-3 text-sm font-bold leading-6 text-zinc-700">
-                Flexible monthly access. Add the matching Stripe monthly Price ID in Vercel when the subscription amount is final.
+                Flexible monthly access with secure billing through Stripe Checkout.
               </p>
               <div className="mt-5">
                 <LearnerPackageCheckoutButton
@@ -86,7 +86,7 @@ export default async function LearnerPackageDetailPage({ params, searchParams }:
               <p className="text-sm font-black uppercase text-zinc-500">Yearly</p>
               <p className="mt-2 text-2xl font-black text-brand">{learnerPackage.yearlyPrice}</p>
               <p className="mt-3 text-sm font-bold leading-6 text-zinc-700">
-                Annual access for learners who want a longer LDA support plan. Connect the yearly Stripe Price ID when pricing is ready.
+                Annual access for learners who want a longer LDA support plan at better value.
               </p>
               <div className="mt-5">
                 <LearnerPackageCheckoutButton

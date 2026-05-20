@@ -62,15 +62,17 @@ export async function POST(request: Request) {
   const priceId = priceEnvName ? process.env[priceEnvName] : undefined;
 
   if (!stripeSecretKey) {
+    console.error("Learner package checkout is missing STRIPE_SECRET_KEY.");
     return jsonNoStore(
-      { error: "Stripe subscriptions are not configured yet. Add STRIPE_SECRET_KEY in Vercel." },
+      { error: "Subscription checkout is being connected. Please try again shortly or contact LDA support." },
       { status: 400 }
     );
   }
 
   if (!priceEnvName || !priceId) {
+    console.error(`Learner package checkout is missing Stripe Price ID: ${priceEnvName ?? "unknown price env"}.`);
     return jsonNoStore(
-      { error: `Add ${priceEnvName ?? "the Stripe Price ID"} in Vercel to enable this subscription.` },
+      { error: "This learner package is being connected to checkout. Please try again shortly or contact LDA support." },
       { status: 400 }
     );
   }
