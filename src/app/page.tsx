@@ -81,6 +81,8 @@ const safetyItems = [
 
 export default async function HomePage() {
   const account = await getHeaderAccountSummary();
+  const learnerEntryHref = account ? account.dashboardHref : "/auth/login?role=learner";
+  const learnerSignUpHref = account ? account.dashboardHref : "/auth/sign-up?role=learner";
 
   return (
     <>
@@ -89,7 +91,7 @@ export default async function HomePage() {
           <div className="flex min-w-0 items-center gap-5">
             <Brand size="home" />
             <nav className="hidden items-center gap-4 xl:flex">
-              <Link href="/auth/login?role=learner" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
+              <Link href={learnerEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
               <Link href="/instructor" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="#discover" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
               <Link href="#safety" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
@@ -159,7 +161,7 @@ export default async function HomePage() {
                 Book verified local driving instructors, compare upfront prices, choose a lesson time, and pay online in a few clear steps.
               </p>
               <div className="mt-auto hidden pt-8 lg:block">
-                <OnDemandLessonCard />
+                <OnDemandLessonCard futureLessonsHref={learnerSignUpHref} />
               </div>
             </div>
 
@@ -196,7 +198,7 @@ export default async function HomePage() {
         </section>
 
         <section className="bg-white px-4 pb-8 sm:px-6 lg:hidden">
-          <OnDemandLessonCard className="mx-auto max-w-7xl md:grid-cols-[1fr_auto] md:items-center" />
+          <OnDemandLessonCard className="mx-auto max-w-7xl md:grid-cols-[1fr_auto] md:items-center" futureLessonsHref={learnerSignUpHref} />
         </section>
 
         <section id="discover" className="bg-white">
@@ -204,7 +206,7 @@ export default async function HomePage() {
             <h2 className="text-4xl font-black tracking-normal sm:text-5xl">Discover what you can do with LDA</h2>
             <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {suggestionCards.map((card) => (
-                <Link key={card.title} href={card.href} className="group grid min-h-[210px] grid-cols-[1fr_150px] overflow-hidden rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200">
+                <Link key={card.title} href={card.href.startsWith("/auth/login?role=learner") ? learnerEntryHref : card.href} className="group grid min-h-[210px] grid-cols-[1fr_150px] overflow-hidden rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200">
                   <div className="flex flex-col items-start">
                     <h3 className="text-2xl font-black">{card.title}</h3>
                     <p className="mt-4 max-w-xs text-base leading-7 text-zinc-800">{card.body}</p>
@@ -244,7 +246,7 @@ export default async function HomePage() {
   );
 }
 
-function OnDemandLessonCard({ className = "" }: { className?: string }) {
+function OnDemandLessonCard({ className = "", futureLessonsHref = "/auth/sign-up?role=learner" }: { className?: string; futureLessonsHref?: string }) {
   return (
     <div className={`grid gap-4 rounded border border-zinc-200 bg-zinc-50 p-5 shadow-sm ${className}`}>
       <div>
@@ -260,7 +262,7 @@ function OnDemandLessonCard({ className = "" }: { className?: string }) {
         <Link href="/lesson-now" className="lda-pill w-full">
           On-demand lesson
         </Link>
-        <Link href="/auth/sign-up?role=learner" className="lda-pill w-full">
+        <Link href={futureLessonsHref} className="lda-pill w-full">
           Book future lessons
         </Link>
       </div>

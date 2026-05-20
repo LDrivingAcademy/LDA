@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { CarFront, GraduationCap, MailCheck, ShieldCheck } from "lucide-react";
 import { PageTopBar } from "@/components/page-top-bar";
 import { SignUpPasswordHelper } from "@/components/auth/sign-up-password-helper";
+import { getHeaderAccountSummary } from "@/lib/current-account";
 import { signUp } from "../actions";
 
 export default async function SignUpPage({
@@ -12,6 +14,11 @@ export default async function SignUpPage({
   const { message, role } = await searchParams;
   const isInstructor = role === "instructor";
   const nextPath = "/dashboard";
+  const account = await getHeaderAccountSummary();
+
+  if (account) {
+    redirect(account.dashboardHref);
+  }
 
   return (
     <main className="min-h-screen bg-white text-black">

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { CarFront, GraduationCap, KeyRound, ShieldCheck } from "lucide-react";
 import { LoginRememberHelper } from "@/components/auth/login-remember-helper";
 import { PageTopBar } from "@/components/page-top-bar";
+import { getHeaderAccountSummary } from "@/lib/current-account";
 import { signIn } from "../actions";
 
 export default async function LoginPage({
@@ -13,6 +15,12 @@ export default async function LoginPage({
   const { message, role } = await searchParams;
   const isInstructor = role === "instructor";
   const nextPath = isInstructor ? "/instructor-dashboard" : "/learner-dashboard";
+  const account = await getHeaderAccountSummary();
+
+  if (account) {
+    redirect(isInstructor && account.dashboardHref === "/instructor-dashboard" ? "/instructor-dashboard" : account.dashboardHref);
+  }
+
   const rememberedIdentifier = (await cookies()).get("lda_remember_identifier")?.value ?? "";
 
   return (
