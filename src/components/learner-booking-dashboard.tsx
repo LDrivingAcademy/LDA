@@ -577,7 +577,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
             <p className="mt-2 text-sm leading-6 text-zinc-600">Adjust the filters first, then choose an instructor and a visible availability slot.</p>
           </div>
 
-          <div className="grid items-stretch gap-4 xl:grid-cols-3">
+          <div className="grid items-stretch gap-4 xl:grid-cols-2 2xl:grid-cols-3">
             {filteredInstructors.map((instructor) => {
               const isChosen = selectedInstructorId === instructor.id;
               const selectionIsLocked = Boolean(selectedInstructorId && !isChosen);
@@ -609,10 +609,10 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
                       ))}
                     </div>
                   </div>
-                  <div className="mt-auto grid grid-cols-[minmax(0,1fr)_auto] items-center gap-5 border-t border-zinc-200 pt-4 2xl:gap-7">
+                  <div className="mt-auto grid grid-cols-[minmax(8.5rem,1fr)_auto] items-center gap-6 border-t border-zinc-200 pt-4 2xl:gap-8">
                     <div className="min-w-0">
                       <div className="text-xs font-bold uppercase text-zinc-600">Price</div>
-                      <div className="truncate text-2xl font-black tracking-tight" title={`${formatMoney(instructor.price)}/hr`}>{formatMoney(instructor.price)}/hr</div>
+                      <div className="whitespace-nowrap text-2xl font-black tracking-tight" title={`${formatMoney(instructor.price)}/hr`}>{formatMoney(instructor.price)}/hr</div>
                     </div>
                     <button
                       type="button"
