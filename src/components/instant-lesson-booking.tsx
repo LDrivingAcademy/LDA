@@ -1,8 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { Apple, BadgeCheck, CreditCard, Mail, ShieldCheck } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 type InstantLessonBookingProps = {
   instructorName: string;
@@ -21,15 +20,6 @@ function cleanLicenceNumber(value: string) {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
-const paymentOptions: { value: string; label: string; icon: LucideIcon }[] = [
-  { value: "card", label: "Manual card entry", icon: CreditCard },
-  { value: "apple_pay", label: "Apple Pay", icon: Apple },
-  { value: "visa", label: "Visa", icon: CreditCard },
-  { value: "mastercard", label: "Mastercard", icon: CreditCard },
-  { value: "maestro", label: "Maestro", icon: CreditCard },
-  { value: "paypal", label: "PayPal", icon: BadgeCheck }
-];
-
 export function InstantLessonBooking({
   instructorName,
   instructorEmail,
@@ -46,7 +36,6 @@ export function InstantLessonBooking({
     message: "Enter the 16-character provisional licence number, then run the DVLA check."
   });
   const [checkoutState, setCheckoutState] = useState<"idle" | "loading" | "error">("idle");
-  const [paymentPreference, setPaymentPreference] = useState("card");
   const [checkoutError, setCheckoutError] = useState("");
 
   const normalisedLicence = useMemo(() => cleanLicenceNumber(licenceNumber), [licenceNumber]);
@@ -80,12 +69,11 @@ export function InstantLessonBooking({
     });
   }
 
-  async function startCheckout(preferredPaymentOption = paymentPreference) {
+  async function startCheckout() {
     if (!canPay) {
       return;
     }
 
-    setPaymentPreference(preferredPaymentOption);
     setCheckoutState("loading");
     setCheckoutError("");
 
@@ -100,8 +88,7 @@ export function InstantLessonBooking({
         instructorName,
         instructorEmail,
         lessonSummary,
-        amountPence,
-        paymentPreference: preferredPaymentOption
+        amountPence
       })
     });
     const result = await response.json();
@@ -119,7 +106,7 @@ export function InstantLessonBooking({
     <form
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        startCheckout("card");
+        startCheckout();
       }}
       className="rounded bg-white p-5 text-black shadow-2xl"
     >
@@ -208,30 +195,8 @@ export function InstantLessonBooking({
         </div>
       </div>
 
-      <div className="mt-6 rounded bg-zinc-100 p-4">
-        <div className="text-sm font-black text-zinc-600">Payment methods</div>
-        <div className="mt-3 flex flex-wrap gap-2 text-xs font-black text-zinc-700">
-          {paymentOptions.map(({ value, label, icon: Icon }) => (
-            <button
-              key={value}
-              type="button"
-              disabled={!canPay || checkoutState === "loading"}
-              onClick={() => startCheckout(value)}
-              className={`inline-flex items-center gap-1 rounded-full border px-3 py-2 transition ${
-                paymentPreference === value ? "border-brand bg-brand text-white" : "border-zinc-200 bg-white text-zinc-800 hover:border-brand"
-              }`}
-            >
-              <Icon size={14} /> {label}
-            </button>
-          ))}
-        </div>
-        <p className="mt-3 text-xs leading-5 text-zinc-500">
-          Each option opens Stripe Checkout. Manual card entry, Visa, Mastercard, Maestro, and eligible Apple Pay are handled by Stripe's secure card form; Apple Pay requires Stripe domain verification and PayPal depends on account eligibility.
-        </p>
-      </div>
-
       <button disabled={!canPay || checkoutState === "loading"} className="lda-pill mt-6 w-full" type="submit">
-        <Mail size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : "Pay and reserve lesson now"}
+        {checkoutState === "loading" ? "Opening secure checkout..." : "Checkout"}
       </button>
       {checkoutState === "error" ? (
         <p className="mt-3 text-sm font-bold text-brand">{checkoutError || "Payment could not start. Please try again or contact support."}</p>
