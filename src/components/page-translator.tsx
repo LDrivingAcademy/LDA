@@ -4,31 +4,10 @@ import { useCallback, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { googleCodeForLanguage, isRtlLanguage } from "@/lib/languages";
 
-type TranslatorWindow = Window & {
-  google?: {
-    translate?: {
-      TranslateElement: new (options: Record<string, unknown>, element: string) => object;
-    };
-  };
-  googleTranslateElementInit?: () => void;
-  __ldaGoogleTranslateInitialised?: boolean;
-};
-
 const sourceLanguage = "en";
-const translatorScriptId = "google-page-translate";
-const googleUiSelectors = [
-  ".goog-te-banner-frame",
-  ".goog-te-balloon-frame",
-  ".goog-te-menu-frame",
-  ".goog-te-ftab-frame",
-  ".goog-tooltip",
-  ".goog-tooltip:hover",
-  ".VIpgJd-ZVi9od-ORHb-OEVmcd",
-  ".VIpgJd-ZVi9od-aZ2wEe-wOHMyf",
-  ".VIpgJd-ZVi9od-xl07Ob-OEVmcd",
-  ".VIpgJd-yAWNEb-L7lbkb",
-  "iframe.skiptranslate"
-];
+const ignoredTags = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "IFRAME", "SVG", "CANVAS", "INPUT", "TEXTAREA", "SELECT", "OPTION"]);
+const maxBatchSize = 45;
+const originalText = new WeakMap<Text, string>();
 
 function getStoredLanguage() {
   if (typeof window === "undefined") {
@@ -41,241 +20,186 @@ function getStoredLanguage() {
   };
 }
 
-function setTranslateCookie(targetLanguage: string) {
-  const value = targetLanguage === sourceLanguage ? "" : `/en/${targetLanguage}`;
-  const expires = targetLanguage === sourceLanguage ? "Thu, 01 Jan 1970 00:00:00 GMT" : "Fri, 31 Dec 9999 23:59:59 GMT";
-
-  const domains = [
-    "",
-    window.location.hostname,
-    `.${window.location.hostname}`,
-    window.location.hostname.split(".").slice(-2).join("."),
-    `.${window.location.hostname.split(".").slice(-2).join(".")}`
-  ];
-
-  domains.forEach((domain) => {
-    const domainPart = domain ? `; domain=${domain}` : "";
-    document.cookie = `googtrans=${value}; expires=${expires}; path=/${domainPart}`;
-  });
-}
-
-function hasTranslatedDom() {
-  return document.documentElement.className.includes("translated") || document.body.className.includes("translated");
-}
-
-function suppressGoogleTranslateUi() {
-  googleUiSelectors.forEach((selector) => {
-    document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
-      element.style.setProperty("display", "none", "important");
-      element.style.setProperty("visibility", "hidden", "important");
-      element.style.setProperty("pointer-events", "none", "important");
-    });
-  });
-
-  document.querySelectorAll<HTMLElement>(".goog-text-highlight").forEach((element) => {
-    element.style.setProperty("background", "transparent", "important");
-    element.style.setProperty("box-shadow", "none", "important");
-  });
-
-  document.body.style.setProperty("top", "0", "important");
-}
-
-function getTranslateCombo() {
-  return document.querySelector<HTMLSelectElement>(".goog-te-combo");
-}
-
-function emitTranslateEvents(combo: HTMLSelectElement) {
-  combo.dispatchEvent(new Event("input", { bubbles: true }));
-  combo.dispatchEvent(new Event("change", { bubbles: true }));
-}
-
-function dispatchTranslateCombo(targetLanguage: string, options: { force?: boolean } = {}) {
-  const combo = getTranslateCombo();
-
-  if (!combo) {
-    return false;
+function shouldSkipElement(element: Element | null) {
+  if (!element) {
+    return true;
   }
 
-  const nextValue = targetLanguage === sourceLanguage ? "" : targetLanguage;
-
-  if (options.force) {
-    combo.value = "";
-    emitTranslateEvents(combo);
+  if (ignoredTags.has(element.tagName)) {
+    return true;
   }
 
-  const applyValue = () => {
-    combo.value = nextValue;
-    emitTranslateEvents(combo);
-    suppressGoogleTranslateUi();
-  };
-
-  applyValue();
-
-  if (options.force) {
-    window.setTimeout(applyValue, 80);
-  }
-
-  return true;
+  return Boolean(element.closest(".notranslate, [data-no-translate], #google_translate_element"));
 }
 
-function verifyAppliedTranslation(targetLanguage: string, attempt = 0) {
-  if (targetLanguage === sourceLanguage) {
-    return;
-  }
+function getTextNodes(root: ParentNode) {
+  const nodes: Text[] = [];
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const textNode = node as Text;
+      const text = node.textContent || "";
+      const original = originalText.get(textNode);
+      const trimmed = text.trim();
+      const originalTrimmed = original?.trim();
 
-  window.setTimeout(() => {
-    const { selected, custom } = getStoredLanguage();
-    const storedTarget = googleCodeForLanguage(selected, custom) || sourceLanguage;
+      if (originalTrimmed && originalTrimmed.length > 1) {
+        return shouldSkipElement(node.parentElement) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
 
-    if (storedTarget !== targetLanguage || hasTranslatedDom()) {
-      suppressGoogleTranslateUi();
-      return;
+      if (!trimmed || trimmed.length < 2 || !/[A-Za-z]/.test(trimmed)) {
+        return NodeFilter.FILTER_REJECT;
+      }
+
+      if (shouldSkipElement(node.parentElement)) {
+        return NodeFilter.FILTER_REJECT;
+      }
+
+      return NodeFilter.FILTER_ACCEPT;
     }
+  });
 
-    if (attempt < 4) {
-      dispatchTranslateCombo(targetLanguage, { force: true });
-      verifyAppliedTranslation(targetLanguage, attempt + 1);
+  while (walker.nextNode()) {
+    nodes.push(walker.currentNode as Text);
+  }
+
+  return nodes;
+}
+
+function restoreEnglish(nodes: Text[]) {
+  nodes.forEach((node) => {
+    const original = originalText.get(node);
+    if (original !== undefined) {
+      node.textContent = original;
     }
-  }, 1200);
+  });
+}
+
+function applyWhitespace(original: string, translated: string) {
+  const leading = original.match(/^\s*/)?.[0] || "";
+  const trailing = original.match(/\s*$/)?.[0] || "";
+  return `${leading}${translated.trim()}${trailing}`;
+}
+
+async function translateBatch(texts: string[], target: string) {
+  const response = await fetch("/api/translate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ texts, target })
+  });
+
+  if (!response.ok) {
+    throw new Error("Translation request failed");
+  }
+
+  const payload = (await response.json()) as { translations?: string[] };
+  return Array.isArray(payload.translations) ? payload.translations : [];
 }
 
 export function PageTranslator() {
   const pathname = usePathname();
-  const ready = useRef(false);
-  const lastApplied = useRef("");
-  const retryTimer = useRef<number | null>(null);
-  const mutationTimer = useRef<number | null>(null);
+  const activeLanguage = useRef(sourceLanguage);
+  const runId = useRef(0);
+  const timer = useRef<number | null>(null);
 
-  const applyLanguage = useCallback((options: { force?: boolean } = {}) => {
+  const translatePage = useCallback(async () => {
+    const currentRun = ++runId.current;
     const { selected, custom } = getStoredLanguage();
     const targetLanguage = googleCodeForLanguage(selected, custom) || sourceLanguage;
     const htmlLanguage = selected === "custom" && custom ? custom : selected;
-    const force = Boolean(options.force);
 
     document.documentElement.lang = htmlLanguage;
     document.documentElement.dir = isRtlLanguage(selected, custom) ? "rtl" : "ltr";
 
-    if (retryTimer.current) {
-      window.clearTimeout(retryTimer.current);
-      retryTimer.current = null;
-    }
+    const nodes = getTextNodes(document.body);
+    nodes.forEach((node) => {
+      if (!originalText.has(node)) {
+        originalText.set(node, node.textContent || "");
+      }
+    });
 
     if (targetLanguage === sourceLanguage) {
-      lastApplied.current = sourceLanguage;
-      setTranslateCookie(sourceLanguage);
-      dispatchTranslateCombo(sourceLanguage, { force });
-      suppressGoogleTranslateUi();
+      activeLanguage.current = sourceLanguage;
+      restoreEnglish(nodes);
       return;
     }
 
-    if (!targetLanguage || (!force && lastApplied.current === targetLanguage && hasTranslatedDom())) {
+    activeLanguage.current = targetLanguage;
+    restoreEnglish(nodes);
+
+    const unique = Array.from(new Set(nodes.map((node) => originalText.get(node) || "").map((text) => text.trim()).filter(Boolean)));
+    const translated = new Map<string, string>();
+
+    for (let index = 0; index < unique.length; index += maxBatchSize) {
+      if (currentRun !== runId.current || activeLanguage.current !== targetLanguage) {
+        return;
+      }
+
+      const batch = unique.slice(index, index + maxBatchSize);
+      try {
+        const translations = await translateBatch(batch, targetLanguage);
+        batch.forEach((text, batchIndex) => {
+          translated.set(text, translations[batchIndex] || text);
+        });
+      } catch {
+        return;
+      }
+    }
+
+    if (currentRun !== runId.current || activeLanguage.current !== targetLanguage) {
       return;
     }
 
-    setTranslateCookie(targetLanguage);
-
-    if (!dispatchTranslateCombo(targetLanguage, { force })) {
-      retryTimer.current = window.setTimeout(() => {
-        if (dispatchTranslateCombo(targetLanguage, { force: true })) {
-          lastApplied.current = targetLanguage;
-          suppressGoogleTranslateUi();
-          verifyAppliedTranslation(targetLanguage);
-        }
-      }, ready.current ? 700 : 1400);
-      return;
-    }
-
-    lastApplied.current = targetLanguage;
-    verifyAppliedTranslation(targetLanguage);
+    nodes.forEach((node) => {
+      const original = originalText.get(node) || "";
+      const replacement = translated.get(original.trim());
+      if (replacement) {
+        node.textContent = applyWhitespace(original, replacement);
+      }
+    });
   }, []);
 
+  const scheduleTranslation = useCallback(
+    (delay = 80) => {
+      if (timer.current) {
+        window.clearTimeout(timer.current);
+      }
+
+      timer.current = window.setTimeout(() => {
+        void translatePage();
+      }, delay);
+    },
+    [translatePage]
+  );
+
   useEffect(() => {
-    const translatorWindow = window as TranslatorWindow;
-
-    translatorWindow.googleTranslateElementInit = () => {
-      if (!translatorWindow.google?.translate?.TranslateElement) {
-        return;
-      }
-
-      if (!translatorWindow.__ldaGoogleTranslateInitialised && !getTranslateCombo()) {
-        new translatorWindow.google.translate.TranslateElement(
-          { pageLanguage: sourceLanguage, autoDisplay: false, multilanguagePage: true },
-          "google_translate_element"
-        );
-        translatorWindow.__ldaGoogleTranslateInitialised = true;
-      }
-
-      ready.current = true;
-      suppressGoogleTranslateUi();
-      window.setTimeout(() => applyLanguage({ force: true }), 400);
-    };
-
-    if (translatorWindow.google?.translate?.TranslateElement) {
-      translatorWindow.googleTranslateElementInit();
-    }
-
-    if (!document.getElementById(translatorScriptId)) {
-      const script = document.createElement("script");
-      script.id = translatorScriptId;
-      script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-      script.async = true;
-      script.onerror = () => {
-        ready.current = false;
-        window.setTimeout(() => applyLanguage({ force: true }), 1200);
-      };
-      document.body.appendChild(script);
-    } else if (getTranslateCombo()) {
-      ready.current = true;
-      window.setTimeout(() => applyLanguage({ force: true }), 150);
-    }
-
-    const onLanguageChange = () => {
-      lastApplied.current = "";
-      window.setTimeout(() => applyLanguage({ force: true }), ready.current ? 150 : 500);
-    };
-
+    const onLanguageChange = () => scheduleTranslation(20);
     window.addEventListener("lda-language-change", onLanguageChange);
     window.addEventListener("storage", onLanguageChange);
-    const observer = new MutationObserver(() => {
-      suppressGoogleTranslateUi();
 
+    const observer = new MutationObserver(() => {
       const { selected, custom } = getStoredLanguage();
       const targetLanguage = googleCodeForLanguage(selected, custom) || sourceLanguage;
-      if (targetLanguage === sourceLanguage || (lastApplied.current === targetLanguage && hasTranslatedDom())) {
-        return;
+      if (targetLanguage !== sourceLanguage) {
+        scheduleTranslation(180);
       }
-
-      if (mutationTimer.current) {
-        window.clearTimeout(mutationTimer.current);
-      }
-
-      mutationTimer.current = window.setTimeout(() => {
-        applyLanguage({ force: true });
-      }, 600);
     });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-    suppressGoogleTranslateUi();
-    applyLanguage({ force: true });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+    scheduleTranslation(120);
 
     return () => {
       window.removeEventListener("lda-language-change", onLanguageChange);
       window.removeEventListener("storage", onLanguageChange);
       observer.disconnect();
-      if (retryTimer.current) {
-        window.clearTimeout(retryTimer.current);
-      }
-      if (mutationTimer.current) {
-        window.clearTimeout(mutationTimer.current);
+      if (timer.current) {
+        window.clearTimeout(timer.current);
       }
     };
-  }, [applyLanguage]);
+  }, [scheduleTranslation]);
 
   useEffect(() => {
-    window.setTimeout(() => {
-      suppressGoogleTranslateUi();
-      applyLanguage({ force: true });
-    }, 250);
-  }, [applyLanguage, pathname]);
+    scheduleTranslation(100);
+  }, [pathname, scheduleTranslation]);
 
-  return <div id="google_translate_element" className="notranslate" aria-hidden="true" />;
+  return null;
 }
