@@ -2,14 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, KeyRound, LogOut, MapPin, MonitorSmartphone, ShieldAlert, Trash2, UserRound } from "lucide-react";
+import { ArrowLeft, KeyRound, LogOut, MapPin, ShieldAlert, Trash2, UserRound } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
-import { readStoredJson } from "@/lib/browser-storage";
 
 const LOCATION_PREF_KEY = "lda-location-sharing-enabled";
-const TRUSTED_DEVICE_KEY = "lda_trusted_device";
-const TRUSTED_DEVICES_KEY = "lda_trusted_devices";
-const REMEMBERED_IDENTIFIER_KEY = "lda_remember_identifier";
 
 type LoginActivity = {
   device: string;
@@ -18,17 +14,9 @@ type LoginActivity = {
   location: string;
 };
 
-type TrustedDevice = {
-  id: string;
-  name: string;
-  identifier?: string;
-  addedAt: string;
-};
-
 export function AccountCentre() {
   const [deletionRequested, setDeletionRequested] = useState(false);
   const [activity, setActivity] = useState<LoginActivity[]>([]);
-  const [trustedDevices, setTrustedDevices] = useState<TrustedDevice[]>([]);
   const [locationSharingEnabled, setLocationSharingEnabled] = useState(true);
   const [locationStatus, setLocationStatus] = useState("Location sharing is on for live tracking and nearby instructor sorting.");
 
@@ -39,8 +27,6 @@ export function AccountCentre() {
       when: new Date().toLocaleString("en-GB"),
       location: "Location permission not shared"
     };
-
-    setTrustedDevices(readStoredJson<TrustedDevice[]>(TRUSTED_DEVICES_KEY, []));
 
     const storedPreference = localStorage.getItem(LOCATION_PREF_KEY);
     const enabled = storedPreference !== "false";
@@ -112,34 +98,6 @@ export function AccountCentre() {
     setLocationStatus("Location sharing is off. Live tracking and nearby instructor sorting will use your postcode until it is turned back on.");
   }
 
-  function currentDeviceName() {
-    const browser = navigator.userAgent.includes("Safari") && !navigator.userAgent.includes("Chrome") ? "Safari" : navigator.userAgent.includes("Chrome") ? "Chrome" : "Browser";
-    return `${navigator.platform || "This device"} · ${browser}`;
-  }
-
-  function addCurrentDevice() {
-    const identifier = localStorage.getItem(REMEMBERED_IDENTIFIER_KEY) ?? undefined;
-    const device: TrustedDevice = {
-      id: crypto.randomUUID(),
-      name: currentDeviceName(),
-      identifier,
-      addedAt: new Date().toISOString()
-    };
-    const nextDevices = [device, ...trustedDevices.filter((item) => item.name !== device.name)].slice(0, 8);
-    setTrustedDevices(nextDevices);
-    localStorage.setItem(TRUSTED_DEVICE_KEY, "true");
-    localStorage.setItem(TRUSTED_DEVICES_KEY, JSON.stringify(nextDevices));
-  }
-
-  function removeDevice(id: string) {
-    const nextDevices = trustedDevices.filter((device) => device.id !== id);
-    setTrustedDevices(nextDevices);
-    localStorage.setItem(TRUSTED_DEVICES_KEY, JSON.stringify(nextDevices));
-    if (nextDevices.length === 0) {
-      localStorage.removeItem(TRUSTED_DEVICE_KEY);
-    }
-  }
-
   return (
     <main className="min-h-screen bg-white text-black">
       <header className="border-b border-zinc-200 bg-black text-white">
@@ -166,7 +124,6 @@ export function AccountCentre() {
               ["Personal Info", "/auth/verify?role=learner"],
               ["Change Password", "/auth/forgot-password?role=learner"],
               ["Add a Recovery Number", "/auth/verify?role=learner"],
-              ["Device List", "#device-list"],
               ["Your Log In Activities", "#log-in-activities"]
             ].map(([label, href]) => (
               <Link key={label} href={href} className="flex items-center justify-between rounded border border-zinc-200 bg-zinc-50 p-4 text-sm font-black hover:ring-2 hover:ring-brand">
@@ -235,39 +192,6 @@ export function AccountCentre() {
                 </button>
               </form>
             </div>
-          </div>
-        </article>
-
-        <article id="device-list" className="rounded border border-zinc-200 bg-white p-5 shadow-sm lg:col-span-2">
-          <MonitorSmartphone className="text-brand" />
-          <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-black">Device List</h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-600">
-                Add trusted devices that can remember your LDA login identifier. If your browser password manager also fills the password, LDA can send you straight through on this device.
-              </p>
-            </div>
-            <button type="button" onClick={addCurrentDevice} className="lda-pill lda-pill-sm">
-              Add this device
-            </button>
-          </div>
-          <div className="mt-5 grid gap-3">
-            {trustedDevices.length ? (
-              trustedDevices.map((device) => (
-                <div key={device.id} className="flex flex-wrap items-center justify-between gap-3 rounded border border-zinc-200 bg-zinc-50 p-4">
-                  <div>
-                    <div className="font-black">{device.name}</div>
-                    <div className="mt-1 text-sm text-zinc-600">Added {new Date(device.addedAt).toLocaleString("en-GB")}</div>
-                    {device.identifier ? <div className="mt-1 text-sm font-bold text-zinc-700">{device.identifier}</div> : null}
-                  </div>
-                  <button type="button" onClick={() => removeDevice(device.id)} className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-black hover:ring-2 hover:ring-brand">
-                    Remove
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div className="rounded border border-zinc-200 bg-zinc-50 p-4 text-sm font-bold text-zinc-600">No remembered devices have been added from this browser yet.</div>
-            )}
           </div>
         </article>
       </section>

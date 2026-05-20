@@ -14,9 +14,10 @@ function currentDeviceName() {
 }
 
 function rememberCurrentDevice(identifier: string) {
+  const deviceName = currentDeviceName();
   const device = {
     id: crypto.randomUUID(),
-    name: currentDeviceName(),
+    name: deviceName,
     identifier,
     addedAt: new Date().toISOString()
   };
@@ -26,6 +27,14 @@ function rememberCurrentDevice(identifier: string) {
   localStorage.setItem(TRUSTED_DEVICE_KEY, "true");
   localStorage.setItem(REMEMBERED_IDENTIFIER_KEY, identifier);
   localStorage.setItem(TRUSTED_DEVICES_KEY, JSON.stringify(nextDevices));
+
+  void fetch("/api/devices/remember", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ identifier, deviceName })
+  }).catch(() => {
+    // Local remember still works; the server cookie will be refreshed on next login.
+  });
 }
 
 export function SignUpPasswordHelper({ formId }: { formId: string }) {

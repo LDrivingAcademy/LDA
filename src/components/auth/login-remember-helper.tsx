@@ -21,9 +21,10 @@ function currentDeviceName() {
 }
 
 function rememberCurrentDevice(identifier: string) {
+  const deviceName = currentDeviceName();
   const device: TrustedDevice = {
     id: crypto.randomUUID(),
-    name: currentDeviceName(),
+    name: deviceName,
     identifier,
     addedAt: new Date().toISOString()
   };
@@ -33,6 +34,14 @@ function rememberCurrentDevice(identifier: string) {
   localStorage.setItem(TRUSTED_DEVICE_KEY, "true");
   localStorage.setItem(REMEMBERED_IDENTIFIER_KEY, identifier);
   localStorage.setItem(TRUSTED_DEVICES_KEY, JSON.stringify(nextDevices));
+
+  void fetch("/api/devices/remember", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ identifier, deviceName })
+  }).catch(() => {
+    // The browser still has the local identifier; server-side remember can refresh later.
+  });
 }
 
 function forgetCurrentDevice() {
