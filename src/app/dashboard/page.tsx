@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, Sparkles } from "lucide-react";
-import { signOut } from "@/app/auth/actions";
 import { Brand } from "@/components/brand";
+import { FastSignOutButton } from "@/components/fast-sign-out-button";
 import { LearnerBookingDashboard } from "@/components/learner-booking-dashboard";
 import { LearnerDashboardMenu } from "@/components/learner-dashboard-menu";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
@@ -90,9 +90,7 @@ export default async function DashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <form action={signOut}>
-              <button className="lda-pill lda-pill-sm">Sign out</button>
-            </form>
+            <FastSignOutButton />
             {!isInstructor ? <LearnerDashboardMenu /> : null}
           </div>
         </div>
