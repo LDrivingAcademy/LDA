@@ -75,6 +75,12 @@ const instructors: Instructor[] = [
   }
 ];
 
+const coveredAreasByInstructor: Record<string, string[]> = {
+  "amelia-khan": ["Barnet", "Finchley", "Edgware", "Mill Hill", "Whetstone", "High Barnet", "New Barnet", "Totteridge"],
+  "marcus-reed": ["Hendon", "Golders Green", "Brent Cross", "Cricklewood", "Colindale", "West Hampstead", "Dollis Hill", "Neasden"],
+  "priya-shah": ["Harrow", "Wembley", "Kenton", "Northolt", "Pinner", "South Harrow", "Kingsbury", "Sudbury"]
+};
+
 const demoBookingRecords: BookingRecord[] = [
   {
     id: "LDA-AME-UPCOMING",
@@ -575,6 +581,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
             {filteredInstructors.map((instructor) => {
               const isChosen = selectedInstructorId === instructor.id;
               const selectionIsLocked = Boolean(selectedInstructorId && !isChosen);
+              const coveredAreas = coveredAreasByInstructor[instructor.id] ?? instructor.areas.split(",").map((area) => area.trim()).filter(Boolean);
 
               return (
                 <article key={instructor.id} className={`flex h-full min-h-[430px] flex-col rounded border p-5 shadow-sm transition ${isChosen ? "border-brand bg-red-50" : "border-zinc-200 bg-white"} ${selectionIsLocked ? "opacity-80" : ""}`}>
@@ -592,8 +599,15 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
                     <span className="inline-flex min-w-0 items-center gap-2"><CarFront size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.car} · {instructor.transmission}</span></span>
                     <span className="inline-flex min-w-0 items-center gap-2"><Clock3 size={16} className="shrink-0 text-brand" /> <span className="truncate">Next: {instructor.next}</span></span>
                   </div>
-                  <div className="mt-3 min-h-[46px] rounded border border-zinc-200 bg-zinc-50 p-3 text-xs font-bold leading-5 text-zinc-700">
-                    <div className="truncate" title={`Covers ${instructor.areas}`}>Covers {instructor.areas}</div>
+                  <div className="mt-3 min-h-[84px] rounded border border-zinc-200 bg-zinc-50 p-3 text-xs font-bold leading-5 text-zinc-700">
+                    <div className="mb-2 text-[11px] font-black uppercase tracking-wide text-zinc-500">Areas covered, nearest first</div>
+                    <div className="flex flex-wrap gap-2" title={`Covers ${coveredAreas.join(", ")}`}>
+                      {coveredAreas.slice(0, 8).map((area, index) => (
+                        <span key={area} className={`rounded-full border border-zinc-200 bg-white px-2 py-1 leading-none shadow-sm ${index >= 4 ? "xl:hidden" : ""}`}>
+                          {area}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   <div className="mt-auto grid grid-cols-[minmax(0,1fr)_auto] items-center gap-5 border-t border-zinc-200 pt-4 2xl:gap-7">
                     <div className="min-w-0">
