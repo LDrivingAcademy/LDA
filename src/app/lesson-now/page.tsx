@@ -4,13 +4,47 @@ import { InstantLessonBooking } from "@/components/instant-lesson-booking";
 import { PageTopBar } from "@/components/page-top-bar";
 import { demoInstructors } from "@/lib/marketplace-content";
 import { formatMoney } from "@/lib/money";
+import { createClient } from "@/lib/supabase/server";
 
 const closestInstructor = demoInstructors[0];
 const instantLessonPricePence = Number(process.env.LDA_INSTANT_LESSON_PRICE_PENCE ?? 6500);
 const standardPricePence = closestInstructor.price;
 const demandPremiumPence = Math.max(0, instantLessonPricePence - standardPricePence);
 
-export default function LessonNowPage() {
+async function getSavedLearnerDetails() {
+  const supabase = await createClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const [profileResult, learnerResult] = await Promise.all([
+    supabase.from("profiles").select("full_name,email,phone").eq("id", user.id).maybeSingle(),
+    supabase.from("learner_profiles").select("date_of_birth").eq("user_id", user.id).maybeSingle()
+  ]);
+
+  const profile = profileResult.data;
+  const learnerProfile = learnerResult.data;
+
+  return {
+    fullName: profile?.full_name || user.user_metadata?.full_name || "",
+    email: profile?.email || user.email || "",
+    phone: profile?.phone || "",
+    dateOfBirth: learnerProfile?.date_of_birth || "",
+    homeAddress: ""
+  };
+}
+
+export default async function LessonNowPage() {
+  const savedLearnerDetails = await getSavedLearnerDetails();
   const lessonSummary = `Instant LDA lesson with ${closestInstructor.name}, ${closestInstructor.next}, pickup confirmed after payment.`;
 
   return (
@@ -24,10 +58,12 @@ export default function LessonNowPage() {
                 <Clock3 size={16} /> On-demand lesson
               </div>
               <h1 className="mt-5 max-w-4xl text-4xl font-black tracking-normal sm:text-6xl">
-                Closest available instructor, booked as a guest.
+                Closest available instructor, booked {savedLearnerDetails?.email ? "with your LDA account" : "as a guest"}.
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-700">
-                No LDA account needed. Because this is a demand-based instant booking, the price is higher than the standard listed hourly rate.
+                {savedLearnerDetails?.email
+                  ? "Your saved learner details are used to make short-notice booking faster. Because this is a demand-based instant booking, the price is higher than the standard listed hourly rate."
+                  : "No LDA account needed. Because this is a demand-based instant booking, the price is higher than the standard listed hourly rate."}
               </p>
 
               <div className="mt-6 rounded bg-red-50 p-5 text-black ring-1 ring-red-100">
@@ -112,6 +148,7 @@ export default function LessonNowPage() {
               instructorEmail="amelia.instructor@example.com"
               lessonSummary={lessonSummary}
               amountPence={instantLessonPricePence}
+              initialLearnerDetails={savedLearnerDetails}
             />
           </div>
         </section>

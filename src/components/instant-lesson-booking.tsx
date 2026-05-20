@@ -8,6 +8,13 @@ type InstantLessonBookingProps = {
   instructorEmail: string;
   lessonSummary: string;
   amountPence: number;
+  initialLearnerDetails?: {
+    fullName?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    dateOfBirth?: string | null;
+    homeAddress?: string | null;
+  } | null;
 };
 
 type VerifyState =
@@ -24,11 +31,12 @@ export function InstantLessonBooking({
   instructorName,
   instructorEmail,
   lessonSummary,
-  amountPence
+  amountPence,
+  initialLearnerDetails
 }: InstantLessonBookingProps) {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [fullName, setFullName] = useState(initialLearnerDetails?.fullName ?? "");
+  const [email, setEmail] = useState(initialLearnerDetails?.email ?? "");
+  const [phone, setPhone] = useState(initialLearnerDetails?.phone ?? "");
   const [licenceNumber, setLicenceNumber] = useState("");
   const [permission, setPermission] = useState(false);
   const [verifyState, setVerifyState] = useState<VerifyState>({
@@ -40,6 +48,7 @@ export function InstantLessonBooking({
 
   const normalisedLicence = useMemo(() => cleanLicenceNumber(licenceNumber), [licenceNumber]);
   const canPay = Boolean(verifyState.status === "valid" && fullName.trim() && email.trim() && permission);
+  const hasSavedLearnerDetails = Boolean(initialLearnerDetails?.email);
 
   async function verifyLicence() {
     setVerifyState({ status: "checking", message: "Checking licence details..." });
@@ -110,11 +119,22 @@ export function InstantLessonBooking({
       }}
       className="rounded bg-white p-5 text-black shadow-2xl"
     >
-      <div className="text-sm font-black uppercase text-brand">Instant guest booking</div>
-      <h2 className="mt-2 text-3xl font-black tracking-normal">Book without creating an account.</h2>
+      <div className="text-sm font-black uppercase text-brand">
+        {hasSavedLearnerDetails ? "Instant learner booking" : "Instant guest booking"}
+      </div>
+      <h2 className="mt-2 text-3xl font-black tracking-normal">
+        {hasSavedLearnerDetails ? "Book with your saved LDA details." : "Book without creating an account."}
+      </h2>
       <p className="mt-2 text-sm leading-6 text-zinc-600">
-        Instant bookings are priced higher because you are reserving the closest available instructor at short notice.
+        {hasSavedLearnerDetails
+          ? "We have filled in the details saved to your LDA account. Check everything before continuing to secure checkout."
+          : "Instant bookings are priced higher because you are reserving the closest available instructor at short notice."}
       </p>
+      {hasSavedLearnerDetails ? (
+        <div className="mt-4 rounded bg-red-50 p-3 text-sm font-bold leading-6 text-zinc-700 ring-1 ring-red-100">
+          Your saved name, email, and optional phone number are ready here. Address details can be added once they are saved in your learner profile.
+        </div>
+      ) : null}
 
       <div className="mt-5 grid gap-4">
         <label className="grid gap-1">
@@ -123,6 +143,7 @@ export function InstantLessonBooking({
             required
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
+            autoComplete="name"
             className="min-h-12 rounded border border-zinc-300 px-4 font-bold text-black"
             placeholder="Full name"
           />
@@ -135,6 +156,7 @@ export function InstantLessonBooking({
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
             className="min-h-12 rounded border border-zinc-300 px-4 font-bold text-black"
             placeholder="name@gmail.com, name@hotmail.com..."
           />
@@ -146,6 +168,7 @@ export function InstantLessonBooking({
             type="tel"
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
+            autoComplete="tel"
             className="min-h-12 rounded border border-zinc-300 px-4 font-bold text-black"
             placeholder="Used for text confirmation and lesson updates"
           />
