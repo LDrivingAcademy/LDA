@@ -77,9 +77,9 @@ export function AuthHandoffPoller({
   const Icon = state === "authenticated" ? CheckCircle2 : state === "pending" ? Loader2 : Smartphone;
 
   return (
-    <div className="mt-6 rounded border border-red-500/30 bg-red-500/10 p-4">
+    <div className="mt-6 rounded border border-brand bg-brand p-4 shadow-[0_16px_40px_rgba(237,0,16,0.22)]">
       <div className="flex items-start gap-3">
-        <Icon className={`mt-1 text-brand ${state === "pending" ? "animate-spin" : ""}`} size={20} />
+        <Icon className={`mt-1 text-white ${state === "pending" ? "animate-spin" : ""}`} size={20} />
         <div>
           <h2 className="font-black text-white">
             {state === "pending"
@@ -88,7 +88,7 @@ export function AuthHandoffPoller({
                 ? "Approved"
                 : "Login hand-off needs a fresh link"}
           </h2>
-          <p className="mt-1 text-sm leading-6 text-red-100">{message}</p>
+          <p className="mt-1 text-sm leading-6 text-white/90">{message}</p>
         </div>
       </div>
     </div>
