@@ -32,6 +32,16 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.ldrivingacademy.co.uk" }],
+        destination: "https://ldrivingacademy.co.uk/:path*",
+        permanent: true
+      }
+    ];
+  },
   async headers() {
     return [
       {
