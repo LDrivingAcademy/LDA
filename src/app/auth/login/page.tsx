@@ -10,9 +10,9 @@ import { signIn } from "../actions";
 export default async function LoginPage({
   searchParams
 }: {
-  searchParams: Promise<{ message?: string; role?: string }>;
+  searchParams: Promise<{ identifier?: string; message?: string; role?: string }>;
 }) {
-  const { message, role } = await searchParams;
+  const { identifier, message, role } = await searchParams;
   const isInstructor = role === "instructor";
   const nextPath = isInstructor ? "/instructor-dashboard" : "/learner-dashboard";
   const account = await getHeaderAccountSummary();
@@ -21,7 +21,7 @@ export default async function LoginPage({
     redirect(isInstructor && account.dashboardHref === "/instructor-dashboard" ? "/instructor-dashboard" : account.dashboardHref);
   }
 
-  const rememberedIdentifier = (await cookies()).get("lda_remember_identifier")?.value ?? "";
+  const rememberedIdentifier = identifier ?? (await cookies()).get("lda_remember_identifier")?.value ?? "";
 
   return (
     <main className="min-h-screen bg-white text-black">

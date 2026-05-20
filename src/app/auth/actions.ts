@@ -505,35 +505,48 @@ export async function requestPasswordReset(formData: FormData) {
 }
 
 export async function updatePassword(formData: FormData) {
-  const username = String(formData.get("username") ?? "").trim();
+  const role = safeRole(formData.get("role"));
+  const identifier = String(formData.get("identifier") ?? formData.get("username") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const supabase = await createClient();
+  const updateUrl = (message: string) => {
+    const params = new URLSearchParams({ role, message });
+    if (identifier) {
+      params.set("email", identifier);
+    }
+    redirect(`/auth/update-password?${params.toString()}`);
+  };
 
   if (!supabase) {
     authError("Supabase environment variables are not configured yet.");
   }
 
-  if (!username) {
-    redirect(`/auth/update-password?message=${encodeURIComponent("Enter your account username or email first.")}`);
+  if (!identifier) {
+    updateUrl("Enter the email linked to your account first.");
   }
 
   if (password.length < 8) {
-    redirect(`/auth/update-password?message=${encodeURIComponent("Use a password with at least 8 characters.")}`);
+    updateUrl("Use a password with at least 8 characters.");
   }
 
   if (password !== confirmPassword) {
-    redirect(`/auth/update-password?message=${encodeURIComponent("The two passwords do not match.")}`);
+    updateUrl("The passwords do not match.");
   }
 
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
-    redirect(`/auth/update-password?message=${encodeURIComponent(error.message)}`);
+    updateUrl(error.message);
   }
 
   revalidatePath("/", "layout");
-  redirect(`/auth/login?message=${encodeURIComponent("Password changed. Log in with your new password.")}`);
+  const params = new URLSearchParams({
+    role,
+    message: "Password changed. Log in with your new password."
+  });
+  params.set("identifier", identifier);
+  redirect(`/auth/login?${params.toString()}`);
 }
 
 export async function signOut() {

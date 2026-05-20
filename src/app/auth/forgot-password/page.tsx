@@ -22,7 +22,7 @@ export default async function ForgotPasswordPage({
               Reset your LDA password securely.
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-700">
-              Enter the email attached to your account. LDA will send a secure reset link that opens the new-password page.
+              Enter the email linked to your account. LDA will send a secure email with a Reset Password button.
             </p>
           </div>
 
@@ -38,7 +38,7 @@ export default async function ForgotPasswordPage({
                 <input required name="email" type="email" autoComplete="email" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="you@example.com" />
               </label>
               <button className="lda-pill mt-2">
-                <Mail size={18} /> Send reset email
+                <Mail size={18} /> Send reset confirmation
               </button>
             </form>
           </section>

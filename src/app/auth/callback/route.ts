@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
   const tokenHash = request.nextUrl.searchParams.get("token_hash");
   const otpType = request.nextUrl.searchParams.get("type");
   const errorDescription = request.nextUrl.searchParams.get("error_description") || request.nextUrl.searchParams.get("error");
+  const resetEmail = request.nextUrl.searchParams.get("email");
 
   if (errorDescription) {
     return loginRedirect(request, role, errorDescription.replace(/\+/g, " "));
@@ -72,8 +73,10 @@ export async function GET(request: NextRequest) {
     return loginRedirect(request, role, "Supabase environment variables are not configured yet.");
   }
 
+  let verifiedEmail = resetEmail;
+
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
       const message = error.message.includes("code verifier")
@@ -83,8 +86,9 @@ export async function GET(request: NextRequest) {
         : error.message;
       return loginRedirect(request, role, message);
     }
+    verifiedEmail = data.user?.email ?? data.session?.user.email ?? verifiedEmail;
   } else if (tokenHash && otpType) {
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,
       type: otpType as EmailOtpType
     });
@@ -92,9 +96,16 @@ export async function GET(request: NextRequest) {
     if (error) {
       return loginRedirect(request, role, error.message);
     }
+    verifiedEmail = data.user?.email ?? data.session?.user.email ?? verifiedEmail;
   } else {
     return loginRedirect(request, role, "The email link is invalid or has expired. Request a fresh secure link.");
   }
 
-  return redirectWithAuthCookies(new URL(nextPath, request.nextUrl.origin), response);
+  const target = new URL(nextPath, request.nextUrl.origin);
+  target.searchParams.set("role", role);
+  if (nextPath === "/auth/update-password" && verifiedEmail) {
+    target.searchParams.set("email", verifiedEmail);
+  }
+
+  return redirectWithAuthCookies(target, response);
 }

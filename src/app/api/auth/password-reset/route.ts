@@ -138,6 +138,7 @@ export async function POST(request: NextRequest) {
   confirmUrl.searchParams.set("type", data.properties.verification_type || "recovery");
   confirmUrl.searchParams.set("next", "/auth/update-password");
   confirmUrl.searchParams.set("role", role);
+  confirmUrl.searchParams.set("email", email);
 
   try {
     await sendPasswordResetEmail(email, role, confirmUrl.toString());
