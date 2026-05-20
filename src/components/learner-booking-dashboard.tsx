@@ -595,17 +595,17 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
                   <div className="mt-3 min-h-[46px] rounded border border-zinc-200 bg-zinc-50 p-3 text-xs font-bold leading-5 text-zinc-700">
                     <div className="truncate" title={`Covers ${instructor.areas}`}>Covers {instructor.areas}</div>
                   </div>
-                  <div className="mt-auto flex items-center justify-between border-t border-zinc-200 pt-4">
-                    <div>
+                  <div className="mt-auto grid grid-cols-[minmax(0,1fr)_auto] items-center gap-5 border-t border-zinc-200 pt-4 2xl:gap-7">
+                    <div className="min-w-0">
                       <div className="text-xs font-bold uppercase text-zinc-600">Price</div>
-                      <div className="text-2xl font-black">{formatMoney(instructor.price)}/hr</div>
+                      <div className="truncate text-2xl font-black tracking-tight" title={`${formatMoney(instructor.price)}/hr`}>{formatMoney(instructor.price)}/hr</div>
                     </div>
                     <button
                       type="button"
                       onClick={() => handleInstructorSelection(instructor.id)}
                       disabled={selectionIsLocked}
                       aria-pressed={isChosen}
-                      className={`lda-pill lda-pill-sm min-w-28 ${selectionIsLocked ? "cursor-not-allowed" : ""}`}
+                      className={`lda-pill lda-pill-sm min-w-28 shrink-0 ${selectionIsLocked ? "cursor-not-allowed" : ""}`}
                       style={
                         isChosen
                           ? {
