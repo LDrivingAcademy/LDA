@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { ShieldCheck } from "lucide-react";
+import { CreditCard, ShieldCheck } from "lucide-react";
 
 type InstantLessonBookingProps = {
   instructorName: string;
@@ -195,7 +195,8 @@ export function InstantLessonBooking({
         </div>
       </div>
 
-      <button disabled={!canPay || checkoutState === "loading"} className="lda-pill mt-6 w-full" type="submit">
+      <button disabled={!canPay || checkoutState === "loading"} className="lda-pill mt-6 min-h-[5rem] w-full gap-4 px-8 text-2xl shadow-[inset_0_0_0_2px_rgba(255,255,255,0.18),0_18px_34px_rgba(184,0,15,0.25)]" type="submit">
+        <CreditCard size={30} strokeWidth={2.4} />
         {checkoutState === "loading" ? "Opening secure checkout..." : "Checkout"}
       </button>
       {checkoutState === "error" ? (
