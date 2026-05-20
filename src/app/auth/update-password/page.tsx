@@ -16,7 +16,7 @@ export default async function UpdatePasswordPage({
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <PageTopBar backHref={`/auth/login?role=${accountRole}`} backLabel="Back to login" />
+      <PageTopBar />
       <div className="mx-auto max-w-4xl px-4 py-8">
         <section className="grid gap-6 lg:grid-cols-[1fr_420px]">
           <div>
