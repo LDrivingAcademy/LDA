@@ -67,7 +67,7 @@ export default async function DashboardPage() {
           <div className="flex min-w-0 items-center gap-5">
             <Brand size="home" />
             <div className="min-w-0">
-              <div className="text-sm font-bold text-red-200">Learner account</div>
+              <div className="text-sm font-bold text-red-200">{isInstructor ? "Instructor Account" : "Learner account"}</div>
               <div className="mt-1 truncate text-xl font-black">{displayName}</div>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 {isInstructor ? (
