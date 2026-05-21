@@ -71,9 +71,9 @@ export default async function DashboardPage() {
               <div className="mt-1 truncate text-xl font-black">{displayName}</div>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 {isInstructor ? (
-                  <span className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100">
+                  <Link href="/instructor-plus" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
                     Instructor
-                  </span>
+                  </Link>
                 ) : (
                   <>
                     <Link href="/learner-plus" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
