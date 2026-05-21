@@ -113,12 +113,13 @@ export function SmartMatchExperience() {
   }
 
   return (
-    <section className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[420px_1fr] lg:px-8">
-      <aside className="rounded border border-zinc-800 bg-zinc-950 p-5 text-white shadow-sm">
-        <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-          <Brain size={16} /> Adaptive learner profile
-        </div>
-        <div className="mt-5 grid gap-4">
+    <section className="mx-auto grid max-w-7xl items-start gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[420px_1fr] lg:items-stretch lg:px-8">
+      <aside className="rounded border border-zinc-800 bg-zinc-950 p-5 text-white shadow-sm lg:h-full">
+        <div className="flex h-full flex-col">
+          <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
+            <Brain size={16} /> Adaptive learner profile
+          </div>
+          <div className="mt-5 grid gap-4">
           <label className="grid gap-1">
             <span className="text-xs font-black uppercase text-zinc-400">Area or postcode</span>
             <input value={input.postcode ?? ""} onChange={(event) => setInput({ ...input, postcode: event.target.value.toUpperCase() })} className="rounded border border-zinc-800 bg-black px-3 py-3 text-sm font-bold text-white" />
@@ -211,7 +212,8 @@ export function SmartMatchExperience() {
             />
             I am happy for LDA to share my selected support preferences with my chosen instructor after I book.
           </label>
-          <button onClick={runMatch} className="lda-pill w-full" disabled={loading}>
+          </div>
+          <button onClick={runMatch} className="lda-pill mt-5 w-full lg:mt-auto" disabled={loading}>
             <Sparkles size={18} /> {loading ? "Building match..." : "Run LDA SmartMatch"}
           </button>
         </div>

@@ -230,7 +230,8 @@ export function runSmartMatch(input: SmartMatchInput) {
     })
     .sort((a, b) => b.matchScore - a.matchScore);
 
-  const top = ranked[0];
+  const topMatches = ranked.slice(0, 4);
+  const top = topMatches[0] ?? ranked[0] ?? smartMatchInstructors[0];
   const accessibilityPlan = [
     input.disclosureConsent
       ? "Only share the support notes you choose with the selected instructor before the lesson."
@@ -258,6 +259,6 @@ export function runSmartMatch(input: SmartMatchInput) {
       "Progress tracker recommendations after each completed lesson"
     ],
     plan,
-    matches: ranked
+    matches: topMatches
   };
 }
