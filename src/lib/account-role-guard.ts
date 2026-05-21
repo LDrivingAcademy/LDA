@@ -11,13 +11,14 @@ type ProfileRow = {
   email?: string | null;
 };
 
-const DUAL_MARKETPLACE_ROLE_TEST_EMAILS = new Set(["joshuamn1@hotmail.com"]);
+const DUAL_MARKETPLACE_ROLE_TEST_EMAIL = "joshuamn1@hotmail.com";
+const DUAL_MARKETPLACE_ROLE_TEST_EMAILS = new Set([DUAL_MARKETPLACE_ROLE_TEST_EMAIL]);
 
-export function normalizeAccountEmail(email: string) {
-  return email.trim().toLowerCase();
+export function normalizeAccountEmail(email: string | null | undefined) {
+  return String(email ?? "").trim().toLowerCase();
 }
 
-export function isDualMarketplaceRoleTestEmail(email: string) {
+export function isDualMarketplaceRoleTestEmail(email: string | null | undefined) {
   return DUAL_MARKETPLACE_ROLE_TEST_EMAILS.has(normalizeAccountEmail(email));
 }
 
@@ -98,6 +99,7 @@ export async function ensureEmailCanUseRole(client: SupabaseClient, email: strin
     throw new Error(roleConflictMessage(matchingRole, requestedRole));
   }
 
+  // Only the named LDA test account may hold learner and instructor roles at once.
   if (conflictingRole && !isDualMarketplaceRoleTestEmail(email)) {
     throw new Error(roleConflictMessage(conflictingRole, requestedRole));
   }
