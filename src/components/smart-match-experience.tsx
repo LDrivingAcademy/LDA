@@ -230,12 +230,12 @@ export function SmartMatchExperience() {
 
         {result ? (
           <>
-            <article className="rounded border border-red-500/30 bg-red-500/10 p-5 text-red-50">
+            <article className="rounded border border-red-700 bg-[#e30613] p-5 text-white shadow-[0_18px_45px_rgba(227,6,19,0.25)]">
               <h3 className="text-2xl font-black">{result.summary}</h3>
               <div className="mt-4 grid gap-2">
                 {result.plan.map((step) => (
                   <div key={step} className="flex items-start gap-3 text-sm font-bold leading-6">
-                    <CheckCircle2 className="mt-0.5 shrink-0" size={18} /> {step}
+                    <CheckCircle2 className="mt-0.5 shrink-0 text-white" size={18} /> {step}
                   </div>
                 ))}
               </div>
