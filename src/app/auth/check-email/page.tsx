@@ -1,4 +1,5 @@
-import { MailCheck } from "lucide-react";
+import { MailCheck, RefreshCw } from "lucide-react";
+import { sendMagicLink } from "@/app/auth/actions";
 import { AuthHandoffPoller } from "@/components/auth/auth-handoff-poller";
 import { PageTopBar } from "@/components/page-top-bar";
 
@@ -10,6 +11,9 @@ export default async function CheckEmailPage({
   const { email, role, request, purpose } = await searchParams;
   const safeRole = role === "instructor" ? "instructor" : "learner";
   const isPasswordReset = purpose === "reset";
+  const resetReturnTo = email
+    ? `/auth/check-email?email=${encodeURIComponent(email)}&role=${safeRole}&purpose=reset`
+    : `/auth/forgot-password?role=${safeRole}`;
 
   return (
     <main className="min-h-screen bg-white text-black">
@@ -46,6 +50,26 @@ export default async function CheckEmailPage({
               role={safeRole}
               approvedMessage={isPasswordReset ? "Approved. Taking you to the LDA password reset page now." : undefined}
             />
+          ) : null}
+          {email ? (
+            isPasswordReset ? (
+              <form action="/api/auth/password-reset" method="post" className="mt-4">
+                <input type="hidden" name="email" value={email} />
+                <input type="hidden" name="accountIntent" value={safeRole} />
+                <input type="hidden" name="returnTo" value={resetReturnTo} />
+                <button type="submit" className="lda-pill w-full justify-center sm:w-auto">
+                  <RefreshCw size={18} /> Resend email
+                </button>
+              </form>
+            ) : (
+              <form action={sendMagicLink} className="mt-4">
+                <input type="hidden" name="email" value={email} />
+                <input type="hidden" name="accountIntent" value={safeRole} />
+                <button type="submit" className="lda-pill w-full justify-center sm:w-auto">
+                  <RefreshCw size={18} /> Resend email
+                </button>
+              </form>
+            )
           ) : null}
         </section>
       </div>
