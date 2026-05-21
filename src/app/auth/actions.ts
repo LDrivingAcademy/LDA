@@ -322,8 +322,31 @@ export async function signIn(formData: FormData) {
 
     const needsVerification = marketplaceRoles.length === 0;
     if (!needsVerification && !marketplaceRoles.includes(role)) {
-      await supabase.auth.signOut({ scope: "local" });
-      passwordRedirect(roleConflictMessage(marketplaceRoles[0], role), role);
+      if (!isDualMarketplaceRoleTestEmail(user.email)) {
+        await supabase.auth.signOut({ scope: "local" });
+        passwordRedirect(roleConflictMessage(marketplaceRoles[0], role), role);
+      }
+
+      const writeClient = createAdminClient() ?? supabase;
+      const { error: roleUpsertError } = await writeClient.from("account_roles").upsert({ user_id: user.id, role });
+
+      if (roleUpsertError) {
+        await supabase.auth.signOut({ scope: "local" });
+        passwordRedirect(roleUpsertError.message, role);
+      }
+
+      if (role === "instructor") {
+        const { error: instructorProfileError } = await writeClient.from("instructor_profiles").upsert({
+          user_id: user.id,
+          display_name: user.user_metadata?.full_name || user.email || "LDA instructor",
+          verification_status: "pending"
+        });
+
+        if (instructorProfileError) {
+          await supabase.auth.signOut({ scope: "local" });
+          passwordRedirect(instructorProfileError.message, role);
+        }
+      }
     }
 
     if (needsVerification) {
