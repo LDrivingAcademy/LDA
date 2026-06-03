@@ -1,8 +1,10 @@
-# LDA / L Driving Academy Web Marketplace
+# Legacy LDA Web Snapshot
 
-Production-style Next.js web app skeleton for a UK learner-driver marketplace.
+This folder is an old marketplace skeleton kept only for reference while the root app is rebuilt.
 
-## Stack
+Do not deploy this folder to Vercel. The active LDA application lives at the repository root and uses the root `package.json`, `src`, `public`, `supabase`, and `vercel.json` files.
+
+## Historical stack
 
 - Next.js App Router with TypeScript
 - Tailwind CSS
@@ -12,12 +14,11 @@ Production-style Next.js web app skeleton for a UK learner-driver marketplace.
 - Resend email placeholders
 - Vercel deployment
 
-The app currently runs with demo data until Supabase, Stripe, Maps, and email environment variables are configured.
+The root app currently runs with demo fallbacks until Supabase, Stripe, Maps, and email environment variables are configured.
 
-## Local setup
+## Active local setup
 
 ```bash
-cd lda-web
 npm install
 cp .env.example .env.local
 npm run dev
@@ -27,6 +28,6 @@ Open `http://localhost:3000`.
 
 ## Deployment
 
-Connect `LDrivingAcademy/LDA` to Vercel and set the project root to `lda-web`, or use the root `vercel.json`/workspace scripts in this repo.
+Connect `LDrivingAcademy/LDA` to Vercel with the project root set to the repository root.
 
-Required production variables are listed in `.env.example`.
+Required production variables are listed in the root `.env.example`.
