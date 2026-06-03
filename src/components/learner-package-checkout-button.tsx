@@ -55,7 +55,9 @@ export function LearnerPackageCheckoutButton({
   return (
     <div>
       <button
-        className={`lda-pill ${compact ? "lda-pill-sm" : ""} w-full justify-center disabled:cursor-not-allowed disabled:opacity-60`}
+        className={`lda-pill ${
+          compact ? "lda-pill-sm" : ""
+        } min-h-11 w-full justify-center whitespace-normal text-center leading-5 disabled:cursor-not-allowed disabled:opacity-60`}
         type="button"
         onClick={startCheckout}
         disabled={disabled || isLoading}
