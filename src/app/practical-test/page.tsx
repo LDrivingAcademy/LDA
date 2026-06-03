@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Target } from "lucide-react";
+import { ArrowLeft, ExternalLink, ShieldCheck, Target } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { PracticalTestPlanner } from "@/components/practical-test-planner";
 
@@ -26,10 +26,16 @@ export default function PracticalTestPage() {
             </p>
           </div>
           <aside className="rounded border border-red-500/30 bg-zinc-950 p-5 shadow-2xl">
-            <h2 className="text-2xl font-black">Official handoff</h2>
-            <p className="mt-3 text-sm font-semibold leading-6 text-zinc-300">Use LDA for readiness, then book the real slot through GOV.UK.</p>
+            <ShieldCheck className="text-brand" />
+            <h2 className="mt-4 text-2xl font-black">Official learner handoff</h2>
+            <p className="mt-3 text-sm font-semibold leading-6 text-zinc-300">
+              Use LDA for readiness, then book the real car test yourself through GOV.UK. From 12 May 2026, third parties and instructors must not book car tests for learners.
+            </p>
             <a href="https://www.gov.uk/book-driving-test" target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 text-sm font-black text-red-100 underline decoration-brand decoration-2 underline-offset-4">
               Open official practical booking <ExternalLink size={16} />
+            </a>
+            <a href="https://www.gov.uk/guidance/changes-to-driving-test-booking-rules-in-2026" target="_blank" rel="noreferrer" className="mt-3 flex items-center gap-2 text-sm font-black text-zinc-200 underline decoration-zinc-500 decoration-2 underline-offset-4">
+              Check 2026 booking rules <ExternalLink size={16} />
             </a>
           </aside>
         </div>
