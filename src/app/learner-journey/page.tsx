@@ -63,7 +63,7 @@ const actionSections = [
       "Hazard perception video practice",
       "Highway Code revision checklist",
       "Mock theory test targets",
-      "Official DVSA booking link placeholder"
+      "Official GOV.UK theory test handoff"
     ],
     href: "/theory-test"
   },
@@ -89,7 +89,7 @@ const actionSections = [
       "Mock-ready checklist",
       "Instructor sign-off from lesson notes",
       "Local route and manoeuvre confidence",
-      "Official GOV.UK practical test handoff"
+      "Learner-controlled GOV.UK practical test handoff"
     ],
     href: "/practical-test"
   },
