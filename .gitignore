@@ -9,7 +9,16 @@ google-services.json
 # Web app
 node_modules/
 .next/
+out/
+dist/
+build/
+coverage/
+.turbo/
+.vercel/
 *.tsbuildinfo
+.codex-*.log
+pnpm-debug.log
+.pnpm-debug.log
 
 # Xcode
 DerivedData/
