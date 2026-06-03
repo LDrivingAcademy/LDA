@@ -121,9 +121,9 @@ export function AccountCentre() {
           </p>
           <div className="mt-5 grid gap-3">
             {[
-              ["Personal Info", "/auth/verify?role=learner"],
+              ["Personal Info", "/account/personal-info"],
               ["Change Password", "/auth/forgot-password?role=learner"],
-              ["Add a Recovery Number", "/auth/verify?role=learner"],
+              ["Add a Recovery Number", "/account/personal-info"],
               ["Your Log In Activities", "#log-in-activities"]
             ].map(([label, href]) => (
               <Link key={label} href={href} className="flex items-center justify-between rounded border border-zinc-200 bg-zinc-50 p-4 text-sm font-black hover:ring-2 hover:ring-brand">
