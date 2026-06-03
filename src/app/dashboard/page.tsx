@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, Sparkles } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { FastSignOutButton } from "@/components/fast-sign-out-button";
+import { InstructorLessonPingMap } from "@/components/instructor-lesson-ping-map";
 import { LearnerBookingDashboard } from "@/components/learner-booking-dashboard";
 import { LearnerDashboardMenu } from "@/components/learner-dashboard-menu";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
@@ -174,6 +175,7 @@ function InstructorDashboard() {
   return (
     <section className="mx-auto grid max-w-7xl gap-5 px-4 pb-10 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
       <div className="grid gap-5">
+        <InstructorLessonPingMap />
         <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <BadgeCheck className="text-brand" />
           <h2 className="mt-4 text-2xl font-black">Instructor onboarding dashboard</h2>
