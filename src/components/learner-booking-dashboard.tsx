@@ -577,26 +577,26 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
             <p className="mt-2 text-sm leading-6 text-zinc-600">Adjust the filters first, then choose an instructor and a visible availability slot.</p>
           </div>
 
-          <div className="grid items-stretch gap-4 xl:grid-cols-2 2xl:grid-cols-3">
+          <div className="grid items-stretch gap-4 xl:grid-cols-2">
             {filteredInstructors.map((instructor) => {
               const isChosen = selectedInstructorId === instructor.id;
               const selectionIsLocked = Boolean(selectedInstructorId && !isChosen);
               const coveredAreas = coveredAreasByInstructor[instructor.id] ?? instructor.areas.split(",").map((area) => area.trim()).filter(Boolean);
 
               return (
-                <article key={instructor.id} className={`flex h-full min-h-[430px] flex-col rounded border p-5 shadow-sm transition ${isChosen ? "border-brand bg-red-50" : "border-zinc-200 bg-white"} ${selectionIsLocked ? "opacity-80" : ""}`}>
-                  <div className="flex min-h-[122px] items-start justify-between gap-3">
-                    <div>
+                <article key={instructor.id} className={`flex h-full min-h-[470px] min-w-0 flex-col overflow-hidden rounded border p-5 shadow-sm transition ${isChosen ? "border-brand bg-red-50" : "border-zinc-200 bg-white"} ${selectionIsLocked ? "opacity-80" : ""}`}>
+                  <div className="grid min-h-[122px] grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                    <div className="min-w-0">
                       <div className="grid h-16 w-16 place-items-center rounded bg-black text-xl font-black text-white">{instructor.name.slice(0, 1)}</div>
-                      <h3 className="mt-4 text-xl font-black">{instructor.name}</h3>
+                      <h3 className="mt-4 break-words text-xl font-black leading-7">{instructor.name}</h3>
                     </div>
-                    <span className="rounded bg-red-500/10 px-2 py-1 text-xs font-black text-brand">Verified {instructor.type}</span>
+                    <span className="max-w-28 rounded bg-red-500/10 px-2 py-1 text-center text-xs font-black text-brand">Verified {instructor.type}</span>
                   </div>
-                  <p className="mt-2 truncate text-sm leading-6 text-zinc-600" title={instructor.bio}>{instructor.bio}</p>
+                  <p className="mt-3 min-h-[72px] break-words text-sm font-bold leading-6 text-zinc-600" title={instructor.bio}>{instructor.bio}</p>
                   <div className="mt-4 grid min-h-[116px] grid-rows-4 gap-2 text-sm text-zinc-700">
                     <span className="inline-flex min-w-0 items-center gap-2"><Star size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.rating} rating</span></span>
                     <span className="inline-flex min-w-0 items-center gap-2"><MapPin size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.distanceMiles} miles away</span></span>
-                    <span className="inline-flex min-w-0 items-center gap-2"><CarFront size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.car} · {instructor.transmission}</span></span>
+                    <span className="inline-flex min-w-0 items-center gap-2"><CarFront size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.car} Â· {instructor.transmission}</span></span>
                     <span className="inline-flex min-w-0 items-center gap-2"><Clock3 size={16} className="shrink-0 text-brand" /> <span className="truncate">Next: {instructor.next}</span></span>
                   </div>
                   <div className="mt-3 min-h-[84px] rounded border border-zinc-200 bg-zinc-50 p-3 text-xs font-bold leading-5 text-zinc-700">
@@ -609,7 +609,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
                       ))}
                     </div>
                   </div>
-                  <div className="mt-auto grid grid-cols-[minmax(8.5rem,1fr)_auto] items-center gap-6 border-t border-zinc-200 pt-4 2xl:gap-8">
+                  <div className="mt-auto flex flex-wrap items-end justify-between gap-4 border-t border-zinc-200 pt-4">
                     <div className="min-w-0">
                       <div className="text-xs font-bold uppercase text-zinc-600">Price</div>
                       <div className="whitespace-nowrap text-2xl font-black tracking-tight" title={`${formatMoney(instructor.price)}/hr`}>{formatMoney(instructor.price)}/hr</div>
@@ -619,7 +619,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
                       onClick={() => handleInstructorSelection(instructor.id)}
                       disabled={selectionIsLocked}
                       aria-pressed={isChosen}
-                      className={`lda-pill lda-pill-sm min-w-28 shrink-0 ${selectionIsLocked ? "cursor-not-allowed" : ""}`}
+                      className={`lda-pill lda-pill-sm min-w-28 max-w-full shrink-0 justify-center ${selectionIsLocked ? "cursor-not-allowed" : ""}`}
                       style={
                         isChosen
                           ? {
