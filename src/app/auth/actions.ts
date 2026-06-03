@@ -56,6 +56,85 @@ function normalizePhone(value: FormDataEntryValue | null) {
   return phone;
 }
 
+type InstructorDocumentField = {
+  fieldName: string;
+  documentType: "adi_pdi_badge" | "driving_licence" | "insurance";
+  label: string;
+};
+
+type UploadedFileLike = Blob & {
+  name?: string;
+  size: number;
+};
+
+type SupabaseWriteClient = NonNullable<ReturnType<typeof createAdminClient>> | NonNullable<Awaited<ReturnType<typeof createClient>>>;
+
+const instructorDocumentFields: InstructorDocumentField[] = [
+  { fieldName: "adiPdiDocument", documentType: "adi_pdi_badge", label: "ADI/PDI badge or certificate" },
+  { fieldName: "drivingLicenceDocument", documentType: "driving_licence", label: "Driving licence" },
+  { fieldName: "insuranceDocument", documentType: "insurance", label: "Insurance certificate" }
+];
+
+function getUploadedFile(formData: FormData, fieldName: string): UploadedFileLike | null {
+  const value = formData.get(fieldName);
+
+  if (!value || typeof value === "string" || !("arrayBuffer" in value) || !("size" in value) || value.size <= 0) {
+    return null;
+  }
+
+  return value as UploadedFileLike;
+}
+
+function safeFileName(value?: string) {
+  return String(value || "document")
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "document";
+}
+
+async function uploadInstructorVerificationDocuments(writeClient: SupabaseWriteClient, userId: string, formData: FormData) {
+  for (const { fieldName, label } of instructorDocumentFields) {
+    if (!getUploadedFile(formData, fieldName)) {
+      verifyRedirect("instructor", `Upload your ${label.toLowerCase()} before submitting instructor verification.`);
+    }
+  }
+
+  for (const { fieldName, documentType, label } of instructorDocumentFields) {
+    const file = getUploadedFile(formData, fieldName);
+
+    if (!file) {
+      verifyRedirect("instructor", `Upload your ${label.toLowerCase()} before submitting instructor verification.`);
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      verifyRedirect("instructor", `${label} must be under 8MB.`);
+    }
+
+    const storagePath = `${userId}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+    const { error: uploadError } = await writeClient.storage.from("instructor-documents").upload(storagePath, file, {
+      contentType: file.type || "application/octet-stream",
+      upsert: false
+    });
+
+    if (uploadError) {
+      verifyRedirect("instructor", `${label} could not be uploaded. ${uploadError.message}`);
+    }
+
+    const { error: documentError } = await writeClient.from("instructor_documents").insert({
+      instructor_id: userId,
+      uploaded_by: userId,
+      document_type: documentType,
+      storage_path: storagePath,
+      status: "pending"
+    });
+
+    if (documentError) {
+      verifyRedirect("instructor", `${label} could not be saved for review. ${documentError.message}`);
+    }
+  }
+}
+
 function passwordRedirect(message: string, role: "learner" | "instructor" = "learner"): never {
   redirect(`/auth/login?role=${role}&message=${encodeURIComponent(message)}`);
 }
@@ -273,6 +352,8 @@ export async function completeVerification(formData: FormData) {
       areas_covered: areasCovered,
       base_postcode: basePostcode || null
     });
+
+    await uploadInstructorVerificationDocuments(writeClient, user.id, formData);
 
     revalidatePath("/", "layout");
     redirect("/instructor-dashboard?verification=pending");
