@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, BellRing, CalendarCheck, FileCheck2, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarCheck, FileCheck2, Sparkles } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { FastSignOutButton } from "@/components/fast-sign-out-button";
 import { InstructorLessonPingMap } from "@/components/instructor-lesson-ping-map";
@@ -10,7 +10,6 @@ import { LearnerDashboardMenu } from "@/components/learner-dashboard-menu";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
-import { instructorJourneyStages } from "@/lib/marketplace-content";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -174,35 +173,8 @@ export default async function DashboardPage() {
 
 function InstructorDashboard() {
   return (
-    <section className="mx-auto grid max-w-7xl gap-5 px-4 pb-10 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
-      <div className="grid gap-5">
-        <InstructorLessonPingMap />
-        <div className="grid gap-3 md:grid-cols-3">
-          {instructorJourneyStages.map((stage) => (
-            <article key={stage.title} className="rounded border border-zinc-200 bg-white p-4 text-black shadow-sm">
-              <h3 className="font-black">{stage.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-600">{stage.detail}</p>
-            </article>
-          ))}
-        </div>
-      </div>
-      <aside className="rounded border border-zinc-800 bg-ink p-5 text-white shadow-sm">
-        <div className="flex items-center gap-2 text-sm font-black uppercase text-red-200">
-          <BellRing size={16} /> Notifications
-        </div>
-        <div className="mt-4 grid gap-3">
-          {[
-            "New paid booking from learner",
-            "Learner pickup postcode confirmed",
-            "Start en route sharing one second location updates",
-            "Lesson completed - payout pending"
-          ].map((item) => (
-            <div key={item} className="rounded border border-zinc-800 bg-zinc-950 p-3 text-sm font-bold leading-6">
-              {item}
-            </div>
-          ))}
-        </div>
-      </aside>
+    <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+      <InstructorLessonPingMap />
     </section>
   );
 }
