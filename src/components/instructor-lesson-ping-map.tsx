@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, CarFront, Clock3, MapPin, Navigation, RadioTower, XCircle } from "lucide-react";
+import { CarFront, Clock3, LocateFixed, MapPin, Navigation, RadioTower } from "lucide-react";
 
 type Point = {
   lat: number;
@@ -162,14 +162,13 @@ export function InstructorLessonPingMap() {
   const routeLineRef = useRef<any>(null);
   const [progress, setProgress] = useState(0.08);
   const [isEnRoute, setIsEnRoute] = useState(false);
-  const [isCancelled, setIsCancelled] = useState(false);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "fallback">("loading");
 
   const lessonStartsAt = useMemo(() => new Date(Date.now() + 18 * 60 * 1000), []);
   const [minutesUntilLesson, setMinutesUntilLesson] = useState(() =>
     Math.max(0, Math.ceil((lessonStartsAt.getTime() - Date.now()) / 60000))
   );
-  const isPingActive = !isCancelled && minutesUntilLesson <= PING_WINDOW_MINUTES;
+  const isPingActive = minutesUntilLesson <= PING_WINDOW_MINUTES;
   const instructorLocation = useMemo(
     () => (isEnRoute ? interpolate(instructorBase, learnerPickup, progress) : instructorBase),
     [isEnRoute, progress]
@@ -186,14 +185,14 @@ export function InstructorLessonPingMap() {
   }, [lessonStartsAt]);
 
   useEffect(() => {
-    if (!isEnRoute || isCancelled) return;
+    if (!isEnRoute) return;
 
     const interval = window.setInterval(() => {
       setProgress((current) => Math.min(0.94, current + 0.012));
     }, 1000);
 
     return () => window.clearInterval(interval);
-  }, [isCancelled, isEnRoute]);
+  }, [isEnRoute]);
 
   useEffect(() => {
     let cancelled = false;
@@ -269,6 +268,15 @@ export function InstructorLessonPingMap() {
     learnerMarkerRef.current?.setIcon(learnerPingIcon(isPingActive));
   }, [isPingActive]);
 
+  function recenterMap() {
+    if (!mapRef.current || !window.google?.maps) return;
+
+    const bounds = new window.google.maps.LatLngBounds();
+    bounds.extend(instructorLocation);
+    bounds.extend(learnerPickup);
+    mapRef.current.fitBounds(bounds, 72);
+  }
+
   return (
     <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -278,7 +286,7 @@ export function InstructorLessonPingMap() {
           </div>
           <h2 className="mt-4 text-2xl font-black">Next lesson location alert.</h2>
           <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-zinc-600">
-            The learner pickup ping unlocks {PING_WINDOW_MINUTES} minutes before the lesson. Start route tracking when you are heading out, or cancel from here if you cannot attend.
+            The learner pickup ping unlocks {PING_WINDOW_MINUTES} minutes before the lesson. Start route tracking when you are heading out, and use the map control to re-centre the route if you move away from it.
           </p>
         </div>
         <div className="rounded border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-black text-zinc-800">
@@ -290,9 +298,13 @@ export function InstructorLessonPingMap() {
         <div className="relative overflow-hidden rounded border border-zinc-200 bg-zinc-100">
           <div ref={mapElementRef} className={`${mapStatus === "ready" ? "block" : "hidden"} h-[390px] w-full`} aria-label="Instructor map showing learner pickup ping and route" />
           {mapStatus !== "ready" ? <FallbackMap isPingActive={isPingActive} progress={isEnRoute ? progress : 0.08} /> : null}
-          <div className="pointer-events-none absolute left-4 top-4 rounded-full border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-zinc-700 shadow-sm">
-            {isPingActive ? "Red learner ping active" : "Pickup hidden until 20 min window"}
-          </div>
+          <button
+            type="button"
+            onClick={recenterMap}
+            className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-zinc-700 shadow-sm hover:ring-2 hover:ring-brand"
+          >
+            <LocateFixed size={15} /> Re-centre map
+          </button>
         </div>
 
         <div className="grid content-start gap-3">
@@ -310,28 +322,12 @@ export function InstructorLessonPingMap() {
           </div>
           <button
             type="button"
-            disabled={!isPingActive || isCancelled}
+            disabled={!isPingActive}
             onClick={() => setIsEnRoute(true)}
             className="lda-pill w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Navigation size={18} /> {isEnRoute ? "Tracking en route" : "Start heading to learner"}
           </button>
-          <button
-            type="button"
-            disabled={isCancelled}
-            onClick={() => {
-              setIsCancelled(true);
-              setIsEnRoute(false);
-            }}
-            className="inline-flex w-full items-center justify-center gap-2 rounded border border-zinc-300 bg-white px-4 py-3 text-sm font-black text-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <XCircle size={18} /> Cancel lesson
-          </button>
-          {isCancelled ? (
-            <div className="rounded border border-red-200 bg-red-50 p-3 text-sm font-bold leading-6 text-brand">
-              <AlertTriangle className="mb-2" size={18} /> Cancellation marked for support review. Late cancellation rules may apply.
-            </div>
-          ) : null}
         </div>
       </div>
     </article>
