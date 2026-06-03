@@ -59,6 +59,16 @@ function passwordRedirect(message: string, role: "learner" | "instructor" = "lea
   redirect(`/auth/login?role=${role}&message=${encodeURIComponent(message)}`);
 }
 
+function authServiceErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error || "");
+
+  if (/fetch failed|failed to fetch|network|ECONN|ENOTFOUND|ETIMEDOUT|certificate|TLS/i.test(message)) {
+    return "LDA could not reach the secure login service. Check the Supabase URL and publishable key in Vercel, then redeploy.";
+  }
+
+  return message || "LDA could not complete login. Please try again.";
+}
+
 function signUpRedirect(message: string, role: "learner" | "instructor" = "learner"): never {
   redirect(`/auth/sign-up?role=${role}&message=${encodeURIComponent(message)}`);
 }
@@ -300,15 +310,30 @@ export async function signIn(formData: FormData) {
     ? { email: identifier.toLowerCase(), password }
     : { phone: normalizePhone(identifier), password };
 
-  const { error } = await supabase.auth.signInWithPassword(signInPayload);
+  let signInError: { message?: string } | null = null;
 
-  if (error) {
-    passwordRedirect(error.message, role);
+  try {
+    const { error } = await supabase.auth.signInWithPassword(signInPayload);
+    signInError = error;
+  } catch (error) {
+    passwordRedirect(authServiceErrorMessage(error), role);
   }
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  if (signInError) {
+    passwordRedirect(signInError.message || "LDA could not complete login. Please try again.", role);
+  }
+
+  let user = null;
+
+  try {
+    const { data, error: userError } = await supabase.auth.getUser();
+    if (userError) {
+      passwordRedirect(userError.message, role);
+    }
+    user = data.user;
+  } catch (error) {
+    passwordRedirect(authServiceErrorMessage(error), role);
+  }
 
   if (user) {
     let marketplaceRoles: MarketplaceRole[] = [];
