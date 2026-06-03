@@ -36,14 +36,14 @@ export default async function VerifyAccountPage({
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-700">
               {isInstructor
-                ? "Your email link is confirmed. Add the details LDA needs before your instructor account can move into admin review. Existing learners who request instructor access from their account centre do not need to repeat this first-time screen."
+                ? "Your email link is confirmed. Add the details LDA needs before your instructor account can move into admin review."
                 : "Your email link is confirmed. Confirm the learner details needed before booking with approved local instructors."}
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               {[
                 ["Email session", "Confirmed through Supabase Auth"],
                 ["Database record", "Stored against your LDA profile"],
-                ["Next step", isInstructor ? "Instructor dashboard" : "Booking dashboard"]
+                ["Next step", isInstructor ? "Instructor onboarding" : "Booking dashboard"]
               ].map(([title, body]) => (
                 <article key={title} className="rounded border border-zinc-200 bg-white p-4">
                   <CheckCircle2 className="text-brand" />
@@ -60,7 +60,7 @@ export default async function VerifyAccountPage({
                 {isInstructor ? <CarFront size={16} /> : <BookOpenCheck size={16} />}
                 {isInstructor ? "Instructor details" : "Learner details"}
               </div>
-              <h2 className="mt-1 text-2xl font-black">{isInstructor ? "Finish instructor setup" : "Verify, then start booking"}</h2>
+              <h2 className="mt-1 text-2xl font-black">{isInstructor ? "Finish account setup" : "Verify, then start booking"}</h2>
             </div>
 
             {!hasSupabaseConfig() ? (
@@ -74,7 +74,7 @@ export default async function VerifyAccountPage({
             ) : (
               <>
                 {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-brand">{message}</div> : null}
-                <form action={completeVerification} className="grid gap-3">
+                <form action={completeVerification} encType="multipart/form-data" className="grid gap-3">
                   <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
                   <label className="grid gap-1">
                     <span className="text-sm font-bold text-zinc-600">First name</span>
@@ -183,6 +183,24 @@ function InstructorFields() {
         <span className="text-sm font-bold text-zinc-600">Areas covered</span>
         <input required name="areasCovered" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Barnet, Enfield, Finchley" />
       </label>
+      <div className="grid gap-3 rounded border border-zinc-200 bg-zinc-50 p-3">
+        <div>
+          <h3 className="font-black">Verification documents</h3>
+          <p className="mt-1 text-sm leading-5 text-zinc-600">Upload these before LDA can review and approve your instructor profile.</p>
+        </div>
+        <label className="grid gap-1">
+          <span className="text-sm font-bold text-zinc-600">ADI/PDI badge or certificate</span>
+          <input required name="adiPdiDocument" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black file:mr-3 file:rounded file:border-0 file:bg-black file:px-3 file:py-2 file:text-sm file:font-black file:text-white" />
+        </label>
+        <label className="grid gap-1">
+          <span className="text-sm font-bold text-zinc-600">Driving licence</span>
+          <input required name="drivingLicenceDocument" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black file:mr-3 file:rounded file:border-0 file:bg-black file:px-3 file:py-2 file:text-sm file:font-black file:text-white" />
+        </label>
+        <label className="grid gap-1">
+          <span className="text-sm font-bold text-zinc-600">Insurance certificate</span>
+          <input required name="insuranceDocument" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black file:mr-3 file:rounded file:border-0 file:bg-black file:px-3 file:py-2 file:text-sm file:font-black file:text-white" />
+        </label>
+      </div>
     </>
   );
 }
