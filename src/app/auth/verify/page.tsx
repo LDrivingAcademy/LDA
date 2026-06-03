@@ -36,14 +36,14 @@ export default async function VerifyAccountPage({
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-700">
               {isInstructor
-                ? "Your email link is confirmed. Add the details LDA needs before your instructor account can move into admin review."
+                ? "Your email link is confirmed. Add the details LDA needs before your instructor account can move into admin review. Existing learners who request instructor access from their account centre do not need to repeat this first-time screen."
                 : "Your email link is confirmed. Confirm the learner details needed before booking with approved local instructors."}
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               {[
                 ["Email session", "Confirmed through Supabase Auth"],
                 ["Database record", "Stored against your LDA profile"],
-                ["Next step", isInstructor ? "Instructor onboarding" : "Booking dashboard"]
+                ["Next step", isInstructor ? "Instructor dashboard" : "Booking dashboard"]
               ].map(([title, body]) => (
                 <article key={title} className="rounded border border-zinc-200 bg-white p-4">
                   <CheckCircle2 className="text-brand" />
@@ -60,7 +60,7 @@ export default async function VerifyAccountPage({
                 {isInstructor ? <CarFront size={16} /> : <BookOpenCheck size={16} />}
                 {isInstructor ? "Instructor details" : "Learner details"}
               </div>
-              <h2 className="mt-1 text-2xl font-black">{isInstructor ? "Finish account setup" : "Verify, then start booking"}</h2>
+              <h2 className="mt-1 text-2xl font-black">{isInstructor ? "Finish instructor setup" : "Verify, then start booking"}</h2>
             </div>
 
             {!hasSupabaseConfig() ? (
@@ -76,16 +76,14 @@ export default async function VerifyAccountPage({
                 {message ? <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-brand">{message}</div> : null}
                 <form action={completeVerification} className="grid gap-3">
                   <input type="hidden" name="accountIntent" value={isInstructor ? "instructor" : "learner"} />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="grid gap-1">
-                      <span className="text-sm font-bold text-zinc-600">First name</span>
-                      <input required name="firstName" defaultValue={savedFirstName} autoComplete="given-name" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="First name" />
-                    </label>
-                    <label className="grid gap-1">
-                      <span className="text-sm font-bold text-zinc-600">Last name</span>
-                      <input required name="lastName" defaultValue={savedLastName} autoComplete="family-name" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Last name" />
-                    </label>
-                  </div>
+                  <label className="grid gap-1">
+                    <span className="text-sm font-bold text-zinc-600">First name</span>
+                    <input required name="firstName" defaultValue={savedFirstName} autoComplete="given-name" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="First name" />
+                  </label>
+                  <label className="grid gap-1">
+                    <span className="text-sm font-bold text-zinc-600">Last name</span>
+                    <input required name="lastName" defaultValue={savedLastName} autoComplete="family-name" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Last name" />
+                  </label>
                   <label className="grid gap-1">
                     <span className="text-sm font-bold text-zinc-600">Email</span>
                     <input disabled value={user.email ?? ""} className="rounded border border-zinc-300 bg-zinc-100 px-3 py-3 text-zinc-600" />
@@ -108,7 +106,7 @@ export default async function VerifyAccountPage({
                   </label>
 
                   <button className="lda-pill mt-2">
-                    <BadgeCheck size={18} /> {isInstructor ? "Submit for verification" : "Continue to learner booking"}
+                    <BadgeCheck size={18} /> {isInstructor ? "Continue to instructor dashboard" : "Continue to learner booking"}
                   </button>
                 </form>
               </>
