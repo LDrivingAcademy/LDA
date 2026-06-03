@@ -17,20 +17,23 @@ export function LearnerPackageCard({ learnerPackage }: LearnerPackageCardProps) 
 
   return (
     <article
-      className={`rounded border p-5 transition hover:-translate-y-0.5 hover:shadow-lg ${
+      className={`flex h-full flex-col rounded border p-5 transition hover:-translate-y-0.5 hover:shadow-lg ${
         learnerPackage.highlighted ? "border-brand bg-red-500/10" : "border-zinc-200 bg-white"
       }`}
     >
-      <Link className="block focus:outline-none focus:ring-2 focus:ring-brand" href={`/learner-plus/${learnerPackage.slug}`}>
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-2xl font-black">{learnerPackage.name}</h2>
+      <Link
+        className="flex flex-1 flex-col focus:outline-none focus:ring-2 focus:ring-brand"
+        href={`/learner-plus/${learnerPackage.slug}`}
+      >
+        <h2 className="min-h-8 text-2xl font-black leading-8">{learnerPackage.name}</h2>
+        <div className="mt-3 flex min-h-8 items-start">
           <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-brand">
             {isCurrentPlan ? "Current plan" : learnerPackage.label}
           </span>
         </div>
-        <p className="mt-3 text-lg font-black text-brand">{learnerPackage.price}</p>
-        <p className="mt-3 text-sm font-bold leading-6 text-zinc-700">{learnerPackage.summary}</p>
-        <div className="mt-5 grid gap-3">
+        <p className="mt-4 min-h-8 text-lg font-black leading-8 text-brand">{learnerPackage.price}</p>
+        <p className="mt-3 min-h-24 text-sm font-bold leading-6 text-zinc-700">{learnerPackage.summary}</p>
+        <div className="mt-5 grid min-h-48 content-start gap-3">
           {learnerPackage.features.map((feature) => (
             <div key={feature} className="flex items-start gap-3 text-sm font-bold leading-6 text-zinc-800">
               {learnerPackage.highlighted ? (
@@ -42,11 +45,15 @@ export function LearnerPackageCard({ learnerPackage }: LearnerPackageCardProps) 
             </div>
           ))}
         </div>
-        <span className="mt-5 inline-flex text-sm font-black text-brand">View full package details</span>
+        <span className="mt-auto inline-flex pt-5 text-sm font-black text-brand">View full package details</span>
       </Link>
       <div className="mt-6">
         {isCurrentPlan ? (
-          <button className="lda-pill lda-pill-sm w-full justify-center opacity-60" type="button" disabled>
+          <button
+            className="lda-pill lda-pill-sm min-h-11 w-full justify-center whitespace-normal text-center leading-5 opacity-60"
+            type="button"
+            disabled
+          >
             Current plan
           </button>
         ) : (
