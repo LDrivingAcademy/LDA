@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, Sparkles } from "lucide-react";
+import { ArrowRight, BellRing, CalendarCheck, FileCheck2, Sparkles } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { FastSignOutButton } from "@/components/fast-sign-out-button";
 import { InstructorLessonPingMap } from "@/components/instructor-lesson-ping-map";
@@ -177,14 +177,6 @@ function InstructorDashboard() {
     <section className="mx-auto grid max-w-7xl gap-5 px-4 pb-10 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
       <div className="grid gap-5">
         <InstructorLessonPingMap />
-        <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
-          <BadgeCheck className="text-brand" />
-          <h2 className="mt-4 text-2xl font-black">Instructor onboarding dashboard</h2>
-          <p className="mt-2 max-w-3xl text-zinc-600">Continue verification, upload documents, set price, car, areas covered, and availability. You will not appear in learner search until admin approves your profile.</p>
-          <Link href="/instructor" className="lda-pill lda-pill-sm mt-5">
-            Open instructor setup <ArrowRight size={16} />
-          </Link>
-        </article>
         <div className="grid gap-3 md:grid-cols-3">
           {instructorJourneyStages.map((stage) => (
             <article key={stage.title} className="rounded border border-zinc-200 bg-white p-4 text-black shadow-sm">
