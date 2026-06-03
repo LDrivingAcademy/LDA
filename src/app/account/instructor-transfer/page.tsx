@@ -61,7 +61,7 @@ export default async function InstructorTransferPage({
               This account cannot request a learner-to-instructor transfer because it is not an active learner-only account.
             </div>
           ) : (
-            <form action={requestInstructorTransfer} className="grid gap-3">
+            <form action={requestInstructorTransfer} encType="multipart/form-data" className="grid gap-3">
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">Full licence held since</span>
                 <input required name="fullLicenceHeldSince" type="date" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black" />
@@ -84,6 +84,58 @@ export default async function InstructorTransferPage({
                 <span className="text-sm font-bold text-zinc-600">Notes for LDA review</span>
                 <textarea name="notes" rows={4} className="rounded border border-zinc-300 bg-white px-3 py-3 text-black" placeholder="Tell us where you are in the ADI/PDI process." />
               </label>
+              <div className="grid gap-3 rounded border border-zinc-200 bg-zinc-50 p-3">
+                <h3 className="font-black">Instructor profile details</h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="grid gap-1">
+                    <span className="text-sm font-bold text-zinc-600">Base postcode</span>
+                    <input required name="basePostcode" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black" placeholder="EN5 5XY" />
+                  </label>
+                  <label className="grid gap-1">
+                    <span className="text-sm font-bold text-zinc-600">Hourly price</span>
+                    <input required name="hourlyRate" type="number" min="0" step="1" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black" placeholder="40" />
+                  </label>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="grid gap-1">
+                    <span className="text-sm font-bold text-zinc-600">Car make</span>
+                    <input name="carMake" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black" placeholder="Toyota" />
+                  </label>
+                  <label className="grid gap-1">
+                    <span className="text-sm font-bold text-zinc-600">Car model</span>
+                    <input name="carModel" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black" placeholder="Yaris" />
+                  </label>
+                </div>
+                <label className="grid gap-1">
+                  <span className="text-sm font-bold text-zinc-600">Transmission</span>
+                  <select name="transmission" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black">
+                    <option value="manual">Manual</option>
+                    <option value="automatic">Automatic</option>
+                  </select>
+                </label>
+                <label className="grid gap-1">
+                  <span className="text-sm font-bold text-zinc-600">Areas covered</span>
+                  <input required name="areasCovered" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black" placeholder="Barnet, Enfield, Finchley" />
+                </label>
+              </div>
+              <div className="grid gap-3 rounded border border-zinc-200 bg-zinc-50 p-3">
+                <div>
+                  <h3 className="font-black">Verification documents</h3>
+                  <p className="mt-1 text-sm leading-5 text-zinc-600">These are required before LDA can review your transfer.</p>
+                </div>
+                <label className="grid gap-1">
+                  <span className="text-sm font-bold text-zinc-600">ADI/PDI badge or certificate</span>
+                  <input required name="adiPdiDocument" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black file:mr-3 file:rounded file:border-0 file:bg-black file:px-3 file:py-2 file:text-sm file:font-black file:text-white" />
+                </label>
+                <label className="grid gap-1">
+                  <span className="text-sm font-bold text-zinc-600">Driving licence</span>
+                  <input required name="drivingLicenceDocument" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black file:mr-3 file:rounded file:border-0 file:bg-black file:px-3 file:py-2 file:text-sm file:font-black file:text-white" />
+                </label>
+                <label className="grid gap-1">
+                  <span className="text-sm font-bold text-zinc-600">Insurance certificate</span>
+                  <input required name="insuranceDocument" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black file:mr-3 file:rounded file:border-0 file:bg-black file:px-3 file:py-2 file:text-sm file:font-black file:text-white" />
+                </label>
+              </div>
               <button className="lda-pill mt-2">
                 Request instructor transfer <ArrowRight size={18} />
               </button>
