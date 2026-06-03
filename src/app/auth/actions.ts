@@ -9,6 +9,7 @@ import { createHandoffSecret, hashHandoffSecret, setHandoffCookie } from "@/lib/
 import { ensureEmailCanUseRole, ensureEmailDoesNotHaveDifferentRole, ensureUserCanUseRole, getMarketplaceRolesForUser, isDualMarketplaceRoleTestEmail, roleConflictMessage, type MarketplaceRole } from "@/lib/account-role-guard";
 import { isAtLeast17 } from "@/lib/learner-eligibility";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { authServiceErrorMessage } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 
 function authError(message: string): never {
@@ -59,16 +60,6 @@ function passwordRedirect(message: string, role: "learner" | "instructor" = "lea
   redirect(`/auth/login?role=${role}&message=${encodeURIComponent(message)}`);
 }
 
-function authServiceErrorMessage(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error || "");
-
-  if (/fetch failed|failed to fetch|network|ECONN|ENOTFOUND|ETIMEDOUT|certificate|TLS/i.test(message)) {
-    return "LDA could not reach the secure login service. Check the Supabase URL and publishable key in Vercel, then redeploy.";
-  }
-
-  return message || "LDA could not complete login. Please try again.";
-}
-
 function signUpRedirect(message: string, role: "learner" | "instructor" = "learner"): never {
   redirect(`/auth/sign-up?role=${role}&message=${encodeURIComponent(message)}`);
 }
@@ -86,6 +77,18 @@ function verifyRedirect(role: "learner" | "instructor", message: string): never 
 
 function dashboardPathForRole(role: "learner" | "instructor") {
   return role === "instructor" ? "/instructor-dashboard" : "/learner-dashboard";
+}
+
+async function signOutLocalSession(supabase: Awaited<ReturnType<typeof createClient>>) {
+  if (!supabase) {
+    return;
+  }
+
+  try {
+    await supabase.auth.signOut({ scope: "local" });
+  } catch {
+    // Login error handling should not be replaced by a secondary sign-out failure.
+  }
 }
 
 export async function sendMagicLink(formData: FormData) {
@@ -341,14 +344,14 @@ export async function signIn(formData: FormData) {
     try {
       marketplaceRoles = await getMarketplaceRolesForUser(supabase, user.id);
     } catch (roleError) {
-      await supabase.auth.signOut({ scope: "local" });
-      passwordRedirect(roleError instanceof Error ? roleError.message : "LDA could not confirm your account role.", role);
+      await signOutLocalSession(supabase);
+      passwordRedirect(authServiceErrorMessage(roleError), role);
     }
 
     const needsVerification = marketplaceRoles.length === 0;
     if (!needsVerification && !marketplaceRoles.includes(role)) {
       if (!isDualMarketplaceRoleTestEmail(user.email)) {
-        await supabase.auth.signOut({ scope: "local" });
+        await signOutLocalSession(supabase);
         passwordRedirect(roleConflictMessage(marketplaceRoles[0], role), role);
       }
 
@@ -356,7 +359,7 @@ export async function signIn(formData: FormData) {
       const { error: roleUpsertError } = await writeClient.from("account_roles").upsert({ user_id: user.id, role });
 
       if (roleUpsertError) {
-        await supabase.auth.signOut({ scope: "local" });
+        await signOutLocalSession(supabase);
         passwordRedirect(roleUpsertError.message, role);
       }
 
@@ -368,7 +371,7 @@ export async function signIn(formData: FormData) {
         });
 
         if (instructorProfileError) {
-          await supabase.auth.signOut({ scope: "local" });
+          await signOutLocalSession(supabase);
           passwordRedirect(instructorProfileError.message, role);
         }
       }
@@ -603,7 +606,7 @@ export async function signOut() {
 
   const supabase = await createClient();
   if (supabase) {
-    await supabase.auth.signOut({ scope: "local" });
+    await signOutLocalSession(supabase);
   }
 
   revalidatePath("/", "layout");
