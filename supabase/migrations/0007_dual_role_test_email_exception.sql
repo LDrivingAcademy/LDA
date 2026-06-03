@@ -1,7 +1,5 @@
--- Temporary development exception:
--- joshuamn1@hotmail.com may hold both learner and instructor roles while LDA
--- tests the split dashboard flows. All other emails remain one marketplace role
--- at a time and should use the learner-to-instructor transfer process.
+-- Deprecated temporary development exception.
+-- Superseded by 0009_remove_dual_role_test_email_exception.sql.
 
 create or replace function private.is_dual_marketplace_role_exception(account_id uuid)
 returns boolean
@@ -13,7 +11,7 @@ as $$
     select 1
     from public.profiles
     where profiles.id = account_id
-      and lower(profiles.email) = 'joshuamn1@hotmail.com'
+      and lower(profiles.email) = 'dual-role-test@example.invalid'
   );
 $$;
 
