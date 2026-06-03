@@ -28,6 +28,7 @@ type NearbyInstructorGoogleMapProps = {
 const FALLBACK_CENTER = { lat: 51.6538, lng: -0.1997 };
 const FIVE_MILES_IN_METRES = 8047;
 const INSTRUCTOR_BEARINGS = [210, 52, 126, 300, 15];
+const MIN_PROFESSIONAL_MAP_ZOOM = 3;
 
 function googleWindow() {
   if (typeof window === "undefined") {
@@ -125,7 +126,7 @@ function markerIcon(label: string, isSelected: boolean, isLearner = false) {
           </filter>
           <path filter="url(#shadow)" d="M30 4c14.4 0 26 11.6 26 26 0 18.5-26 38-26 38S4 48.5 4 30C4 15.6 15.6 4 30 4Z" fill="#e50914" stroke="#fff" stroke-width="5"/>
           <rect filter="url(#shadow)" x="48" y="14" width="60" height="34" rx="17" fill="#fff" stroke="#e5e7eb" stroke-width="2"/>
-          <text x="30" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#fff">•</text>
+          <text x="30" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#fff">â€¢</text>
           <text x="78" y="37" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#111">You</text>
         </svg>
       `)}`,
@@ -208,6 +209,7 @@ export function NearbyInstructorGoogleMap({
         mapRef.current = new google.maps.Map(mapElementRef.current, {
           center,
           zoom: 13,
+          minZoom: MIN_PROFESSIONAL_MAP_ZOOM,
           disableDefaultUI: false,
           mapTypeControl: false,
           streetViewControl: false,
@@ -319,8 +321,8 @@ export function NearbyInstructorGoogleMap({
           <div style="font-family: Arial, sans-serif; max-width: 220px;">
             <strong style="font-size: 16px;">${instructor.name}</strong>
             <div style="margin-top: 6px;">${instructor.distanceMiles} miles away</div>
-            <div>${instructor.rating} rating · ${formatMoney(instructor.price)}/hr</div>
-            <div>${instructor.car} · ${instructor.transmission}</div>
+            <div>${instructor.rating} rating Â· ${formatMoney(instructor.price)}/hr</div>
+            <div>${instructor.car} Â· ${instructor.transmission}</div>
           </div>
         `);
         infoWindowRef.current?.open({ map: mapRef.current, anchor: marker });
@@ -370,7 +372,7 @@ export function NearbyInstructorGoogleMap({
         </div>
       ) : null}
       <div className="pointer-events-none absolute bottom-4 right-4 rounded border border-zinc-300 bg-white/95 px-3 py-2 text-xs font-black text-zinc-700 shadow-sm">
-        5 mile local radius · demo instructor locations
+        5 mile local radius Â· demo instructor locations
       </div>
       <div className="pointer-events-none absolute left-4 top-4 rounded-full border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-zinc-700 shadow-sm">
         {userPosition ? `Live: ${userPosition.lat.toFixed(4)}, ${userPosition.lng.toFixed(4)}` : postcode}
