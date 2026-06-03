@@ -12,6 +12,9 @@ export function SocialSubscribePrompt({ initialEmail = "", initiallySubscribed =
   const [email, setEmail] = useState(initialEmail);
   const [closed, setClosed] = useState(false);
   const [subscribed, setSubscribed] = useState(initiallySubscribed);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const stored = window.localStorage.getItem("lda-social-email");
@@ -21,15 +24,41 @@ export function SocialSubscribePrompt({ initialEmail = "", initiallySubscribed =
     }
   }, [initialEmail]);
 
-  function subscribe(event: FormEvent<HTMLFormElement>) {
+  async function subscribe(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const cleanEmail = email.trim();
     if (!cleanEmail) {
       return;
     }
 
-    window.localStorage.setItem("lda-social-email", cleanEmail);
-    setSubscribed(true);
+    setLoading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/social/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: cleanEmail,
+          source: "social",
+          pageUrl: window.location.href
+        })
+      });
+      const payload = (await response.json()) as { message?: string; error?: string };
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Subscription could not be saved.");
+      }
+
+      window.localStorage.setItem("lda-social-email", cleanEmail);
+      setSubscribed(true);
+      setMessage(payload.message || "You are subscribed. You can use the social links below.");
+    } catch (subscribeError) {
+      setError(subscribeError instanceof Error ? subscribeError.message : "Subscription could not be saved.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (closed) {
@@ -59,7 +88,7 @@ export function SocialSubscribePrompt({ initialEmail = "", initiallySubscribed =
 
       {subscribed ? (
         <div className="mt-4 rounded bg-green-50 p-3 text-sm font-black text-green-800">
-          Subscribed{email ? ` as ${email}` : ""}. You can use the social links below.
+          {message || `Subscribed${email ? ` as ${email}` : ""}. You can use the social links below.`}
         </div>
       ) : (
         <form onSubmit={subscribe} className="mt-4 flex flex-col gap-3 sm:flex-row">
@@ -71,13 +100,14 @@ export function SocialSubscribePrompt({ initialEmail = "", initiallySubscribed =
             placeholder="you@example.com"
             className="min-h-12 flex-1 rounded border border-zinc-300 bg-white px-4 text-sm font-bold text-black"
           />
-          <button className="lda-pill lda-pill-sm whitespace-nowrap" type="submit">
-            Subscribe
+          <button className="lda-pill lda-pill-sm whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={loading}>
+            {loading ? "Saving..." : "Subscribe"}
           </button>
         </form>
       )}
+      {error ? <p className="mt-3 rounded bg-red-50 p-3 text-xs font-bold leading-5 text-red-800">{error}</p> : null}
       <p className="mt-3 text-xs leading-5 text-zinc-500">
-        TODO: Connect this to Supabase consent storage and Resend before live marketing emails are sent.
+        We will only use this for LDA learner tips, offers, free trials, and platform updates.
       </p>
     </section>
   );
