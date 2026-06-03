@@ -55,6 +55,12 @@ export default async function DashboardPage() {
     Boolean(learnerProfile?.learner_plus_active) &&
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
   const displayName = profile?.full_name || user.email || "Learner";
+  const verificationStatus = instructorProfile?.verification_status ?? "not started";
+  const statusRequestHref = `mailto:info@ldrivingacademy.co.uk?subject=${encodeURIComponent(
+    "Instructor verification status request"
+  )}&body=${encodeURIComponent(
+    `Hello LDA,\n\nPlease can you send me a status update on my instructor verification process.\n\nAccount: ${profile?.email ?? user.email ?? "Unknown"}\nCurrent status: ${verificationStatus}\n\nThank you.`
+  )}`;
 
   if (!isInstructor && !hasCompletedLearnerEligibility(learnerProfile)) {
     redirect("/auth/verify?role=learner&message=Complete learner eligibility before booking. Your date of birth must show you are 17 or over, and you must accept the terms and provisional licence checks.");
@@ -103,27 +109,47 @@ export default async function DashboardPage() {
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-2 lg:px-8">
         <article className="flex flex-col rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <CalendarCheck className="text-brand" />
-          <h2 className="mt-4 text-xl font-black">Learner journey</h2>
-          <p className="mt-2 text-zinc-600">Plan the full route from first lesson to getting on the road after passing.</p>
+          <h2 className="mt-4 text-xl font-black">{isInstructor ? "Instructor journey" : "Learner journey"}</h2>
+          <p className="mt-2 text-zinc-600">
+            {isInstructor
+              ? "Plan the full route from verification to approved availability, bookings, lessons, and payouts."
+              : "Plan the full route from first lesson to getting on the road after passing."}
+          </p>
           <div className="mb-8 mt-3 grid gap-2 text-sm font-bold text-zinc-700 sm:grid-cols-2">
-            <span>Theory test booking</span>
-            <span>Driving lessons</span>
-            <span>Practical test booking</span>
-            <span>First car guidance</span>
-            <span>Insurance quote support</span>
-            <span>Progress and revision</span>
+            {isInstructor ? (
+              <>
+                <span>ADI/PDI verification</span>
+                <span>Profile setup</span>
+                <span>Vehicle and pricing</span>
+                <span>Areas covered</span>
+                <span>Availability publishing</span>
+                <span>Bookings and payouts</span>
+              </>
+            ) : (
+              <>
+                <span>Theory test booking</span>
+                <span>Driving lessons</span>
+                <span>Practical test booking</span>
+                <span>First car guidance</span>
+                <span>Insurance quote support</span>
+                <span>Progress and revision</span>
+              </>
+            )}
           </div>
-          <Link href="/learner-journey" className="lda-pill lda-pill-sm mt-auto self-start">
-            LDA learner journey <ArrowRight size={16} />
+          <Link href={isInstructor ? "/instructor" : "/learner-journey"} className="lda-pill lda-pill-sm mt-auto self-start">
+            {isInstructor ? "LDA instructor journey" : "LDA learner journey"} <ArrowRight size={16} />
           </Link>
         </article>
         {isInstructor ? (
-          <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
+          <article className="flex flex-col rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
             <FileCheck2 className="text-brand" />
             <h2 className="mt-4 text-xl font-black">Instructor verification</h2>
             <p className="mt-2 text-zinc-600">
-              Status: <span className="font-black">{instructorProfile?.verification_status ?? "not started"}</span>
+              Status: <span className="font-black">{verificationStatus}</span>
             </p>
+            <Link href={statusRequestHref} className="lda-pill lda-pill-sm mt-auto self-start">
+              Status request <ArrowRight size={16} />
+            </Link>
           </article>
         ) : (
           <article className="flex flex-col rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
@@ -148,19 +174,19 @@ function InstructorDashboard() {
   return (
     <section className="mx-auto grid max-w-7xl gap-5 px-4 pb-10 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
       <div className="grid gap-5">
-        <article className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
+        <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <BadgeCheck className="text-brand" />
           <h2 className="mt-4 text-2xl font-black">Instructor onboarding dashboard</h2>
-          <p className="mt-2 max-w-3xl text-zinc-400">Continue verification, upload documents, set price, car, areas covered, and availability. You will not appear in learner search until admin approves your profile.</p>
+          <p className="mt-2 max-w-3xl text-zinc-600">Continue verification, upload documents, set price, car, areas covered, and availability. You will not appear in learner search until admin approves your profile.</p>
           <Link href="/instructor" className="lda-pill lda-pill-sm mt-5">
             Open instructor setup <ArrowRight size={16} />
           </Link>
         </article>
         <div className="grid gap-3 md:grid-cols-3">
           {instructorJourneyStages.map((stage) => (
-            <article key={stage.title} className="rounded border border-zinc-800 bg-zinc-950 p-4 shadow-sm">
+            <article key={stage.title} className="rounded border border-zinc-200 bg-white p-4 text-black shadow-sm">
               <h3 className="font-black">{stage.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-400">{stage.detail}</p>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">{stage.detail}</p>
             </article>
           ))}
         </div>
