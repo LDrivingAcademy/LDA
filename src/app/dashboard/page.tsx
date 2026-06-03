@@ -4,6 +4,7 @@ import { ArrowRight, BadgeCheck, BellRing, CalendarCheck, FileCheck2, Sparkles }
 import { Brand } from "@/components/brand";
 import { FastSignOutButton } from "@/components/fast-sign-out-button";
 import { InstructorLessonPingMap } from "@/components/instructor-lesson-ping-map";
+import { InstructorDashboardMenu } from "@/components/instructor-dashboard-menu";
 import { LearnerBookingDashboard } from "@/components/learner-booking-dashboard";
 import { LearnerDashboardMenu } from "@/components/learner-dashboard-menu";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
@@ -98,7 +99,7 @@ export default async function DashboardPage() {
           </div>
           <div className="flex items-center gap-3">
             <FastSignOutButton />
-            {!isInstructor ? <LearnerDashboardMenu /> : null}
+            {isInstructor ? <InstructorDashboardMenu /> : <LearnerDashboardMenu />}
           </div>
         </div>
       </header>
