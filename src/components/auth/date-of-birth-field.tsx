@@ -57,7 +57,7 @@ export function DateOfBirthField({ latestEligibleDate }: { latestEligibleDate: s
 
   return (
     <div className="grid gap-2">
-      <span className="text-sm font-bold text-zinc-400">Date of birth</span>
+      <span className="text-sm font-bold text-zinc-600">Date of birth</span>
       <input type="hidden" name="dateOfBirth" value={dateValue} />
       <div className="grid gap-2 sm:grid-cols-[1fr_1.25fr_1fr]">
         <label className="grid gap-1">
@@ -66,7 +66,7 @@ export function DateOfBirthField({ latestEligibleDate }: { latestEligibleDate: s
             required
             value={day}
             onChange={(event) => updateDate({ day: event.target.value })}
-            className="rounded border border-zinc-800 bg-black px-3 py-3 text-white"
+            className="rounded border border-zinc-300 bg-white px-3 py-3 text-black"
           >
             <option value="">DD</option>
             {Array.from({ length: 31 }, (_, index) => String(index + 1).padStart(2, "0")).map((value) => (
@@ -82,7 +82,7 @@ export function DateOfBirthField({ latestEligibleDate }: { latestEligibleDate: s
             required
             value={month}
             onChange={(event) => updateDate({ month: event.target.value })}
-            className="rounded border border-zinc-800 bg-black px-3 py-3 text-white"
+            className="rounded border border-zinc-300 bg-white px-3 py-3 text-black"
           >
             <option value="">Month</option>
             {months.map(([value, label]) => (
@@ -98,7 +98,7 @@ export function DateOfBirthField({ latestEligibleDate }: { latestEligibleDate: s
             required
             value={year}
             onChange={(event) => updateDate({ year: event.target.value })}
-            className="rounded border border-zinc-800 bg-black px-3 py-3 text-white"
+            className="rounded border border-zinc-300 bg-white px-3 py-3 text-black"
           >
             <option value="">YYYY</option>
             {years.map((value) => (
