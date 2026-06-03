@@ -24,23 +24,36 @@ export async function getHeaderAccountSummary(): Promise<HeaderAccountSummary | 
     return null;
   }
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  let user = null;
+
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    return null;
+  }
 
   if (!user) {
     return null;
   }
 
-  const [{ data: profile }, { data: roles }, { data: learnerProfile }] = await Promise.all([
-    supabase.from("profiles").select("full_name,email").eq("id", user.id).maybeSingle(),
-    supabase.from("account_roles").select("role").eq("user_id", user.id),
-    supabase
-      .from("learner_profiles")
-      .select("learner_plus_active,learner_plus_expires_at")
-      .eq("user_id", user.id)
-      .maybeSingle()
-  ]);
+  let profile = null;
+  let roles = null;
+  let learnerProfile = null;
+
+  try {
+    [{ data: profile }, { data: roles }, { data: learnerProfile }] = await Promise.all([
+      supabase.from("profiles").select("full_name,email").eq("id", user.id).maybeSingle(),
+      supabase.from("account_roles").select("role").eq("user_id", user.id),
+      supabase
+        .from("learner_profiles")
+        .select("learner_plus_active,learner_plus_expires_at")
+        .eq("user_id", user.id)
+        .maybeSingle()
+    ]);
+  } catch {
+    return null;
+  }
 
   const roleNames = roles?.map((role) => String(role.role)) ?? [];
   const isInstructor = roleNames.includes("instructor");
