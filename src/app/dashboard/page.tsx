@@ -78,16 +78,16 @@ export default async function DashboardPage() {
               <div className="mt-1 truncate text-xl font-black">{displayName}</div>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 {isInstructor ? (
-                  <Link href="/instructor-plus" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
+                  <Link href="/instructor-plus?from=dashboard" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
                     Instructor
                   </Link>
                 ) : (
                   <>
-                    <Link href="/learner-plus" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
+                    <Link href="/learner-plus?from=dashboard" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
                       {hasLearnerPlus ? "Learner Plus" : "Learner"}
                     </Link>
                     {!hasLearnerPlus ? (
-                      <Link href="/learner-plus" className="rounded-full border border-red-500/40 bg-transparent px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
+                      <Link href="/learner-plus?from=dashboard" className="rounded-full border border-red-500/40 bg-transparent px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
                         Upgrade to Plus
                       </Link>
                     ) : null}
@@ -137,7 +137,7 @@ export default async function DashboardPage() {
               </>
             )}
           </div>
-          <Link href={isInstructor ? "/instructor" : "/learner-journey"} className="lda-pill lda-pill-sm mt-auto self-start">
+          <Link href={isInstructor ? "/instructor?from=dashboard" : "/learner-journey?from=dashboard"} className="lda-pill lda-pill-sm mt-auto self-start">
             {isInstructor ? "LDA instructor journey" : "LDA learner journey"} <ArrowRight size={16} />
           </Link>
         </article>
