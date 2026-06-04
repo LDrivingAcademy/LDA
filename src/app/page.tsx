@@ -206,7 +206,7 @@ export default async function HomePage() {
             <h2 className="text-4xl font-black tracking-normal sm:text-5xl">Discover what you can do with LDA</h2>
             <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {suggestionCards.map((card) => (
-                <Link key={card.title} href={card.href.startsWith("/auth/login?role=learner") ? learnerEntryHref : card.href} className="group grid min-h-[210px] grid-cols-[1fr_150px] overflow-hidden rounded bg-zinc-100 p-6 text-black hover:bg-zinc-200">
+                <Link key={card.title} href={card.href.startsWith("/auth/login?role=learner") ? learnerEntryHref : card.href} className="group grid min-h-[210px] gap-5 overflow-hidden rounded bg-zinc-100 p-5 text-black hover:bg-zinc-200 sm:grid-cols-[1fr_150px] sm:p-6">
                   <div className="flex flex-col items-start">
                     <h3 className="text-2xl font-black">{card.title}</h3>
                     <p className="mt-4 max-w-xs text-base leading-7 text-zinc-800">{card.body}</p>
@@ -281,8 +281,8 @@ function CardVisual({ type }: { type: CardVisualType }) {
   }[type];
 
   return (
-    <div className="relative grid place-items-center text-black">
-      <div className="grid h-24 w-24 place-items-center rounded bg-white text-brand shadow-sm transition group-hover:scale-105">
+    <div className="relative grid place-items-start text-black sm:place-items-center">
+      <div className="grid h-20 w-20 place-items-center rounded bg-white text-brand shadow-sm transition group-hover:scale-105 sm:h-24 sm:w-24">
         {visual}
       </div>
     </div>
