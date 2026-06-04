@@ -19,6 +19,7 @@ import { Brand } from "@/components/brand";
 import { LanguageSelector } from "@/components/language-selector";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
+import { getPageBackLink, type PageSourceSearchParams, withDashboardSource } from "@/lib/page-back-link";
 
 const journeyStages = [
   {
@@ -78,7 +79,7 @@ const actionSections = [
       "Pay securely through Stripe Checkout",
       "Use live tracking near lesson time"
     ],
-    href: "/learner-dashboard"
+    href: "/dashboard"
   },
   {
     id: "practical-test",
@@ -134,7 +135,14 @@ const actionSections = [
   }
 ];
 
-export default function LearnerJourneyPage() {
+type LearnerJourneyPageProps = {
+  searchParams?: PageSourceSearchParams;
+};
+
+export default async function LearnerJourneyPage({ searchParams }: LearnerJourneyPageProps) {
+  const { backHref, backLabel, fromDashboard } = await getPageBackLink(searchParams);
+  const learnerEntryHref = fromDashboard ? "/dashboard" : "/auth/login?role=learner";
+
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
@@ -142,21 +150,21 @@ export default function LearnerJourneyPage() {
           <div className="flex items-center gap-7">
             <Brand />
             <nav className="hidden items-center gap-7 lg:flex">
-              <Link href="/learner-dashboard" className="rounded-full border border-red-500/60 bg-red-500/15 px-3 py-2 text-sm font-black text-white ring-2 ring-brand">
+              <Link href={learnerEntryHref} className="rounded-full border border-red-500/60 bg-red-500/15 px-3 py-2 text-sm font-black text-white ring-2 ring-brand">
                 Learner
               </Link>
-              <Link href="/smart-match?from=dashboard" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+              <Link href={withDashboardSource("/smart-match", fromDashboard)} className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 SmartMatch
               </Link>
-              <Link href="/support/learner" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+              <Link href={withDashboardSource("/support/learner", fromDashboard)} className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 Support
               </Link>
             </nav>
           </div>
           <div className="hidden items-center gap-6 md:flex">
             <LanguageSelector />
-            <Link href="/learner-dashboard" className="lda-pill lda-pill-sm">
-              <ArrowLeft size={17} /> Back to dashboard
+            <Link href={backHref} className="lda-pill lda-pill-sm">
+              <ArrowLeft size={17} /> {backLabel}
             </Link>
           </div>
           <div className="md:hidden">
@@ -182,7 +190,7 @@ export default function LearnerJourneyPage() {
                 <Link href="#journey-sections" className="lda-pill lda-pill-sm">
                   View journey sections <ArrowRight size={17} />
                 </Link>
-                <Link href="/learner-dashboard" className="lda-pill lda-pill-sm">
+                <Link href={backHref} className="lda-pill lda-pill-sm">
                   <ArrowLeft size={17} /> Return to booking
                 </Link>
               </div>
@@ -225,7 +233,7 @@ export default function LearnerJourneyPage() {
               <div className="text-sm font-black uppercase text-brand">Journey sections</div>
               <h2 className="mt-2 text-3xl font-black">Open the area you want to work on.</h2>
             </div>
-            <Link href="/smart-match?from=dashboard" className="lda-pill lda-pill-sm">
+            <Link href={withDashboardSource("/smart-match", fromDashboard)} className="lda-pill lda-pill-sm">
               Use SmartMatch <ArrowRight size={17} />
             </Link>
           </div>
@@ -253,7 +261,7 @@ export default function LearnerJourneyPage() {
                       </span>
                     ))}
                   </div>
-                  <Link href={section.href} className="lda-pill lda-pill-sm mt-5">
+                  <Link href={withDashboardSource(section.href, fromDashboard)} className="lda-pill lda-pill-sm mt-5">
                     Open section <ArrowRight size={17} />
                   </Link>
                 </article>
