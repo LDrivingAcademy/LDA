@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CarFront, Clock3, LocateFixed, MapPin, Navigation, RadioTower } from "lucide-react";
+import { LDA_GOOGLE_MAP_STYLES } from "@/lib/google-map-style";
 
 type Point = {
   lat: number;
@@ -217,12 +218,7 @@ export function InstructorLessonPingMap() {
           fullscreenControl: true,
           clickableIcons: false,
           gestureHandling: "greedy",
-          styles: [
-            {
-              featureType: "poi.business",
-              stylers: [{ visibility: "off" }]
-            }
-          ]
+          styles: LDA_GOOGLE_MAP_STYLES
         });
 
         routeLineRef.current = new maps.Polyline({
