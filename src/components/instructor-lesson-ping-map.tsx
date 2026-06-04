@@ -17,7 +17,13 @@ declare global {
 }
 
 const PING_WINDOW_MINUTES = 20;
-const MIN_PROFESSIONAL_MAP_ZOOM = 3;
+const MIN_PROFESSIONAL_MAP_ZOOM = 10;
+const LOCAL_MAP_RESTRICTION = {
+  north: 52.25,
+  south: 51.1,
+  west: -0.8,
+  east: 0.35
+};
 const learnerPickup: Point = {
   lat: 51.6523,
   lng: -0.1995,
@@ -210,12 +216,17 @@ export function InstructorLessonPingMap() {
           center: learnerPickup,
           zoom: 13,
           minZoom: MIN_PROFESSIONAL_MAP_ZOOM,
+          backgroundColor: "#eef2ef",
           disableDefaultUI: false,
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: true,
           clickableIcons: false,
           gestureHandling: "greedy",
+          restriction: {
+            latLngBounds: LOCAL_MAP_RESTRICTION,
+            strictBounds: false
+          },
           styles: [
             {
               featureType: "poi.business",
@@ -248,6 +259,9 @@ export function InstructorLessonPingMap() {
         });
 
         map.fitBounds(bounds, 72);
+        if (map.getZoom?.() < MIN_PROFESSIONAL_MAP_ZOOM) {
+          map.setZoom(MIN_PROFESSIONAL_MAP_ZOOM);
+        }
         mapRef.current = map;
         setMapStatus("ready");
       })
@@ -295,7 +309,7 @@ export function InstructorLessonPingMap() {
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_320px]">
-        <div className="relative overflow-hidden rounded border border-zinc-200 bg-zinc-100">
+        <div className="lda-polished-map relative overflow-hidden rounded border border-zinc-200 bg-zinc-100">
           <div ref={mapElementRef} className={`${mapStatus === "ready" ? "block" : "hidden"} h-[390px] w-full`} aria-label="Instructor map showing learner pickup ping and route" />
           {mapStatus !== "ready" ? <FallbackMap isPingActive={isPingActive} progress={isEnRoute ? progress : 0.08} /> : null}
           <button
