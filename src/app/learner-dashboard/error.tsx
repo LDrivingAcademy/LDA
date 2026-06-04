@@ -33,7 +33,7 @@ export default function LearnerDashboardError({
               <RefreshCw size={17} /> Reload dashboard
             </button>
             <Link href="/" className="lda-pill lda-pill-sm">
-              Back to homepage
+              Back to home page
             </Link>
           </div>
         </div>
