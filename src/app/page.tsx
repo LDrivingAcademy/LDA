@@ -20,24 +20,6 @@ export const dynamic = "force-dynamic";
 
 type CardVisualType = "car" | "calendar" | "match" | "instructor" | "tracking" | "social";
 
-const productFlow = [
-  {
-    step: "01",
-    title: "Match",
-    body: "Compare verified instructors by location, price, car, transmission, reviews, and availability."
-  },
-  {
-    step: "02",
-    title: "Book",
-    body: "Choose your lesson time, confirm pickup details, and keep your booking reference in LDA."
-  },
-  {
-    step: "03",
-    title: "Track",
-    body: "Use LDA tools for lesson arrival, booking records, support, and progress after each session."
-  }
-];
-
 const suggestionCards: {
   title: string;
   body: string;
@@ -217,25 +199,6 @@ export default async function HomePage() {
 
         <section className="bg-white px-4 pb-8 sm:px-6 lg:hidden">
           <OnDemandLessonCard className="mx-auto max-w-7xl md:grid-cols-[1fr_auto] md:items-center" futureLessonsHref={learnerSignUpHref} />
-        </section>
-
-        <section className="bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <div className="text-sm font-black uppercase text-brand">How LDA works</div>
-              <h2 className="mt-3 text-4xl font-black tracking-normal sm:text-5xl">Match. Book. Track.</h2>
-              <p className="mt-4 text-lg leading-8 text-zinc-700">A simple flow for a complex marketplace.</p>
-            </div>
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {productFlow.map((item) => (
-                <article key={item.step} className="rounded border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
-                  <div className="text-sm font-black text-brand">{item.step}</div>
-                  <h3 className="mt-3 text-2xl font-black">{item.title}</h3>
-                  <p className="mt-3 text-sm font-semibold leading-6 text-zinc-700">{item.body}</p>
-                </article>
-              ))}
-            </div>
-          </div>
         </section>
 
         <section id="discover" className="bg-white">
