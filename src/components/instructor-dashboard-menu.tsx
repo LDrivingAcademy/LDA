@@ -7,7 +7,7 @@ import { ChevronRight, Menu } from "lucide-react";
 const instructorMenuItems = [
   { label: "Learner Progress Notes", href: "/progress-tracker?from=dashboard" },
   { label: "Instructor support", href: "/support/instructor/dashboard" },
-  { label: "Your Bookings & Calendar", href: "/instructor?from=dashboard" },
+  { label: "Your Bookings & Calendar", href: "/instructor-calendar" },
   { label: "Notification Hub", href: "/notification-hub?from=dashboard" }
 ];
 
