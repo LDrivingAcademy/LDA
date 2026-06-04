@@ -28,7 +28,13 @@ type NearbyInstructorGoogleMapProps = {
 const FALLBACK_CENTER = { lat: 51.6538, lng: -0.1997 };
 const FIVE_MILES_IN_METRES = 8047;
 const INSTRUCTOR_BEARINGS = [210, 52, 126, 300, 15];
-const MIN_PROFESSIONAL_MAP_ZOOM = 3;
+const MIN_PROFESSIONAL_MAP_ZOOM = 10;
+const LOCAL_MAP_RESTRICTION = {
+  north: 52.25,
+  south: 51.1,
+  west: -0.8,
+  east: 0.35
+};
 
 function googleWindow() {
   if (typeof window === "undefined") {
@@ -126,7 +132,7 @@ function markerIcon(label: string, isSelected: boolean, isLearner = false) {
           </filter>
           <path filter="url(#shadow)" d="M30 4c14.4 0 26 11.6 26 26 0 18.5-26 38-26 38S4 48.5 4 30C4 15.6 15.6 4 30 4Z" fill="#e50914" stroke="#fff" stroke-width="5"/>
           <rect filter="url(#shadow)" x="48" y="14" width="60" height="34" rx="17" fill="#fff" stroke="#e5e7eb" stroke-width="2"/>
-          <text x="30" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#fff">â€¢</text>
+          <text x="30" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#fff">•</text>
           <text x="78" y="37" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#111">You</text>
         </svg>
       `)}`,
@@ -210,12 +216,17 @@ export function NearbyInstructorGoogleMap({
           center,
           zoom: 13,
           minZoom: MIN_PROFESSIONAL_MAP_ZOOM,
+          backgroundColor: "#eef2ef",
           disableDefaultUI: false,
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: true,
           clickableIcons: true,
           gestureHandling: "greedy",
+          restriction: {
+            latLngBounds: LOCAL_MAP_RESTRICTION,
+            strictBounds: false
+          },
           styles: [
             {
               featureType: "poi.business",
@@ -321,8 +332,8 @@ export function NearbyInstructorGoogleMap({
           <div style="font-family: Arial, sans-serif; max-width: 220px;">
             <strong style="font-size: 16px;">${instructor.name}</strong>
             <div style="margin-top: 6px;">${instructor.distanceMiles} miles away</div>
-            <div>${instructor.rating} rating Â· ${formatMoney(instructor.price)}/hr</div>
-            <div>${instructor.car} Â· ${instructor.transmission}</div>
+            <div>${instructor.rating} rating · ${formatMoney(instructor.price)}/hr</div>
+            <div>${instructor.car} · ${instructor.transmission}</div>
           </div>
         `);
         infoWindowRef.current?.open({ map: mapRef.current, anchor: marker });
@@ -334,6 +345,9 @@ export function NearbyInstructorGoogleMap({
     const hasBounds = typeof bounds.isEmpty === "function" ? !bounds.isEmpty() : true;
     if (!hasFittedBoundsRef.current && hasBounds) {
       mapRef.current.fitBounds(bounds, 72);
+      if (mapRef.current.getZoom?.() < MIN_PROFESSIONAL_MAP_ZOOM) {
+        mapRef.current.setZoom(MIN_PROFESSIONAL_MAP_ZOOM);
+      }
       hasFittedBoundsRef.current = true;
     }
   }, [center.lat, center.lng, instructorPositions]);
@@ -355,7 +369,7 @@ export function NearbyInstructorGoogleMap({
   }, [instructors, selectedInstructorId]);
 
   return (
-    <div className="relative mt-5 h-[420px] overflow-hidden rounded border border-zinc-200 bg-[#eef2ef] shadow-inner">
+    <div className="lda-polished-map relative mt-5 h-[420px] overflow-hidden rounded border border-zinc-200 bg-[#eef2ef] shadow-inner">
       <div ref={mapElementRef} className="h-full w-full" aria-label="Google map showing your live location and nearby demo instructors" />
       {mapState !== "ready" ? (
         <div className="absolute inset-0 grid place-items-center bg-white/95 p-6 text-center">
@@ -372,7 +386,7 @@ export function NearbyInstructorGoogleMap({
         </div>
       ) : null}
       <div className="pointer-events-none absolute bottom-4 right-4 rounded border border-zinc-300 bg-white/95 px-3 py-2 text-xs font-black text-zinc-700 shadow-sm">
-        5 mile local radius Â· demo instructor locations
+        5 mile local radius · demo instructor locations
       </div>
       <div className="pointer-events-none absolute left-4 top-4 rounded-full border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-zinc-700 shadow-sm">
         {userPosition ? `Live: ${userPosition.lat.toFixed(4)}, ${userPosition.lng.toFixed(4)}` : postcode}
