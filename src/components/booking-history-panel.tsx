@@ -60,7 +60,7 @@ function formatStatus(status: BookingRecord["status"]) {
   return "Pending";
 }
 
-export function BookingHistoryPanel() {
+export function BookingHistoryPanel({ fromDashboard = false }: { fromDashboard?: boolean }) {
   const [bookings, setBookings] = useState<BookingRecord[]>(fallbackBookings);
   const [openBookingId, setOpenBookingId] = useState<string | null>(fallbackBookings[1]?.id ?? null);
   const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
@@ -156,7 +156,7 @@ export function BookingHistoryPanel() {
                     <div className="rounded border border-zinc-200 bg-zinc-50 p-4">
                       <h3 className="font-black">Completed lesson details</h3>
                       <p className="mt-2 text-sm font-semibold leading-6 text-zinc-700">{booking.review || "No revision notes have been added yet."}</p>
-                      <Link href="/after-lesson-revision" className="lda-pill lda-pill-sm mt-4">
+                      <Link href={fromDashboard ? "/after-lesson-revision?from=dashboard" : "/after-lesson-revision"} className="lda-pill lda-pill-sm mt-4">
                         Open after lesson revision
                       </Link>
                     </div>
