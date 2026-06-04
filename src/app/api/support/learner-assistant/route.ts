@@ -1,5 +1,5 @@
 import { sendSupportEscalationEmail } from "@/lib/email";
-import { isRateLimited, jsonNoStore, rateLimitResponse, readJsonBody, safeEmail, safeText } from "@/lib/security";
+import { isRateLimited, jsonNoStore, rateLimitResponse, safeEmail, safeText } from "@/lib/security";
 
 type LearnerAssistantRequest = {
   name?: string;
@@ -54,10 +54,7 @@ export async function POST(request: Request) {
     return rateLimitResponse();
   }
 
-  const input = await readJsonBody<LearnerAssistantRequest>(request);
-  if (!input) {
-    return jsonNoStore({ error: "Invalid support request." }, { status: 400 });
-  }
+  const input = (await request.json()) as LearnerAssistantRequest;
 
   if (!isMeaningful(input.message)) {
     return jsonNoStore({ error: "Enter a support question first." }, { status: 400 });
