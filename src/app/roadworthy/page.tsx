@@ -1,6 +1,7 @@
 import { BookOpenCheck, ExternalLink, GraduationCap } from "lucide-react";
 import { PageTopBar } from "@/components/page-top-bar";
 import { RoadworthyGuide } from "@/components/roadworthy-guide";
+import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 
 const researchLinks = [
   {
@@ -29,10 +30,16 @@ const researchLinks = [
   }
 ];
 
-export default function RoadworthyPage() {
+type RoadworthyPageProps = {
+  searchParams?: PageSourceSearchParams;
+};
+
+export default async function RoadworthyPage({ searchParams }: RoadworthyPageProps) {
+  const { backHref, backLabel } = await getPageBackLink(searchParams);
+
   return (
     <>
-      <PageTopBar />
+      <PageTopBar backHref={backHref} backLabel={backLabel} />
       <main className="min-h-screen bg-white text-black">
         <section className="border-b border-zinc-200 px-4 py-10">
           <div className="mx-auto max-w-7xl">
