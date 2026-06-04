@@ -11,6 +11,7 @@ import {
   PauseCircle,
   PlusCircle,
   ShieldCheck,
+  Trash2,
   XCircle,
   UserRound
 } from "lucide-react";
@@ -173,6 +174,7 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
   const [displayMonth, setDisplayMonth] = useState(() => new Date(2026, 5, 1));
   const [selectedDate, setSelectedDate] = useState("2026-06-08");
   const [slots, setSlots] = useState<InstructorSlot[]>(initialSlots);
+  const [removeMode, setRemoveMode] = useState(false);
   const monthCells = useMemo(() => getMonthCells(displayMonth), [displayMonth]);
   const visibleMonthPrefix = `${displayMonth.getFullYear()}-${String(displayMonth.getMonth() + 1).padStart(2, "0")}`;
   const monthSlots = slots.filter((slot) => slot.date.startsWith(visibleMonthPrefix));
@@ -231,6 +233,11 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
         note: "New availability slot"
       }
     ]);
+    setRemoveMode(false);
+  }
+
+  function removeAvailabilitySlot(slotId: string) {
+    setSlots((current) => current.filter((slot) => slot.id !== slotId || (slot.status !== "free" && slot.status !== "blocked")));
   }
 
   return (
@@ -326,9 +333,19 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
           <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="text-sm font-black uppercase text-brand">Day planner</div>
             <h2 className="mt-2 text-2xl font-black">{new Intl.DateTimeFormat("en-GB", { dateStyle: "full" }).format(new Date(`${selectedDate}T12:00:00`))}</h2>
-            <button type="button" onClick={addFreeSlot} className="lda-pill lda-pill-sm mt-4">
-              <PlusCircle size={17} /> Add free slot
-            </button>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button type="button" onClick={addFreeSlot} className="lda-pill lda-pill-sm">
+                <PlusCircle size={17} /> Add free slot
+              </button>
+              <button type="button" onClick={() => setRemoveMode((current) => !current)} className={`lda-pill lda-pill-sm ${removeMode ? "bg-black text-white" : ""}`}>
+                <Trash2 size={17} /> Remove slot
+              </button>
+            </div>
+            {removeMode ? (
+              <p className="mt-3 rounded border border-red-200 bg-red-50 p-3 text-xs font-black leading-5 text-red-800">
+                Remove mode is on. Only free or unavailable slots can be removed; booked and being-booked lessons stay system controlled.
+              </p>
+            ) : null}
             <div className="mt-5 grid gap-3">
               {selectedSlots.length > 0 ? (
                 selectedSlots.map((slot) => (
@@ -359,6 +376,11 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
                       </div>
                     ) : null}
                     {slot.note ? <p className="mt-3 text-sm font-semibold leading-6 text-zinc-600">{slot.note}</p> : null}
+                    {removeMode && (slot.status === "free" || slot.status === "blocked") ? (
+                      <button type="button" onClick={() => removeAvailabilitySlot(slot.id)} className="mt-4 inline-flex items-center gap-2 rounded border border-red-200 bg-white px-3 py-2 text-sm font-black text-red-700 hover:bg-red-50">
+                        <Trash2 size={16} /> Remove this slot
+                      </button>
+                    ) : null}
                     {slot.status === "booked" ? (
                       <div className="mt-4 rounded border border-red-200 bg-white p-3">
                         <p className="text-xs font-bold leading-5 text-zinc-600">
