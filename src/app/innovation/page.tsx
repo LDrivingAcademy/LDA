@@ -3,29 +3,37 @@ import { ArrowLeft, CalendarCheck, CheckCircle2, RadioTower, ShieldCheck, Sparkl
 
 const learnerModules = [
   "SmartMatch profile that understands confidence, support needs, price, transmission, distance, availability, and instructor strengths.",
-  "Protected lesson record for booking reference, payment status, cancellation decisions, live tracking, progress notes, and revision focus.",
-  "Pass pathway from first lesson to theory, practical, first car, insurance support, and future instructor-transfer eligibility."
+  "Protected lesson record for booking reference, payment status, cancellation decisions, live tracking, progress notes, revision focus, and lesson history.",
+  "Pass pathway from first lesson to theory, practical, first car, insurance support, confidence milestones, and future instructor-transfer eligibility."
 ];
 
 const instructorModules = [
-  "Instructor business OS with verification, profile, availability, checkout holds, confirmed lessons, unavailable time, and cancellation handling.",
-  "Clientele builder that turns first bookings into repeat learners through progress records, learner history, reminders, reviews, and ranking signals.",
-  "Self-employed support layer for payout visibility, dispute evidence, tax-friendly records, demand signals, and priority support."
+  "Instructor business OS with verification, profile, availability, checkout holds, confirmed lessons, unavailable time, learner progress, and cancellation handling.",
+  "Clientele builder that turns first bookings into repeat learners through progress records, learner history, reminders, reviews, ranking signals, and retention tools.",
+  "Self-employed support layer for payout visibility, dispute evidence, tax-friendly records, demand signals, cancellation quality, and priority support."
+];
+
+const operatingLayers = [
+  "Find: compare verified instructors, price, distance, car, transmission, teaching style, reviews, and availability.",
+  "Book: choose slots, protect payment evidence, confirm pickup, and keep every booking reference inside LDA.",
+  "Learn: track lesson notes, weak skills, next focus, recommended videos, progress updates, and pass readiness.",
+  "Run: give instructors a calendar, availability controls, client records, payout visibility, retention signals, and support evidence.",
+  "Protect: detect off-platform requests, preserve cancellation evidence, reduce leakage, and keep learner-instructor trust accountable."
 ];
 
 const moatModules = [
   {
-    title: "On-platform necessity",
-    body: "The useful record lives inside LDA: learner progress, booking references, payment evidence, cancellation decisions, reviews, and support history.",
+    title: "One-stop lesson command centre",
+    body: "Learners should not need scattered texts, cash payments, random notes, and unclear arrangements. The useful record lives inside LDA.",
     icon: ShieldCheck
   },
   {
-    title: "Intelligent matching",
-    body: "LDA should feel more precise than a traditional driving school because it adapts to learner goals, instructor strengths, location, price, vehicle, and availability.",
+    title: "High-precision matching",
+    body: "LDA should feel more intelligent than a traditional driving school because it adapts to goals, nerves, budget, area, vehicle, instructor strengths, and real availability.",
     icon: Sparkles
   },
   {
-    title: "Live confidence",
+    title: "Live lesson confidence",
     body: "Arrival tracking, pickup visibility, lesson references, notifications, and protected support make learners feel safer and more in control.",
     icon: RadioTower
   },
@@ -49,9 +57,9 @@ const moatModules = [
 const deliveryPhases = [
   "Phase 1: Make protected LDA bookings, support escalation, progress records, and calendar controls feel essential.",
   "Phase 2: Add in-app messaging with off-platform phrase warnings, booking-safe templates, and learner report shortcuts.",
-  "Phase 3: Add instructor growth intelligence: retention, conversion, ranking health, demand heatmaps, and cancellation quality.",
-  "Phase 4: Build mobile-first learner and instructor apps around live lessons, notifications, payments, progress, and availability.",
-  "Phase 5: Launch advanced AI support for lesson planning, weak-skill detection, instructor recommendations, and owner risk monitoring."
+  "Phase 3: Add instructor growth intelligence: retention, conversion, ranking health, demand heatmaps, cancellation quality, and repeat-booking prompts.",
+  "Phase 4: Build mobile-first learner and instructor apps around live lessons, notifications, payments, progress, documents, and availability.",
+  "Phase 5: Launch advanced AI support for lesson planning, weak-skill detection, instructor recommendations, owner risk monitoring, and marketplace forecasting."
 ];
 
 export default function InnovationPage() {
@@ -62,16 +70,43 @@ export default function InnovationPage() {
           <Link href="/" className="inline-flex items-center gap-2 text-sm font-black text-zinc-300 hover:text-white">
             <ArrowLeft size={17} /> Back to LDA
           </Link>
-          <div className="mt-10 max-w-4xl">
+          <div className="mt-10 max-w-5xl">
             <div className="inline-flex items-center gap-2 rounded border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
               <Sparkles size={16} /> LDA Intelligent Lesson OS
             </div>
-            <h1 className="mt-5 text-5xl font-black tracking-normal sm:text-6xl">
-              The platform learners and instructors should need, not just want.
+            <h1 className="mt-5 text-5xl font-black tracking-normal sm:text-6xl lg:text-7xl">
+              The one-stop driving platform learners and instructors should not want to live without.
             </h1>
-            <p className="mt-5 max-w-3xl text-lg font-semibold leading-8 text-zinc-300">
-              LDA is being built as a connected operating system for learning to drive and running a driving-instructor business: matching, booking, payment, progress, safety, live tracking, support, ranking, and marketplace protection in one place.
+            <p className="mt-5 max-w-4xl text-lg font-semibold leading-8 text-zinc-300">
+              LDA is being built as a high-performance operating system for learning to drive and running a driving-instructor business: matching, booking, payment, progress, safety, live tracking, support, ranking, retention, and marketplace protection in one place.
             </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href="/auth/sign-up?role=learner" className="lda-pill">
+                Start as a learner
+              </Link>
+              <Link href="/instructor" className="lda-pill bg-white text-black hover:bg-zinc-200">
+                Build as an instructor
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-zinc-200 bg-zinc-50">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <div className="text-sm font-black uppercase text-brand">The LDA stack</div>
+            <h2 className="mt-3 text-4xl font-black tracking-normal">Find. Book. Learn. Run. Protect.</h2>
+            <p className="mt-4 text-lg leading-8 text-zinc-700">
+              The goal is not to copy a driving school. The goal is to build the connected system around everything that happens before, during, and after every lesson.
+            </p>
+          </div>
+          <div className="mt-8 grid gap-3 lg:grid-cols-5">
+            {operatingLayers.map((layer) => (
+              <div key={layer} className="rounded border border-zinc-200 bg-white p-4 text-sm font-black leading-6 shadow-sm">
+                {layer}
+              </div>
+            ))}
           </div>
         </div>
       </section>
