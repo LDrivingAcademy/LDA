@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   CalendarCheck,
   CarFront,
-  CheckCircle2,
   Clock3,
   HelpCircle,
   RadioTower,
@@ -90,15 +89,6 @@ const suggestionCards: {
   }
 ];
 
-const trustSignals = [
-  "ADI/PDI verified instructor flow",
-  "Secure online payment records",
-  "Protected lesson references",
-  "Progress saved after lessons",
-  "Cancellation evidence trail",
-  "Learner and instructor support paths"
-];
-
 export default async function HomePage() {
   const account = await getHeaderAccountSummary();
   const learnerEntryHref =
@@ -125,7 +115,6 @@ export default async function HomePage() {
               <Link href={learnerEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
               <Link href={instructorEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="#discover" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
-              <Link href="#safety" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
               <Link href="/about" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 About
               </Link>
@@ -265,26 +254,6 @@ export default async function HomePage() {
                   </div>
                   <CardVisual type={card.image} />
                 </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="safety" className="bg-white">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8 lg:py-14">
-            <div>
-              <div className="text-sm font-black uppercase text-brand">Trust signals</div>
-              <h2 className="mt-3 text-4xl font-black tracking-normal">Safety and proof before every lesson.</h2>
-              <p className="mt-4 max-w-xl text-lg leading-8 text-zinc-700">
-                LDA is structured around verified instructors, transparent pricing, protected records, secure payments, and clear support paths.
-              </p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {trustSignals.map((item) => (
-                <div key={item} className="flex items-start gap-4 rounded bg-zinc-100 p-4">
-                  <CheckCircle2 className="mt-0.5 shrink-0 text-brand" />
-                  <span className="font-bold leading-7 text-zinc-900">{item}</span>
-                </div>
               ))}
             </div>
           </div>
