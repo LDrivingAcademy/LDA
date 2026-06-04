@@ -3,6 +3,7 @@ import { ArrowRight, BadgeCheck, CalendarDays, CarFront, FileUp, MapPinned, Shie
 import { PageTopBar } from "@/components/page-top-bar";
 import { SiteFooter } from "@/components/site-footer";
 import { instructorJourneyStages, instructorSteps } from "@/lib/marketplace-content";
+import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 
 const onboardingBlocks = [
   { title: "Verification", detail: "ADI/PDI status, badge number, ID, driving licence, insurance, and supporting evidence.", icon: FileUp },
@@ -11,10 +12,16 @@ const onboardingBlocks = [
   { title: "Payouts", detail: "Stripe Connect account, gross lesson value, platform commission, net earnings, and payout status.", icon: WalletCards }
 ];
 
-export default function InstructorPage() {
+type InstructorPageProps = {
+  searchParams?: PageSourceSearchParams;
+};
+
+export default async function InstructorPage({ searchParams }: InstructorPageProps) {
+  const { backHref, backLabel, fromDashboard } = await getPageBackLink(searchParams);
+
   return (
     <>
-      <PageTopBar />
+      <PageTopBar backHref={backHref} backLabel={backLabel} />
       <main className="min-h-screen bg-white text-black">
         <section className="px-4 py-10 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
@@ -28,8 +35,8 @@ export default function InstructorPage() {
                   Instructors have a separate route from learners. Submit verification, set your profile and pricing, publish availability, then wait for admin approval before appearing in search.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <Link href="/auth/login?role=instructor" className="lda-pill lda-pill-sm">
-                    Start instructor sign up <ArrowRight size={16} />
+                  <Link href={fromDashboard ? "/dashboard" : "/auth/login?role=instructor"} className="lda-pill lda-pill-sm">
+                    {fromDashboard ? "Open instructor dashboard" : "Start instructor sign up"} <ArrowRight size={16} />
                   </Link>
                   <Link href="/terms" className="lda-pill lda-pill-sm">
                     Read instructor terms
