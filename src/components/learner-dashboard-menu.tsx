@@ -5,10 +5,10 @@ import Link from "next/link";
 import { ChevronRight, Menu } from "lucide-react";
 
 const learnerMenuItems = [
-  { label: "After Lesson Revision", href: "/after-lesson-revision" },
-  { label: "Rate Your Instructor", href: "/rate-instructor" },
-  { label: "Your Booking History", href: "/booking-history" },
-  { label: "Notification Hub", href: "/notification-hub" }
+  { label: "After Lesson Revision", href: "/after-lesson-revision?from=dashboard" },
+  { label: "Rate Your Instructor", href: "/rate-instructor?from=dashboard" },
+  { label: "Your Booking History", href: "/booking-history?from=dashboard" },
+  { label: "Notification Hub", href: "/notification-hub?from=dashboard" }
 ];
 
 export function LearnerDashboardMenu() {
