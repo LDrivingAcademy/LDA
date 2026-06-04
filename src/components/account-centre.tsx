@@ -122,7 +122,7 @@ export function AccountCentre() {
           <div className="mt-5 grid gap-3">
             {[
               ["Personal Info", "/account/personal-info"],
-              ["Change Password", "/auth/forgot-password?role=learner"],
+              ["Change Password", "/account/change-password"],
               ["Add a Recovery Number", "/account/personal-info"],
               ["Your Log In Activities", "#log-in-activities"]
             ].map(([label, href]) => (
@@ -142,7 +142,7 @@ export function AccountCentre() {
           <div className="mt-5 grid gap-3">
             {activity.map((item) => (
               <div key={`${item.device}-${item.when}`} className="rounded border border-zinc-200 bg-zinc-50 p-4 text-sm">
-                <div className="font-black">{item.device} · {item.browser}</div>
+                <div className="font-black">{item.device} Â· {item.browser}</div>
                 <div className="mt-1 text-zinc-600">{item.when}</div>
                 <div className="mt-1 font-bold text-zinc-700">{item.location}</div>
               </div>
