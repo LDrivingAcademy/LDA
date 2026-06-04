@@ -3,11 +3,18 @@ import { BadgeCheck } from "lucide-react";
 import { InstructorPackageCard } from "@/components/instructor-package-card";
 import { PageTopBar } from "@/components/page-top-bar";
 import { instructorPackages } from "@/lib/instructor-packages";
+import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 
-export default function InstructorPlusPage() {
+type InstructorPlusPageProps = {
+  searchParams?: PageSourceSearchParams;
+};
+
+export default async function InstructorPlusPage({ searchParams }: InstructorPlusPageProps) {
+  const { backHref, backLabel } = await getPageBackLink(searchParams);
+
   return (
     <main className="min-h-screen bg-white text-black">
-      <PageTopBar backHref="/instructor-dashboard" backLabel="Back to instructor dashboard" />
+      <PageTopBar backHref={backHref} backLabel={backLabel} />
       <section className="mx-auto max-w-7xl px-5 py-14">
         <div className="rounded-md border border-neutral-200 bg-white p-6 shadow-sm sm:p-10">
           <div className="inline-flex items-center gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-black uppercase text-brand">
