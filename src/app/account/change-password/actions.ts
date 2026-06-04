@@ -46,7 +46,7 @@ export async function changeAccountPassword(formData: FormData) {
   }
 
   if (currentPassword === newPassword) {
-    changePasswordRedirect("Choose a new password that is different from your current password.");
+    changePasswordRedirect("Same password. Your new password cannot be the same as your current password.");
   }
 
   const { error: signInError } = await supabase.auth.signInWithPassword({
