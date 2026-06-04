@@ -8,6 +8,12 @@ import { ProgressFeedbackForm } from "@/components/progress-feedback-form";
 import { SiteFooter } from "@/components/site-footer";
 import { createClient } from "@/lib/supabase/server";
 
+type ProgressTrackerPageProps = {
+  searchParams?: Promise<{
+    from?: string;
+  }>;
+};
+
 const benefits = [
   "Keep a shared record of completed lesson topics",
   "Send learner tips immediately after a completed lesson",
@@ -19,7 +25,11 @@ function displayName(fullName?: string | null, email?: string | null) {
   return fullName?.trim() || email?.split("@")[0] || "LDA instructor";
 }
 
-export default async function ProgressTrackerPage() {
+export default async function ProgressTrackerPage({ searchParams }: ProgressTrackerPageProps) {
+  const params = await searchParams;
+  const fromDashboard = params?.from === "dashboard";
+  const backHref = fromDashboard ? "/dashboard" : "/";
+  const backLabel = fromDashboard ? "Back to dashboard" : "Back to home page";
   const supabase = await createClient();
   let isInstructor = false;
   let isLearner = false;
@@ -68,11 +78,8 @@ export default async function ProgressTrackerPage() {
           </div>
           <div className="hidden items-center gap-6 md:flex">
             <LanguageSelector />
-            <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
-              <ArrowLeft size={17} /> Back to dashboard
-            </Link>
-            <Link href="/" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
-              <ArrowLeft size={17} /> Home
+            <Link href={backHref} className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+              <ArrowLeft size={17} /> {backLabel}
             </Link>
           </div>
           <div className="md:hidden">
@@ -94,8 +101,8 @@ export default async function ProgressTrackerPage() {
               <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-zinc-300">
                 Instructors can record what was covered, send learner feedback, and add tips or videos before the next lesson.
               </p>
-              <Link href="/dashboard" className="lda-pill lda-pill-sm mt-6">
-                <ArrowLeft size={17} /> Back to previous page
+              <Link href={backHref} className="lda-pill lda-pill-sm mt-6">
+                <ArrowLeft size={17} /> {backLabel}
               </Link>
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 {benefits.map((benefit) => (
