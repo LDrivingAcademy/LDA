@@ -45,6 +45,13 @@ const instructorStart: Point = {
   lng: -0.1765,
   label: "Instructor - Finchley"
 };
+const MIN_PROFESSIONAL_MAP_ZOOM = 10;
+const LOCAL_MAP_RESTRICTION = {
+  north: 52.25,
+  south: 51.1,
+  west: -0.8,
+  east: 0.35
+};
 const initialInstructorLocation = interpolate(instructorStart, learnerPickup, 0.18);
 
 function interpolate(start: Point, end: Point, progress: number): Point {
@@ -190,12 +197,21 @@ export function LiveLessonMap({ mode = "demo" }: { mode?: TrackingMode }) {
           center: learnerPickup,
           clickableIcons: false,
           disableDefaultUI: true,
+          backgroundColor: "#eef2ef",
           mapTypeControl: false,
+          minZoom: MIN_PROFESSIONAL_MAP_ZOOM,
+          restriction: {
+            latLngBounds: LOCAL_MAP_RESTRICTION,
+            strictBounds: false
+          },
           streetViewControl: false,
           zoom: 13
         });
         mapInstance.current = map;
         map.fitBounds(bounds, 80);
+        if ((map as any).getZoom?.() < MIN_PROFESSIONAL_MAP_ZOOM) {
+          (map as any).setZoom(MIN_PROFESSIONAL_MAP_ZOOM);
+        }
 
         routeLine.current = new maps.Polyline({
           geodesic: true,
@@ -282,7 +298,7 @@ export function LiveLessonMap({ mode = "demo" }: { mode?: TrackingMode }) {
           </div>
           <div
             ref={mapRef}
-            className={`${useFallback ? "hidden" : "block"} h-[360px] overflow-hidden rounded border border-zinc-200 bg-zinc-100`}
+            className={`lda-polished-map ${useFallback ? "hidden" : "block"} h-[360px] overflow-hidden rounded border border-zinc-200 bg-zinc-100`}
           />
           {useFallback ? <FallbackMap progress={progress} mode={mode} /> : null}
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
