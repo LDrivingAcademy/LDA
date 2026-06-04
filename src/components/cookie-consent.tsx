@@ -23,19 +23,39 @@ const cookieOptions: Array<{ key: keyof Omit<CookieChoice, "necessary">; label: 
   { key: "preferences", label: "Preference cookies" }
 ];
 
+function readStoredConsent() {
+  try {
+    return window.localStorage.getItem("lda-cookie-consent");
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredConsent(nextChoice: CookieChoice) {
+  try {
+    window.localStorage.setItem("lda-cookie-consent", JSON.stringify(nextChoice));
+  } catch {
+    // Consent still applies for this page view even if storage is unavailable.
+  }
+}
+
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
   const [choosing, setChoosing] = useState(false);
   const [choice, setChoice] = useState<CookieChoice>(defaultChoice);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("lda-cookie-consent");
+    const stored = readStoredConsent();
     setVisible(!stored);
   }, []);
 
   function saveCookieChoice(nextChoice: CookieChoice) {
-    window.localStorage.setItem("lda-cookie-consent", JSON.stringify(nextChoice));
-    window.dispatchEvent(new CustomEvent("lda-cookie-consent-updated", { detail: nextChoice }));
+    writeStoredConsent(nextChoice);
+    try {
+      window.dispatchEvent(new CustomEvent("lda-cookie-consent-updated", { detail: nextChoice }));
+    } catch {
+      // Event dispatch is an enhancement for integrations listening on the page.
+    }
     setVisible(false);
   }
 
