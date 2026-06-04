@@ -16,17 +16,16 @@ const starterSkills = [
   "Independent driving"
 ];
 
-export function ProgressFeedbackForm() {
-  const [learnerName, setLearnerName] = useState("Learner name");
+export function ProgressFeedbackForm({ instructorName }: { instructorName: string }) {
+  const [learnerName, setLearnerName] = useState("");
   const [learnerEmail, setLearnerEmail] = useState("");
-  const [instructorName, setInstructorName] = useState("Amelia Hart");
-  const [lessonReference, setLessonReference] = useState("LDA-BOOKING-REF");
+  const [lessonReference, setLessonReference] = useState("");
   const [skills, setSkills] = useState(starterSkills.map((title, index) => ({ title, complete: index < 3 })));
   const [newSkill, setNewSkill] = useState("");
   const [instructorNotes, setInstructorNotes] = useState("Good progress with control and observations. Keep practising mirror checks before changing speed or direction.");
   const [nextLessonFocus, setNextLessonFocus] = useState("Next lesson should focus on junction judgement, meeting traffic, and smoother clutch control in slow traffic.");
   const [recommendedVideos, setRecommendedVideos] = useState("Search: UK driving lesson clutch control\nSearch: UK junction observations MSPSL routine");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "looking-up" | "sending" | "sent" | "error">("idle");
   const [message, setMessage] = useState("");
 
   const completedSkills = useMemo(() => skills.filter((skill) => skill.complete).map((skill) => skill.title), [skills]);
@@ -38,6 +37,31 @@ export function ProgressFeedbackForm() {
     }
     setSkills((current) => [...current, { title: trimmed, complete: false }]);
     setNewSkill("");
+  }
+
+  async function lookupLearnerEmail(name: string) {
+    const trimmed = name.trim();
+    setLearnerName(name);
+    setLearnerEmail("");
+    setMessage("");
+
+    if (trimmed.length < 2) {
+      return;
+    }
+
+    setStatus("looking-up");
+    const response = await fetch(`/api/progress-feedback/learner-lookup?name=${encodeURIComponent(trimmed)}`);
+    const result = await response.json();
+
+    if (!response.ok) {
+      setStatus("idle");
+      setMessage(result.error ?? "Learner email could not be found from that name.");
+      return;
+    }
+
+    setLearnerName(result.name ?? trimmed);
+    setLearnerEmail(result.email ?? "");
+    setStatus("idle");
   }
 
   async function sendFeedback(event: FormEvent<HTMLFormElement>) {
@@ -84,19 +108,19 @@ export function ProgressFeedbackForm() {
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <label className="grid gap-1">
           <span className="text-sm font-black text-zinc-700">Learner name</span>
-          <input value={learnerName} onChange={(event) => setLearnerName(event.target.value)} className="min-h-12 rounded border border-zinc-300 px-4 font-bold" />
+          <input value={learnerName} onChange={(event) => lookupLearnerEmail(event.target.value)} className="min-h-12 rounded border border-zinc-300 px-4 font-bold" placeholder="Start typing learner name" />
         </label>
         <label className="grid gap-1">
           <span className="text-sm font-black text-zinc-700">Learner email</span>
-          <input type="email" value={learnerEmail} onChange={(event) => setLearnerEmail(event.target.value)} className="min-h-12 rounded border border-zinc-300 px-4 font-bold" />
+          <input readOnly type="email" value={learnerEmail} className="min-h-12 rounded border border-zinc-300 bg-zinc-100 px-4 font-bold text-zinc-700" placeholder={status === "looking-up" ? "Looking up learner..." : "Auto-filled from learner name"} />
         </label>
         <label className="grid gap-1">
           <span className="text-sm font-black text-zinc-700">Instructor</span>
-          <input value={instructorName} onChange={(event) => setInstructorName(event.target.value)} className="min-h-12 rounded border border-zinc-300 px-4 font-bold" />
+          <input readOnly value={instructorName} className="min-h-12 rounded border border-zinc-300 bg-zinc-100 px-4 font-bold text-zinc-700" />
         </label>
         <label className="grid gap-1">
           <span className="text-sm font-black text-zinc-700">Lesson reference</span>
-          <input value={lessonReference} onChange={(event) => setLessonReference(event.target.value)} className="min-h-12 rounded border border-zinc-300 px-4 font-mono text-sm font-black" />
+          <input value={lessonReference} onChange={(event) => setLessonReference(event.target.value)} className="min-h-12 rounded border border-zinc-300 px-4 font-mono text-sm font-black" placeholder="Manual lesson reference" />
         </label>
       </div>
 
@@ -144,7 +168,7 @@ export function ProgressFeedbackForm() {
         </label>
       </div>
 
-      <button disabled={status === "sending"} className="lda-pill mt-6 w-full" type="submit">
+      <button disabled={status === "sending" || status === "looking-up"} className="lda-pill mt-6 w-full" type="submit">
         {status === "sending" ? <Mail size={18} /> : <Send size={18} />}
         {status === "sending" ? "Sending progress..." : "Send progress to learner"}
       </button>

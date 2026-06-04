@@ -3,8 +3,10 @@ import { ArrowLeft, BookOpenCheck, CheckCircle2, ClipboardCheck, Video } from "l
 import { Brand } from "@/components/brand";
 import { LanguageSelector } from "@/components/language-selector";
 import { MainMenu } from "@/components/main-menu";
+import { LearnerProgressRecords, type LessonProgressRecord } from "@/components/learner-progress-records";
 import { ProgressFeedbackForm } from "@/components/progress-feedback-form";
 import { SiteFooter } from "@/components/site-footer";
+import { createClient } from "@/lib/supabase/server";
 
 const benefits = [
   "Keep a shared record of completed lesson topics",
@@ -13,7 +15,44 @@ const benefits = [
   "Avoid paying lesson time to re-cover the same topic"
 ];
 
-export default function ProgressTrackerPage() {
+function displayName(fullName?: string | null, email?: string | null) {
+  return fullName?.trim() || email?.split("@")[0] || "LDA instructor";
+}
+
+export default async function ProgressTrackerPage() {
+  const supabase = await createClient();
+  let isInstructor = false;
+  let isLearner = false;
+  let instructorName = "LDA instructor";
+  let learnerRecords: LessonProgressRecord[] = [];
+
+  if (supabase) {
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const [{ data: profile }, { data: roles }] = await Promise.all([
+        supabase.from("profiles").select("full_name,email").eq("id", user.id).maybeSingle(),
+        supabase.from("account_roles").select("role").eq("user_id", user.id)
+      ]);
+      const roleNames = roles?.map((accountRole) => String(accountRole.role)) ?? [];
+      isInstructor = roleNames.includes("instructor");
+      isLearner = roleNames.includes("learner");
+      instructorName = displayName(profile?.full_name, profile?.email ?? user.email);
+
+      if (!isInstructor && isLearner) {
+        const { data } = await supabase
+          .from("lesson_progress_records")
+          .select("id,instructor_name,lesson_reference,completed_skills,instructor_notes,next_lesson_focus,recommended_videos,sent_at")
+          .eq("learner_id", user.id)
+          .order("sent_at", { ascending: false })
+          .limit(20);
+        learnerRecords = data ?? [];
+      }
+    }
+  }
+
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
@@ -84,7 +123,11 @@ export default function ProgressTrackerPage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <ProgressFeedbackForm />
+          {isInstructor ? (
+            <ProgressFeedbackForm instructorName={instructorName} />
+          ) : (
+            <LearnerProgressRecords records={learnerRecords} />
+          )}
         </section>
       </main>
       <SiteFooter />
