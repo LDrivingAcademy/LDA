@@ -1,5 +1,5 @@
 import { sendSupportEscalationEmail } from "@/lib/email";
-import { isRateLimited, jsonNoStore, rateLimitResponse, safeEmail, safeText } from "@/lib/security";
+import { isRateLimited, jsonNoStore, rateLimitResponse, readJsonBody, safeEmail, safeText } from "@/lib/security";
 
 type LearnerAssistantRequest = {
   name?: string;
@@ -10,6 +10,7 @@ type LearnerAssistantRequest = {
 };
 
 const urgentPattern = /\b(urgent|emergency|today|now|payment failed|paid twice|refund|cancel|cancelled|no show|not arrived|late|unsafe|accident|stranded)\b/i;
+const offPlatformPattern = /\b(cash|bank transfer|wire transfer|private payment|pay direct|pay directly|outside lda|outside the app|off platform|off-platform|whatsapp|text me|call me directly|private booking|avoid commission|booking fee)\b/i;
 
 function isMeaningful(value?: string) {
   return typeof value === "string" && value.trim().length > 2;
@@ -29,6 +30,10 @@ function extractOutputText(payload: unknown) {
 }
 
 function demoAnswer(message: string, urgent: boolean) {
+  if (offPlatformPattern.test(message)) {
+    return "Do not pay or move the booking outside LDA. LDA payment protection, cancellation support, progress records, replacement support, and dispute help only apply to lessons booked and paid through LDA. I have prepared this as a platform-protection support issue; include the instructor name, booking reference, and any screenshot or wording you received.";
+  }
+
   if (urgent) {
     return "This looks time-sensitive. I have prepared this as an urgent LDA support issue. Include your booking reference, lesson time, instructor name, and the best phone/email contact. If you are currently unsafe or in immediate danger, contact the emergency services first.";
   }
@@ -49,14 +54,18 @@ export async function POST(request: Request) {
     return rateLimitResponse();
   }
 
-  const input = (await request.json()) as LearnerAssistantRequest;
+  const input = await readJsonBody<LearnerAssistantRequest>(request);
+  if (!input) {
+    return jsonNoStore({ error: "Invalid support request." }, { status: 400 });
+  }
 
   if (!isMeaningful(input.message)) {
     return jsonNoStore({ error: "Enter a support question first." }, { status: 400 });
   }
 
   const message = safeText(input.message, "", 2000);
-  const urgent = input.urgency === "urgent" || urgentPattern.test(message);
+  const offPlatformRisk = offPlatformPattern.test(message);
+  const urgent = input.urgency === "urgent" || urgentPattern.test(message) || offPlatformRisk;
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_SUPPORT_MODEL || "gpt-5.2";
   let answer = "";
@@ -73,14 +82,14 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           model,
           instructions:
-            "You are LDA learner support for a UK learner-driver marketplace. Be concise, practical, and safety-aware. Help learners book lessons, manage bookings, understand cancellations, payment confirmations, pickup postcode issues, and live tracking. Do not give legal advice. If the issue is urgent, tell the learner support will be notified and ask for booking reference/contact details.",
+            "You are LDA learner support for a UK learner-driver marketplace. Be concise, practical, and safety-aware. Help learners book lessons, manage bookings, understand cancellations, payment confirmations, pickup postcode issues, and live tracking. Do not give legal advice. If a learner says an instructor asked for cash, bank transfer, WhatsApp booking, private payment, direct payment, or anything outside LDA, tell them not to pay outside LDA, explain LDA protections only apply to on-platform bookings, and ask for booking reference, instructor name, and screenshots. If the issue is urgent, tell the learner support will be notified and ask for booking reference/contact details.",
           input: [
             {
               role: "user",
               content: [
                 {
                   type: "input_text",
-                  text: `Learner name: ${safeText(input.name, "Not provided", 120)}\nLearner email: ${safeEmail(input.email) || "Not provided"}\nBooking reference: ${safeText(input.bookingReference, "Not provided", 80)}\nUrgent: ${urgent ? "yes" : "no"}\nQuestion: ${message}`
+                  text: `Learner name: ${safeText(input.name, "Not provided", 120)}\nLearner email: ${safeEmail(input.email) || "Not provided"}\nBooking reference: ${safeText(input.bookingReference, "Not provided", 80)}\nUrgent: ${urgent ? "yes" : "no"}\nOff-platform risk: ${offPlatformRisk ? "yes" : "no"}\nQuestion: ${message}`
                 }
               ]
             }
@@ -109,7 +118,7 @@ export async function POST(request: Request) {
         name: safeText(input.name, "", 120),
         email: safeEmail(input.email),
         bookingReference: safeText(input.bookingReference, "", 80),
-        subject: "Learner support escalation",
+        subject: offPlatformRisk ? "Off-platform booking request reported" : "Learner support escalation",
         message,
         assistantSummary: answer,
         urgent
