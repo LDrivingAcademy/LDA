@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CarFront, Clock3, MapPin, Navigation, RadioTower, ShieldCheck } from "lucide-react";
+import { LDA_GOOGLE_MAP_STYLES } from "@/lib/google-map-style";
 
 type Point = {
   lat: number;
@@ -195,6 +196,7 @@ export function LiveLessonMap({ mode = "demo" }: { mode?: TrackingMode }) {
           mapTypeControl: false,
           minZoom: MIN_WORLD_MAP_ZOOM,
           streetViewControl: false,
+          styles: LDA_GOOGLE_MAP_STYLES,
           zoom: 13
         });
         mapInstance.current = map;
