@@ -113,12 +113,14 @@ const suggestionCards: {
 
 export default async function HomePage() {
   const account = await getHeaderAccountSummary();
+  const learnerSignUpMessage = "You are signed in as an instructor. Sign up for a learner account with a different email to use learner features.";
   const learnerEntryHref =
     account?.role === "learner"
       ? "/learner-dashboard"
       : account?.role === "instructor"
-        ? "/auth/sign-up?role=learner&message=You are signed in as an instructor. Sign up for a learner account with a different email to use learner features."
+        ? `/auth/sign-up?role=learner&message=${encodeURIComponent(learnerSignUpMessage)}`
         : "/auth/login?role=learner";
+  const bookOnDemandHref = account?.role === "instructor" ? `/auth/sign-up?role=learner&message=${encodeURIComponent(learnerSignUpMessage)}` : "/lesson-now";
   const instructorEntryHref =
     account?.role === "instructor"
       ? "/instructor-dashboard"
@@ -191,7 +193,7 @@ export default async function HomePage() {
                 <Link href={learnerEntryHref} className="inline-flex min-h-16 items-center justify-center gap-4 rounded bg-brand px-6 py-4 text-base font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 hover:ring-2 hover:ring-red-300">
                   <Search size={23} /> Find instructors <ArrowRight size={22} />
                 </Link>
-                <Link href="/lesson-now" className="inline-flex min-h-16 items-center justify-center gap-4 rounded border border-zinc-400 bg-white px-6 py-4 text-base font-black text-black transition hover:border-brand hover:ring-2 hover:ring-brand/50">
+                <Link href={bookOnDemandHref} className="inline-flex min-h-16 items-center justify-center gap-4 rounded border border-zinc-400 bg-white px-6 py-4 text-base font-black text-black transition hover:border-brand hover:ring-2 hover:ring-brand/50">
                   <CalendarCheck size={23} /> Book on-demand
                 </Link>
               </div>
