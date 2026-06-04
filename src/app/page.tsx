@@ -25,22 +25,17 @@ const productFlow = [
   {
     step: "01",
     title: "Match",
-    body: "Find the right instructor using location, vehicle, availability, price, reviews, teaching strengths, and support needs."
+    body: "Compare verified instructors by location, price, car, transmission, reviews, and availability."
   },
   {
     step: "02",
     title: "Book",
-    body: "Choose a clear slot, confirm pickup details, pay securely, and keep the booking reference inside LDA."
+    body: "Choose your lesson time, confirm pickup details, and keep your booking reference in LDA."
   },
   {
     step: "03",
     title: "Track",
-    body: "Use live lesson tools for arrival clarity, protected records, support paths, and cancellation evidence."
-  },
-  {
-    step: "04",
-    title: "Improve",
-    body: "Store progress notes, next focus, recommended practice, and repeat-booking history after each lesson."
+    body: "Use LDA tools for lesson arrival, booking records, support, and progress after each session."
   }
 ];
 
@@ -73,18 +68,11 @@ const suggestionCards: {
     cta: "View SmartMatch"
   },
   {
-    title: "Innovation OS",
-    body: "See how LDA is becoming the one-stop platform for matching, booking, progress, safety, payments, and instructor growth.",
-    href: "/innovation",
-    image: "match",
-    cta: "Explore LDA OS"
-  },
-  {
-    title: "Instructor business",
+    title: "Become an instructor",
     body: "Apply as an ADI/PDI, upload verification, set availability, manage bookings, and build repeat learner demand.",
     href: "/instructor",
     image: "instructor",
-    cta: "Build with LDA"
+    cta: "Apply now"
   },
   {
     title: "Live tracking",
@@ -109,24 +97,6 @@ const trustSignals = [
   "Progress saved after lessons",
   "Cancellation evidence trail",
   "Learner and instructor support paths"
-];
-
-const dashboardStandards = [
-  {
-    title: "Learner command centre",
-    body: "Upcoming lesson, pickup details, instructor status, progress notes, recommended videos, booking history, and support in one place.",
-    icon: RadioTower
-  },
-  {
-    title: "Instructor operating system",
-    body: "Calendar, free slots, booked lessons, being-booked holds, unavailable time, learner progress, cancellation actions, and payout visibility.",
-    icon: CalendarCheck
-  },
-  {
-    title: "Protected marketplace layer",
-    body: "Booking evidence, secure checkout, off-platform request warnings, progress ownership, support escalation, and platform trust signals.",
-    icon: CheckCircle2
-  }
 ];
 
 export default async function HomePage() {
@@ -155,7 +125,6 @@ export default async function HomePage() {
               <Link href={learnerEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
               <Link href={instructorEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="#discover" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
-              <Link href="/innovation" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Innovation</Link>
               <Link href="#safety" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
               <Link href="/about" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 About
@@ -216,30 +185,16 @@ export default async function HomePage() {
         <section className="bg-white">
           <div className="mx-auto grid max-w-7xl items-stretch gap-8 px-4 pb-0 pt-7 sm:px-6 lg:grid-cols-[560px_1fr] lg:px-8 lg:pb-0 lg:pt-10">
             <div className="flex flex-col py-2 lg:pt-8">
-              <div className="mb-4 inline-flex w-fit items-center gap-2 rounded border border-red-500/30 bg-red-50 px-3 py-2 text-sm font-black text-brand">
-                <Sparkles size={16} /> Intelligent Lesson OS
-              </div>
               <h1 className="max-w-xl text-5xl font-black tracking-normal sm:text-6xl">
-                LDA is the one-stop driving platform.
+                Book driving lessons with LDA.
               </h1>
-              <p className="mt-5 max-w-lg text-lg leading-8 text-zinc-700">
-                Find instructors, book lessons, pay securely, track arrival, store progress, and run an instructor business in one calm, high-tech marketplace.
+              <p className="mt-5 max-w-lg text-lg font-black leading-8 text-zinc-800">
+                Find instructors. Book lessons. Pay securely.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href={learnerEntryHref} className="lda-pill">
                   Find instructors
                 </Link>
-                <Link href={instructorEntryHref} className="lda-pill bg-black text-white hover:bg-zinc-800">
-                  Build as instructor
-                </Link>
-                <Link href="/innovation" className="lda-pill bg-white text-black ring-1 ring-zinc-300 hover:bg-zinc-100">
-                  Explore LDA OS
-                </Link>
-              </div>
-              <div className="mt-7 grid grid-cols-2 gap-3 text-sm font-black text-zinc-800 sm:grid-cols-3">
-                <div className="rounded border border-zinc-200 bg-zinc-50 p-3">Verified instructors</div>
-                <div className="rounded border border-zinc-200 bg-zinc-50 p-3">Secure checkout</div>
-                <div className="rounded border border-zinc-200 bg-zinc-50 p-3">Live lesson tools</div>
               </div>
               <div className="mt-auto hidden pt-8 lg:block">
                 <OnDemandLessonCard futureLessonsHref={learnerSignUpHref} />
@@ -255,18 +210,15 @@ export default async function HomePage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/5" />
                 <Link href="/smart-match" className="lda-pill lda-pill-sm absolute left-5 top-5 z-20 pointer-events-auto sm:left-auto sm:right-8 sm:top-8">
-                  LDA SmartMatch 94%
+                  LDA SmartMatch
                 </Link>
-                <div className="relative z-10 grid gap-4 pt-24 lg:grid-cols-[1fr_260px] lg:items-end">
-                  <div>
-                    <h2 className="max-w-4xl text-4xl font-black tracking-normal text-white drop-shadow-lg sm:text-5xl">
-                      Book with the confidence of a live platform.
-                    </h2>
-                    <p className="mt-4 max-w-3xl text-base font-bold leading-7 text-white drop-shadow">
-                      Smart Match compares distance, rating, price, car, transmission, availability, verification status, teaching strengths, and support preferences.
-                    </p>
-                  </div>
-                  <LiveLessonPanel />
+                <div className="relative z-10 pt-24">
+                  <h2 className="max-w-4xl text-4xl font-black tracking-normal text-white drop-shadow-lg sm:text-5xl">
+                    Book with the confidence of a live platform.
+                  </h2>
+                  <p className="mt-4 max-w-2xl text-base font-bold leading-7 text-white drop-shadow">
+                    SmartMatch compares distance, price, availability, instructor profile, and learner preferences.
+                  </p>
                 </div>
               </div>
             </section>
@@ -277,24 +229,14 @@ export default async function HomePage() {
           <OnDemandLessonCard className="mx-auto max-w-7xl md:grid-cols-[1fr_auto] md:items-center" futureLessonsHref={learnerSignUpHref} />
         </section>
 
-        <section className="border-y border-zinc-200 bg-black text-white">
-          <div className="mx-auto grid max-w-7xl gap-3 px-4 py-5 sm:px-6 md:grid-cols-3 lg:px-8">
-            <div className="text-sm font-black uppercase text-red-200">Marketplace status: live clarity</div>
-            <div className="text-sm font-black uppercase text-zinc-200">Payment record: protected</div>
-            <div className="text-sm font-black uppercase text-zinc-200">Progress tracker: saved after lessons</div>
-          </div>
-        </section>
-
         <section className="bg-white">
           <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
               <div className="text-sm font-black uppercase text-brand">How LDA works</div>
-              <h2 className="mt-3 text-4xl font-black tracking-normal sm:text-5xl">A simple flow for a complex marketplace.</h2>
-              <p className="mt-4 text-lg leading-8 text-zinc-700">
-                LDA should feel obvious from the first visit: match the right people, protect the booking, show what is happening, and keep improving after every lesson.
-              </p>
+              <h2 className="mt-3 text-4xl font-black tracking-normal sm:text-5xl">Match. Book. Track.</h2>
+              <p className="mt-4 text-lg leading-8 text-zinc-700">A simple flow for a complex marketplace.</p>
             </div>
-            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
               {productFlow.map((item) => (
                 <article key={item.step} className="rounded border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
                   <div className="text-sm font-black text-brand">{item.step}</div>
@@ -309,8 +251,7 @@ export default async function HomePage() {
         <section id="discover" className="bg-white">
           <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
-              <div className="text-sm font-black uppercase text-brand">One marketplace, both sides</div>
-              <h2 className="mt-3 text-4xl font-black tracking-normal sm:text-5xl">Everything learners and instructors need to move.</h2>
+              <h2 className="text-4xl font-black tracking-normal sm:text-5xl">Everything learners and instructors need to move.</h2>
             </div>
             <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {suggestionCards.map((card) => (
@@ -348,65 +289,10 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-
-        <section className="border-y border-zinc-200 bg-zinc-50">
-          <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <div className="text-sm font-black uppercase text-brand">Dashboard standard</div>
-              <h2 className="mt-3 text-4xl font-black tracking-normal">The dashboards should feel like the product people rely on daily.</h2>
-              <p className="mt-4 text-lg leading-8 text-zinc-700">
-                Public pages win attention. Dashboards win loyalty. LDA should make each signed-in workflow feel fast, obvious, protected, and useful.
-              </p>
-            </div>
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {dashboardStandards.map((standard) => {
-                const Icon = standard.icon;
-                return (
-                  <article key={standard.title} className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-                    <Icon className="text-brand" />
-                    <h3 className="mt-4 text-xl font-black">{standard.title}</h3>
-                    <p className="mt-3 text-sm font-semibold leading-6 text-zinc-700">{standard.body}</p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
       </main>
       <FeedbackButton />
       <SiteFooter />
     </>
-  );
-}
-
-function LiveLessonPanel() {
-  return (
-    <div className="rounded border border-white/20 bg-white/95 p-4 text-black shadow-2xl backdrop-blur">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="text-xs font-black uppercase text-zinc-500">Next lesson</div>
-          <div className="mt-1 text-xl font-black">Today, 16:30</div>
-        </div>
-        <span className="rounded bg-green-100 px-2.5 py-1 text-xs font-black text-green-800">Protected</span>
-      </div>
-      <div className="mt-4 grid gap-2 text-sm font-bold text-zinc-700">
-        <div className="flex items-center justify-between gap-4 rounded bg-zinc-100 p-3">
-          <span>Instructor ETA</span>
-          <strong className="text-black">8 min</strong>
-        </div>
-        <div className="flex items-center justify-between gap-4 rounded bg-zinc-100 p-3">
-          <span>SmartMatch</span>
-          <strong className="text-black">94%</strong>
-        </div>
-        <div className="flex items-center justify-between gap-4 rounded bg-zinc-100 p-3">
-          <span>Progress</span>
-          <strong className="text-black">68%</strong>
-        </div>
-      </div>
-      <Link href="/tracking" className="lda-pill lda-pill-sm mt-4 w-full">
-        Open live tracking
-      </Link>
-    </div>
   );
 }
 
