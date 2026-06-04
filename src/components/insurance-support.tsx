@@ -70,8 +70,8 @@ export function InsuranceSupport() {
               <BadgePoundSterling className="text-brand" />
               <h2 className="text-2xl font-black">Insurance quote support</h2>
             </div>
-            <div className="mt-5 overflow-hidden rounded border border-zinc-200">
-              <div className="grid grid-cols-[1.1fr_0.7fr_0.8fr_0.7fr_1.2fr] bg-black px-4 py-3 text-xs font-black uppercase text-white">
+            <div className="mt-5 rounded border border-zinc-200">
+              <div className="hidden grid-cols-[1.1fr_0.7fr_0.8fr_0.7fr_1.2fr] bg-black px-4 py-3 text-xs font-black uppercase text-white md:grid">
                 <span>Provider path</span>
                 <span>Cover</span>
                 <span>Estimate</span>
@@ -86,10 +86,10 @@ export function InsuranceSupport() {
                       {row.strengths.map((strength) => <span key={strength} className="text-xs text-zinc-600">{strength}</span>)}
                     </div>
                   </div>
-                  <span>{row.type}</span>
-                  <span className="font-black text-brand">{row.estimate}</span>
-                  <span className="font-black text-black">{row.confidence}%</span>
-                  <span>{row.fit}</span>
+                  <span><span className="mr-2 font-black text-zinc-500 md:hidden">Cover:</span>{row.type}</span>
+                  <span className="font-black text-brand"><span className="mr-2 text-zinc-500 md:hidden">Estimate:</span>{row.estimate}</span>
+                  <span className="font-black text-black"><span className="mr-2 text-zinc-500 md:hidden">Fit score:</span>{row.confidence}%</span>
+                  <span><span className="mr-2 font-black text-zinc-500 md:hidden">Best fit:</span>{row.fit}</span>
                 </div>
               ))}
             </div>
