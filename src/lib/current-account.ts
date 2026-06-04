@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 export type HeaderAccountSummary = {
   dashboardHref: string;
   name: string;
+  role: "instructor" | "learner";
   subscriptionHref: string;
   subscriptionLabel: string;
 };
@@ -65,6 +66,7 @@ export async function getHeaderAccountSummary(): Promise<HeaderAccountSummary | 
   return {
     dashboardHref: isInstructor ? "/instructor-dashboard" : "/learner-dashboard",
     name: getDisplayName(profile?.full_name, profile?.email ?? user.email),
+    role: isInstructor ? "instructor" : "learner",
     subscriptionHref: isInstructor ? "/instructor-dashboard" : "/learner-plus",
     subscriptionLabel: isInstructor ? "Instructor" : hasLearnerPlus ? "Learner Plus" : "Learner"
   };
