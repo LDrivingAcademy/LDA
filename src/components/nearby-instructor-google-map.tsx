@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { LDA_GOOGLE_MAP_STYLES } from "@/lib/google-map-style";
 
 type LatLng = {
   lat: number;
@@ -217,12 +218,7 @@ export function NearbyInstructorGoogleMap({
           fullscreenControl: true,
           clickableIcons: true,
           gestureHandling: "greedy",
-          styles: [
-            {
-              featureType: "poi.business",
-              stylers: [{ visibility: "off" }]
-            }
-          ]
+          styles: LDA_GOOGLE_MAP_STYLES
         });
         infoWindowRef.current = new google.maps.InfoWindow();
         mapRef.current.addListener("dragstart", markUserInteraction);
