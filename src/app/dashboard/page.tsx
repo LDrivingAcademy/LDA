@@ -11,6 +11,45 @@ import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 
+const instructorDashboardSections = [
+  {
+    title: "Today's Lessons",
+    items: ["Upcoming lessons", "Pupil names", "Lesson times and durations", "Pick-up locations", "Lesson status"]
+  },
+  {
+    title: "Pupil Management",
+    items: ["Active pupils", "New enquiries", "Test-ready pupils", "Lesson history"]
+  },
+  {
+    title: "Pupil Progress",
+    items: ["DVSA syllabus progress", "Skills completed", "Areas needing improvement", "Mock test results", "Instructor notes"]
+  },
+  {
+    title: "Diary / Calendar",
+    items: ["Weekly schedule", "Availability", "Booking requests", "Rescheduled lessons", "Test dates"]
+  },
+  {
+    title: "Driving Test Information",
+    items: ["Upcoming practical tests", "Test centre", "Test time and date", "Pass/fail history", "Student readiness status"]
+  },
+  {
+    title: "Finance",
+    items: ["Today's earnings", "Weekly/monthly earnings", "Outstanding payments", "Lesson payments received"]
+  },
+  {
+    title: "Performance Metrics",
+    items: ["Pass rate", "Lessons delivered this week/month", "Student retention", "Reviews and ratings", "Cancellation rate"]
+  },
+  {
+    title: "Messages & Notifications",
+    items: ["New pupil enquiries", "Lesson reminders", "Test reminders", "Company announcements"]
+  },
+  {
+    title: "Vehicle & Compliance",
+    items: ["Vehicle service reminders", "Insurance expiry", "ADI/PDI registration"]
+  }
+];
+
 export default async function DashboardPage() {
   const supabase = await createClient();
 
@@ -111,6 +150,8 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      {isInstructor ? <InstructorDashboardSections /> : null}
+
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-2 lg:px-8">
         <article className="flex flex-col rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <CalendarCheck className="text-brand" />
@@ -172,6 +213,27 @@ export default async function DashboardPage() {
 
       {isInstructor ? <InstructorDashboard /> : <LearnerBookingDashboard learnerEmail={profile?.email ?? user.email} learnerPhone={profile?.phone} />}
     </main>
+  );
+}
+
+function InstructorDashboardSections() {
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {instructorDashboardSections.map((section) => (
+          <article key={section.title} className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+            <h2 className="text-xl font-black text-black">{section.title}</h2>
+            <ul className="mt-4 grid gap-2 text-sm font-bold leading-6 text-zinc-700">
+              {section.items.map((item) => (
+                <li key={item} className="rounded bg-zinc-50 px-3 py-2">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
