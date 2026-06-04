@@ -2,15 +2,22 @@ import Link from "next/link";
 import { ArrowLeft, ExternalLink, Target } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { PracticalTestPlanner } from "@/components/practical-test-planner";
+import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 
-export default function PracticalTestPage() {
+type PracticalTestPageProps = {
+  searchParams?: PageSourceSearchParams;
+};
+
+export default async function PracticalTestPage({ searchParams }: PracticalTestPageProps) {
+  const { backHref, backLabel } = await getPageBackLink(searchParams);
+
   return (
     <main className="min-h-screen bg-white text-black">
       <header className="sticky top-0 z-30 border-b border-zinc-900 bg-black text-white">
         <div className="flex w-full items-center justify-between gap-4 px-[15px] py-4">
           <Brand />
-          <Link href="/learner-journey" className="lda-pill lda-pill-sm">
-            <ArrowLeft size={16} /> LDA learner journey
+          <Link href={backHref} className="lda-pill lda-pill-sm">
+            <ArrowLeft size={16} /> {backLabel}
           </Link>
         </div>
       </header>
