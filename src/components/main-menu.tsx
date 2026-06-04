@@ -19,6 +19,7 @@ const menuLinks = [
 type MainMenuAccount = {
   dashboardHref: string;
   name: string;
+  role: "instructor" | "learner";
   subscriptionHref: string;
   subscriptionLabel: string;
 };
@@ -30,7 +31,7 @@ export function MainMenu({ account }: { account?: MainMenuAccount | null }) {
     ? [
         { href: account.dashboardHref, label: account.name },
         { href: account.subscriptionHref, label: account.subscriptionLabel },
-        { href: "/instructor", label: "Become an Instructor" },
+        ...(account.role === "learner" ? [{ href: "/account/instructor-transfer", label: "Become an instructor" }] : []),
         { href: "/cancellation-policy", label: "Cancellation policy" },
         { href: "/about", label: "About" },
         { href: "/contact", label: "Help" }
