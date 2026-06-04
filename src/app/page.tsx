@@ -14,7 +14,7 @@ import { FeedbackButton } from "@/components/feedback-button";
 import { LanguageSelector } from "@/components/language-selector";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
-import { getHeaderAccountSummary } from "@/lib/current-account";
+import { getHeaderAccountSummary, type HeaderAccountSummary } from "@/lib/current-account";
 
 export const dynamic = "force-dynamic";
 
@@ -110,14 +110,7 @@ export default async function HomePage() {
             </Link>
             {account ? (
               <>
-                <div className="flex items-center gap-1">
-                  <Link href={account.dashboardHref} className="rounded-full border border-red-500/60 bg-transparent px-2.5 py-1.5 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
-                    {account.name}
-                  </Link>
-                  <Link href={account.subscriptionHref} className="rounded-full border border-red-500/60 bg-transparent px-2.5 py-1.5 whitespace-nowrap text-sm font-black uppercase text-white hover:ring-2 hover:ring-brand">
-                    {account.subscriptionLabel}
-                  </Link>
-                </div>
+                <HeaderAccountBlock account={account} />
                 <MainMenu account={account} />
               </>
             ) : (
@@ -129,19 +122,7 @@ export default async function HomePage() {
           </div>
           <div className="flex items-center gap-3 xl:hidden">
             {account ? (
-              <>
-                <div className="hidden items-center gap-2 sm:flex">
-                  <Link href={account.dashboardHref} className="rounded-full border border-red-500/60 bg-transparent px-3 py-1.5 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
-                    {account.name}
-                  </Link>
-                  <Link href={account.subscriptionHref} className="rounded-full border border-red-500/60 bg-transparent px-3 py-1.5 whitespace-nowrap text-sm font-black uppercase text-white hover:ring-2 hover:ring-brand">
-                    {account.subscriptionLabel}
-                  </Link>
-                </div>
-                <Link href={account.subscriptionHref} className="rounded-full border border-red-500/60 bg-transparent px-3 py-1.5 whitespace-nowrap text-sm font-black uppercase text-white hover:ring-2 hover:ring-brand sm:hidden">
-                  {account.subscriptionLabel}
-                </Link>
-              </>
+              <HeaderAccountBlock account={account} compact />
             ) : (
               <>
                 <Link href="/auth/login?role=learner" className="hidden rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand sm:inline-flex">Log in</Link>
@@ -226,6 +207,17 @@ export default async function HomePage() {
       <FeedbackButton />
       <SiteFooter />
     </>
+  );
+}
+
+function HeaderAccountBlock({ account, compact = false }: { account: HeaderAccountSummary; compact?: boolean }) {
+  return (
+    <div className={`min-w-0 text-right leading-tight ${compact ? "max-w-[120px]" : "max-w-[190px]"}`}>
+      <div className="truncate text-sm font-black text-white">{account.name}</div>
+      <Link href={account.dashboardHref} className="mt-1 block truncate text-xs font-black uppercase text-red-200 hover:text-white hover:underline">
+        {account.subscriptionLabel}
+      </Link>
+    </div>
   );
 }
 
