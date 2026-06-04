@@ -186,3 +186,78 @@ body {
 .lda-pill-wide {
   width: 100%;
 }
+
+@media (max-width: 640px) {
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
+
+  header > div.flex {
+    min-width: 0;
+    gap: 0.75rem !important;
+  }
+
+  main h1 {
+    font-size: clamp(2rem, 10vw, 3.1rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  main h2 {
+    font-size: clamp(1.5rem, 7vw, 2.25rem) !important;
+    line-height: 1.1 !important;
+  }
+
+  main h3 {
+    line-height: 1.15 !important;
+  }
+
+  main p,
+  main li {
+    line-height: 1.6 !important;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+  }
+
+  .lda-pill {
+    min-height: 3rem;
+    max-width: 100%;
+    padding: 0.85rem 1rem;
+    white-space: normal;
+    line-height: 1.15;
+  }
+
+  .lda-pill-sm {
+    min-height: 2.5rem;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .lda-mobile-scroll {
+    margin-inline: -1rem;
+    overflow-x: auto;
+    padding-inline: 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lda-mobile-scroll > * {
+    min-width: 640px;
+  }
+}
