@@ -15,8 +15,8 @@ export default async function TrackingPage({ searchParams }: TrackingPageProps) 
     params?.from === "dashboard" ||
     params?.from === "learner-dashboard" ||
     Boolean(bookingReference);
-  const backHref = isLearnerTracking ? "/learner-dashboard" : "/";
-  const backLabel = isLearnerTracking ? "Back to dashboard" : "Back to homepage";
+  const backHref = isLearnerTracking ? "/dashboard" : "/";
+  const backLabel = isLearnerTracking ? "Back to dashboard" : "Back to home page";
   const badge = bookingReference ? "Booked lesson tracking" : isLearnerTracking ? "Live tracking" : "Live tracking demo";
   const heading = isLearnerTracking
     ? "Track your booked instructor to your pickup point."
