@@ -2,11 +2,18 @@ import { PlusCircle } from "lucide-react";
 import { LearnerPackageCard } from "@/components/learner-package-card";
 import { PageTopBar } from "@/components/page-top-bar";
 import { learnerPackages } from "@/lib/learner-packages";
+import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 
-export default function LearnerPlusPage() {
+type LearnerPlusPageProps = {
+  searchParams?: PageSourceSearchParams;
+};
+
+export default async function LearnerPlusPage({ searchParams }: LearnerPlusPageProps) {
+  const { backHref, backLabel } = await getPageBackLink(searchParams);
+
   return (
     <main className="min-h-screen bg-white text-black">
-      <PageTopBar backHref="/learner-dashboard" backLabel="Back to learner dashboard" />
+      <PageTopBar backHref={backHref} backLabel={backLabel} />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <section className="rounded border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-brand">
