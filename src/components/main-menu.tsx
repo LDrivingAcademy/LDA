@@ -30,8 +30,8 @@ export function MainMenu({ account }: { account?: MainMenuAccount | null }) {
   const menuRef = useRef<HTMLDivElement>(null);
   const activeLinks = account
     ? [
-        { href: account.dashboardHref, label: account.name },
-        { href: account.subscriptionHref, label: account.subscriptionLabel },
+        { href: "/account", label: account.name },
+        { href: account.dashboardHref, label: account.role === "instructor" ? "Instructor Dashboard" : "Learner Dashboard" },
         ...(account.role === "learner" ? [{ href: "/account/instructor-transfer", label: "Become an instructor" }] : []),
         { href: "/safety", label: "Safety" },
         { href: "/cancellation-policy", label: "Cancellation policy" },
@@ -83,7 +83,7 @@ export function MainMenu({ account }: { account?: MainMenuAccount | null }) {
             <LanguageSelector />
           </div>
           {activeLinks.map((link) => (
-            <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} className="block px-4 py-3 text-sm font-black hover:bg-red-500/10 hover:text-brand">
+            <Link key={`${link.href}-${link.label}`} href={link.href} onClick={() => setIsOpen(false)} className="block px-4 py-3 text-sm font-black hover:bg-red-500/10 hover:text-brand">
               {link.label}
             </Link>
           ))}
