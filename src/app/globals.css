@@ -35,6 +35,17 @@ body {
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
 
+.lda-polished-map {
+  isolation: isolate;
+  transform: translateZ(0);
+}
+
+.lda-polished-map img {
+  backface-visibility: hidden;
+  image-rendering: auto;
+  transform: translateZ(0);
+}
+
 a[href],
 button:not(:disabled),
 select:not(:disabled),
