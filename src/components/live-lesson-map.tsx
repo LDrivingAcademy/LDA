@@ -45,7 +45,7 @@ const instructorStart: Point = {
   lng: -0.1765,
   label: "Instructor - Finchley"
 };
-const MIN_PROFESSIONAL_MAP_ZOOM = 10;
+const MIN_PROFESSIONAL_MAP_ZOOM = 8;
 const LOCAL_MAP_RESTRICTION = {
   north: 52.25,
   south: 51.1,
