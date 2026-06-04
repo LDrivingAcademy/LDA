@@ -6,15 +6,15 @@ import { useEffect, useRef, useState } from "react";
 import { LanguageSelector } from "@/components/language-selector";
 
 const menuLinks = [
-  { href: "/auth/login?role=learner", label: "Learner log in" },
-  { href: "/auth/sign-up?role=learner", label: "Learner sign up" },
+  { href: "/about", label: "About" },
+  { href: "/instructor", label: "Become an Instructor" },
+  { href: "/cancellation-policy", label: "Cancellation policy" },
+  { href: "/contact", label: "Help" },
   { href: "/auth/login?role=instructor", label: "Instructor log in" },
   { href: "/auth/sign-up?role=instructor", label: "Instructor sign up" },
-  { href: "/instructor", label: "Become an Instructor" },
-  { href: "/safety", label: "Safety" },
-  { href: "/cancellation-policy", label: "Cancellation policy" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Help" }
+  { href: "/auth/login?role=learner", label: "Learner log in" },
+  { href: "/auth/sign-up?role=learner", label: "Learner sign up" },
+  { href: "/safety", label: "Safety" }
 ];
 
 type MainMenuAccount = {
@@ -25,18 +25,24 @@ type MainMenuAccount = {
   subscriptionLabel: string;
 };
 
+function sortLinksByLabel<T extends { label: string }>(links: T[]) {
+  return [...links].sort((first, second) => first.label.localeCompare(second.label));
+}
+
 export function MainMenu({ account }: { account?: MainMenuAccount | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const activeLinks = account
     ? [
         { href: "/account", label: account.name },
-        { href: account.dashboardHref, label: account.role === "instructor" ? "Instructor Dashboard" : "Learner Dashboard" },
-        ...(account.role === "learner" ? [{ href: "/account/instructor-transfer", label: "Become an instructor" }] : []),
-        { href: "/safety", label: "Safety" },
-        { href: "/cancellation-policy", label: "Cancellation policy" },
-        { href: "/about", label: "About" },
-        { href: "/contact", label: "Help" }
+        ...sortLinksByLabel([
+          { href: account.dashboardHref, label: account.role === "instructor" ? "Instructor Dashboard" : "Learner Dashboard" },
+          ...(account.role === "learner" ? [{ href: "/account/instructor-transfer", label: "Become an instructor" }] : []),
+          { href: "/safety", label: "Safety" },
+          { href: "/cancellation-policy", label: "Cancellation policy" },
+          { href: "/about", label: "About" },
+          { href: "/contact", label: "Help" }
+        ])
       ]
     : menuLinks;
 
