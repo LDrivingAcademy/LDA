@@ -20,6 +20,8 @@ const checklist = [
 ];
 
 export function InstructorSupportContent({ entry }: { entry: "public" | "dashboard" }) {
+  const instructorAreaHref = entry === "dashboard" ? "/dashboard" : "/instructor";
+
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
@@ -67,7 +69,7 @@ export function InstructorSupportContent({ entry }: { entry: "public" | "dashboa
                 Get help with onboarding, ADI/PDI verification, documents, profile settings, availability, bookings, earnings, and payouts.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/instructor" className="lda-pill">
+                <Link href={instructorAreaHref} className="lda-pill">
                   <UserCog size={20} /> Instructor area
                 </Link>
                 <a href="mailto:info@ldrivingacademy.co.uk?subject=Instructor%20support%20request" className="lda-pill">
@@ -96,8 +98,9 @@ export function InstructorSupportContent({ entry }: { entry: "public" | "dashboa
           <div className="mt-8 grid gap-5 lg:grid-cols-3">
             {instructorActions.map((action) => {
               const Icon = action.icon;
+              const href = action.cta === "Instructor area" ? instructorAreaHref : action.href;
               return (
-                <Link key={action.title} href={action.href} className="group flex min-h-[260px] flex-col rounded bg-zinc-100 p-6 hover:bg-zinc-200">
+                <Link key={action.title} href={href} className="group flex min-h-[260px] flex-col rounded bg-zinc-100 p-6 hover:bg-zinc-200">
                   <div className="grid h-14 w-14 place-items-center rounded bg-white text-brand shadow-sm">
                     <Icon size={28} />
                   </div>
