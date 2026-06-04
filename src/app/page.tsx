@@ -21,6 +21,29 @@ export const dynamic = "force-dynamic";
 
 type CardVisualType = "car" | "calendar" | "match" | "instructor" | "tracking" | "social";
 
+const productFlow = [
+  {
+    step: "01",
+    title: "Match",
+    body: "Find the right instructor using location, vehicle, availability, price, reviews, teaching strengths, and support needs."
+  },
+  {
+    step: "02",
+    title: "Book",
+    body: "Choose a clear slot, confirm pickup details, pay securely, and keep the booking reference inside LDA."
+  },
+  {
+    step: "03",
+    title: "Track",
+    body: "Use live lesson tools for arrival clarity, protected records, support paths, and cancellation evidence."
+  },
+  {
+    step: "04",
+    title: "Improve",
+    body: "Store progress notes, next focus, recommended practice, and repeat-booking history after each lesson."
+  }
+];
+
 const suggestionCards: {
   title: string;
   body: string;
@@ -259,6 +282,27 @@ export default async function HomePage() {
             <div className="text-sm font-black uppercase text-red-200">Marketplace status: live clarity</div>
             <div className="text-sm font-black uppercase text-zinc-200">Payment record: protected</div>
             <div className="text-sm font-black uppercase text-zinc-200">Progress tracker: saved after lessons</div>
+          </div>
+        </section>
+
+        <section className="bg-white">
+          <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <div className="text-sm font-black uppercase text-brand">How LDA works</div>
+              <h2 className="mt-3 text-4xl font-black tracking-normal sm:text-5xl">A simple flow for a complex marketplace.</h2>
+              <p className="mt-4 text-lg leading-8 text-zinc-700">
+                LDA should feel obvious from the first visit: match the right people, protect the booking, show what is happening, and keep improving after every lesson.
+              </p>
+            </div>
+            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {productFlow.map((item) => (
+                <article key={item.step} className="rounded border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
+                  <div className="text-sm font-black text-brand">{item.step}</div>
+                  <h3 className="mt-3 text-2xl font-black">{item.title}</h3>
+                  <p className="mt-3 text-sm font-semibold leading-6 text-zinc-700">{item.body}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
