@@ -5,6 +5,7 @@ import { LanguageSelector } from "@/components/language-selector";
 import { LearnerSupportAssistant } from "@/components/learner-support-assistant";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
+import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 
 const learnerActions = [
   { title: "Book lessons", body: "Find instructors, compare prices, and continue to the normal learner booking flow.", href: "/auth/login?role=learner", cta: "Start booking", icon: CalendarCheck },
@@ -19,7 +20,13 @@ const supportTopics = [
   { icon: CircleHelp, title: "Urgent issues", body: "If the lesson is today, your instructor is late, or payment is stuck, use the assistant and mark it urgent." }
 ];
 
-export default function LearnerSupportPage() {
+type LearnerSupportPageProps = {
+  searchParams?: PageSourceSearchParams;
+};
+
+export default async function LearnerSupportPage({ searchParams }: LearnerSupportPageProps) {
+  const { backHref, backLabel } = await getPageBackLink(searchParams);
+
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
@@ -35,8 +42,8 @@ export default function LearnerSupportPage() {
           </div>
           <div className="hidden items-center gap-6 md:flex">
             <LanguageSelector />
-            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
-              <CircleHelp size={17} /> Help
+            <Link href={backHref} className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+              <ArrowLeft size={17} /> {backLabel}
             </Link>
           </div>
           <div className="md:hidden">
@@ -49,8 +56,8 @@ export default function LearnerSupportPage() {
         <section className="bg-black text-white">
           <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_520px] lg:px-8 lg:py-16">
             <div>
-              <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-zinc-300 hover:text-white hover:ring-2 hover:ring-brand">
-                <ArrowLeft size={17} /> Back to help
+              <Link href={backHref} className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-zinc-300 hover:text-white hover:ring-2 hover:ring-brand">
+                <ArrowLeft size={17} /> {backLabel}
               </Link>
               <div className="mt-10 inline-flex items-center gap-2 rounded-full border border-red-500/60 bg-red-500/15 px-4 py-2 text-sm font-black text-red-100">
                 <BookOpenCheck size={17} /> Learner support
