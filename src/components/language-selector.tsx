@@ -4,6 +4,38 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Globe2 } from "lucide-react";
 import { googleCodeForLanguage, isRtlLanguage, labelForLanguage, languageOptions } from "@/lib/languages";
 
+function readLocalStorage(key: string) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeLocalStorage(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // Language selection can still apply to the current page view.
+  }
+}
+
+function removeLocalStorage(key: string) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    // Storage removal is best effort only.
+  }
+}
+
+function dispatchLanguageChange(selected: string, customLanguage: string) {
+  try {
+    window.dispatchEvent(new CustomEvent("lda-language-change", { detail: { selected, customLanguage, force: true } }));
+  } catch {
+    // Page translation is an enhancement; do not crash navigation if dispatch fails.
+  }
+}
+
 export function LanguageSelector() {
   const [selected, setSelected] = useState("en-GB");
   const [customLanguage, setCustomLanguage] = useState("");
@@ -12,9 +44,9 @@ export function LanguageSelector() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("lda-language");
+    const stored = readLocalStorage("lda-language");
     setSelected(stored || "en-GB");
-    setCustomLanguage(window.localStorage.getItem("lda-custom-language") || "");
+    setCustomLanguage(readLocalStorage("lda-custom-language") || "");
     setLoaded(true);
   }, []);
 
@@ -30,11 +62,11 @@ export function LanguageSelector() {
 
     document.documentElement.lang = activeLanguage;
     document.documentElement.dir = isRtlLanguage(selected, customLanguage) ? "rtl" : "ltr";
-    window.localStorage.setItem("lda-language", selected);
+    writeLocalStorage("lda-language", selected);
     if (selected === "custom") {
-      window.localStorage.setItem("lda-custom-language", customLanguage);
+      writeLocalStorage("lda-custom-language", customLanguage);
     }
-    window.dispatchEvent(new CustomEvent("lda-language-change", { detail: { selected, customLanguage, force: true } }));
+    dispatchLanguageChange(selected, customLanguage);
   }, [customLanguage, loaded, selected]);
 
   useEffect(() => {
@@ -66,18 +98,14 @@ export function LanguageSelector() {
 
   const handleSelection = (value: string) => {
     setSelected(value);
-    window.localStorage.setItem("lda-language", value);
+    writeLocalStorage("lda-language", value);
 
     if (value !== "custom") {
       setCustomLanguage("");
-      window.localStorage.removeItem("lda-custom-language");
+      removeLocalStorage("lda-custom-language");
       document.documentElement.lang = value;
       document.documentElement.dir = isRtlLanguage(value, "") ? "rtl" : "ltr";
-      window.dispatchEvent(
-        new CustomEvent("lda-language-change", {
-          detail: { selected: value, customLanguage: "", force: true }
-        })
-      );
+      dispatchLanguageChange(value, "");
       setOpen(false);
     }
   };
