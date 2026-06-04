@@ -20,7 +20,7 @@ export default async function InstructorTransferPage({
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <PageTopBar backHref="/learner-dashboard" backLabel="Back to learner dashboard" />
+      <PageTopBar backHref="/dashboard" backLabel="Back to dashboard" />
       <section className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1fr_460px]">
         <div>
           <div className="inline-flex items-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-black text-brand">
