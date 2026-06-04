@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, CalendarCheck, CheckCircle2, FileCheck2, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarCheck, FileCheck2, Sparkles } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { FastSignOutButton } from "@/components/fast-sign-out-button";
 import { InstructorLessonPingMap } from "@/components/instructor-lesson-ping-map";
@@ -10,18 +10,6 @@ import { LearnerDashboardMenu } from "@/components/learner-dashboard-menu";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
-
-const learnerDashboardItems = [
-  "Upcoming lessons and pickup details",
-  "Progress and revision focus",
-  "SmartMatch and booking tools"
-];
-
-const instructorDashboardItems = [
-  "Availability and booked slots",
-  "Learner progress records",
-  "Verification and support visibility"
-];
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -69,7 +57,6 @@ export default async function DashboardPage() {
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
   const displayName = profile?.full_name || user.email || "Learner";
   const verificationStatus = instructorProfile?.verification_status ?? "not started";
-  const dashboardItems = isInstructor ? instructorDashboardItems : learnerDashboardItems;
   const statusRequestHref = `mailto:info@ldrivingacademy.co.uk?subject=${encodeURIComponent(
     "Instructor verification status request"
   )}&body=${encodeURIComponent(
@@ -117,25 +104,10 @@ export default async function DashboardPage() {
       </header>
 
       <section className="bg-black text-white">
-        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_420px] lg:px-8">
-          <div>
-            <h1 className="text-4xl font-black tracking-normal sm:text-5xl">
-              {isInstructor ? "LDA instructor dashboard" : "LDA learner dashboard"}
-            </h1>
-            <p className="mt-4 max-w-3xl text-base font-semibold leading-7 text-zinc-300">
-              {isInstructor
-                ? "Manage your availability, learners, progress records, verification, and support actions from one place."
-                : "Manage your lessons, bookings, progress, and support from one place."}
-            </p>
-          </div>
-          <div className="grid gap-3">
-            {dashboardItems.map((item) => (
-              <div key={item} className="flex items-start gap-3 rounded border border-zinc-800 bg-zinc-950 p-4 text-sm font-black text-zinc-100">
-                <CheckCircle2 className="mt-0.5 shrink-0 text-brand" size={18} />
-                {item}
-              </div>
-            ))}
-          </div>
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <h1 className="text-4xl font-black tracking-normal sm:text-5xl">
+            {isInstructor ? "LDA instructor dashboard" : "LDA learner dashboard"}
+          </h1>
         </div>
       </section>
 
