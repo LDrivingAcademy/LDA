@@ -75,7 +75,7 @@ export function MainMenu({ account }: { account?: MainMenuAccount | null }) {
         <Menu size={24} />
       </button>
       {isOpen ? (
-        <div className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded border border-zinc-800 bg-zinc-950 py-2 text-white shadow-2xl">
+        <div className="absolute right-0 top-full z-50 mt-2 w-[min(92vw,18rem)] overflow-hidden rounded border border-zinc-800 bg-zinc-950 py-2 text-white shadow-2xl">
           <div className="border-b border-zinc-800 px-4 py-3">
             <LanguageSelector />
           </div>
