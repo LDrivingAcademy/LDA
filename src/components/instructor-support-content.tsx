@@ -20,7 +20,7 @@ const checklist = [
 ];
 
 export function InstructorSupportContent({ entry }: { entry: "public" | "dashboard" }) {
-  const instructorAreaHref = entry === "dashboard" ? "/dashboard" : "/instructor";
+  const instructorAreaHref = entry === "dashboard" ? "/instructor-calendar" : "/instructor";
 
   return (
     <>
