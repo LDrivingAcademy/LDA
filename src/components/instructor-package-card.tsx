@@ -24,15 +24,17 @@ export function InstructorPackageCard({ instructorPackage }: InstructorPackageCa
       ].join(" ")}
     >
       <Link href={`/instructor-plus/${instructorPackage.slug}`} className="flex flex-1 flex-col">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex min-h-[4.5rem] items-start justify-between gap-4">
           <h2 className="text-3xl font-black text-black">{instructorPackage.name}</h2>
-          <span className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-black uppercase text-brand">
-            {isCurrent ? "Current plan" : instructorPackage.label}
-          </span>
+          {isCurrent ? (
+            <span className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-black uppercase text-brand">
+              Current plan
+            </span>
+          ) : null}
         </div>
-        <p className="mt-5 text-xl font-black text-brand">{instructorPackage.price}</p>
-        <p className="mt-5 text-base font-bold leading-8 text-neutral-700">{instructorPackage.summary}</p>
-        <ul className="mt-7 space-y-4 text-base font-bold text-neutral-800">
+        <p className="mt-5 min-h-[2rem] text-xl font-black text-brand">{instructorPackage.price}</p>
+        <p className="mt-5 min-h-[8rem] text-base font-bold leading-8 text-neutral-700">{instructorPackage.summary}</p>
+        <ul className="mt-7 min-h-[14rem] space-y-4 text-base font-bold text-neutral-800">
           {instructorPackage.features.map((feature) => (
             <li key={feature} className="flex gap-3">
               {instructorPackage.highlighted ? (
@@ -44,7 +46,7 @@ export function InstructorPackageCard({ instructorPackage }: InstructorPackageCa
             </li>
           ))}
         </ul>
-        <span className="mt-7 block text-sm font-black text-brand">View full package details</span>
+        <span className="mt-auto block pt-7 text-sm font-black text-brand">View full package details</span>
       </Link>
       <div className="mt-7">
         <InstructorPackageCheckoutButton
