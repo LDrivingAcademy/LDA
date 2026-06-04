@@ -2,15 +2,22 @@ import Link from "next/link";
 import { ArrowLeft, CarFront, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { FirstCarGuidance } from "@/components/first-car-guidance";
+import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 
-export default function FirstCarGuidancePage() {
+type FirstCarGuidancePageProps = {
+  searchParams?: PageSourceSearchParams;
+};
+
+export default async function FirstCarGuidancePage({ searchParams }: FirstCarGuidancePageProps) {
+  const { backHref, backLabel } = await getPageBackLink(searchParams);
+
   return (
     <main className="min-h-screen bg-white text-black">
       <header className="sticky top-0 z-30 border-b border-zinc-900 bg-black text-white">
         <div className="flex w-full items-center justify-between gap-4 px-[15px] py-4">
           <Brand />
-          <Link href="/learner-journey" className="lda-pill lda-pill-sm">
-            <ArrowLeft size={16} /> LDA learner journey
+          <Link href={backHref} className="lda-pill lda-pill-sm">
+            <ArrowLeft size={16} /> {backLabel}
           </Link>
         </div>
       </header>
