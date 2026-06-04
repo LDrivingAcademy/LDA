@@ -1,7 +1,7 @@
 import { sendProgressFeedbackEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { isRateLimited, jsonNoStore, rateLimitResponse, readJsonBody, safeEmail, safeText } from "@/lib/security";
+import { isRateLimited, jsonNoStore, rateLimitResponse, safeEmail, safeText } from "@/lib/security";
 
 type ProgressFeedbackRequest = {
   learnerName?: string;
@@ -18,12 +18,20 @@ function hasText(value?: string) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+async function readProgressRequest(request: Request) {
+  try {
+    return (await request.json()) as ProgressFeedbackRequest;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: Request) {
   if (isRateLimited(request, "progress-feedback", 20)) {
     return rateLimitResponse();
   }
 
-  const input = await readJsonBody<ProgressFeedbackRequest>(request);
+  const input = await readProgressRequest(request);
   if (!input) {
     return jsonNoStore({ error: "Invalid progress feedback request." }, { status: 400 });
   }
