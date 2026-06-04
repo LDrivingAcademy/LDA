@@ -59,14 +59,6 @@ export default function AboutPage() {
               <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-zinc-300">
                 L Driving Academy is being built as a UK learner-driver marketplace where learners can compare local instructors and instructors can manage bookings with confidence.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/auth/login?role=learner" className="lda-pill">
-                  Learner login
-                </Link>
-                <Link href="/instructor" className="lda-pill">
-                  Instructor area
-                </Link>
-              </div>
             </div>
 
             <aside className="rounded border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
