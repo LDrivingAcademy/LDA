@@ -7,7 +7,7 @@ type PageTopBarProps = {
   backLabel?: string;
 };
 
-export function PageTopBar({ backHref = "/", backLabel = "Back to homepage" }: PageTopBarProps) {
+export function PageTopBar({ backHref = "/", backLabel = "Back to home page" }: PageTopBarProps) {
   return (
     <header className="w-full bg-black py-4 text-white">
       <div className="flex w-full items-center justify-between gap-4 px-[15px]">
