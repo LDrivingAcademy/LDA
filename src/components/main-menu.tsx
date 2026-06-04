@@ -11,7 +11,6 @@ const menuLinks = [
   { href: "/auth/login?role=instructor", label: "Instructor log in" },
   { href: "/auth/sign-up?role=instructor", label: "Instructor sign up" },
   { href: "/instructor", label: "Become an Instructor" },
-  { href: "/innovation", label: "Innovation" },
   { href: "/cancellation-policy", label: "Cancellation policy" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Help" }
@@ -33,7 +32,6 @@ export function MainMenu({ account }: { account?: MainMenuAccount | null }) {
         { href: account.dashboardHref, label: account.name },
         { href: account.subscriptionHref, label: account.subscriptionLabel },
         ...(account.role === "learner" ? [{ href: "/account/instructor-transfer", label: "Become an instructor" }] : []),
-        { href: "/innovation", label: "Innovation" },
         { href: "/cancellation-policy", label: "Cancellation policy" },
         { href: "/about", label: "About" },
         { href: "/contact", label: "Help" }
