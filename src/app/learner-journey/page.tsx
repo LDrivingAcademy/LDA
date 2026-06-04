@@ -130,7 +130,7 @@ const actionSections = [
       "Revision video links",
       "Next lesson preparation notes"
     ],
-    href: "/progress-tracker"
+    href: "/progress-tracker?from=dashboard"
   }
 ];
 
