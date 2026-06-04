@@ -28,13 +28,7 @@ type NearbyInstructorGoogleMapProps = {
 const FALLBACK_CENTER = { lat: 51.6538, lng: -0.1997 };
 const FIVE_MILES_IN_METRES = 8047;
 const INSTRUCTOR_BEARINGS = [210, 52, 126, 300, 15];
-const MIN_PROFESSIONAL_MAP_ZOOM = 10;
-const LOCAL_MAP_RESTRICTION = {
-  north: 52.25,
-  south: 51.1,
-  west: -0.8,
-  east: 0.35
-};
+const MIN_WORLD_MAP_ZOOM = 2;
 
 function googleWindow() {
   if (typeof window === "undefined") {
@@ -215,7 +209,7 @@ export function NearbyInstructorGoogleMap({
         mapRef.current = new google.maps.Map(mapElementRef.current, {
           center,
           zoom: 13,
-          minZoom: MIN_PROFESSIONAL_MAP_ZOOM,
+          minZoom: MIN_WORLD_MAP_ZOOM,
           backgroundColor: "#eef2ef",
           disableDefaultUI: false,
           mapTypeControl: false,
@@ -223,10 +217,6 @@ export function NearbyInstructorGoogleMap({
           fullscreenControl: true,
           clickableIcons: true,
           gestureHandling: "greedy",
-          restriction: {
-            latLngBounds: LOCAL_MAP_RESTRICTION,
-            strictBounds: false
-          },
           styles: [
             {
               featureType: "poi.business",
@@ -345,9 +335,6 @@ export function NearbyInstructorGoogleMap({
     const hasBounds = typeof bounds.isEmpty === "function" ? !bounds.isEmpty() : true;
     if (!hasFittedBoundsRef.current && hasBounds) {
       mapRef.current.fitBounds(bounds, 72);
-      if (mapRef.current.getZoom?.() < MIN_PROFESSIONAL_MAP_ZOOM) {
-        mapRef.current.setZoom(MIN_PROFESSIONAL_MAP_ZOOM);
-      }
       hasFittedBoundsRef.current = true;
     }
   }, [center.lat, center.lng, instructorPositions]);
