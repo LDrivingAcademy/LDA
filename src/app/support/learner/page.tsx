@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpenCheck, CalendarCheck, CircleHelp, Clock3, CreditCard, ListChecks, MapPin } from "lucide-react";
+import { ArrowLeft, BookOpenCheck, CalendarCheck, CircleHelp, Clock3, CreditCard, ListChecks, MapPin, ShieldAlert } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { LanguageSelector } from "@/components/language-selector";
 import { LearnerSupportAssistant } from "@/components/learner-support-assistant";
@@ -10,13 +10,14 @@ import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-li
 const learnerActions = [
   { title: "Book lessons", body: "Find instructors, compare prices, and continue to the normal learner booking flow.", href: "/auth/login?role=learner", cta: "Start booking", icon: CalendarCheck },
   { title: "Manage bookings", body: "View upcoming, completed, cancelled, and rescheduled lessons from your learner dashboard.", href: "/dashboard", cta: "Open dashboard", icon: ListChecks },
-  { title: "Payment help", body: "Check confirmation references, failed payments, refunds, and duplicate charge questions.", href: "/cancellation-policy", cta: "Payment policy", icon: CreditCard }
+  { title: "Payment help", body: "Check confirmation references, failed payments, refunds, and duplicate charge questions.", href: "/cancellation-policy", cta: "Payment policy", icon: CreditCard },
+  { title: "Report off-platform request", body: "Tell LDA if an instructor asks you to pay by cash, bank transfer, private link, or book outside your LDA dashboard.", href: "mailto:info@ldrivingacademy.co.uk?subject=Report%20off-platform%20booking%20request", cta: "Report request", icon: ShieldAlert }
 ];
 
 const supportTopics = [
   { icon: Clock3, title: "Reschedule or cancel", body: "Use your dashboard first. If the lesson is soon, contact support with your booking reference." },
   { icon: MapPin, title: "Pickup postcode", body: "Keep pickup details accurate so instructors can confirm travel time and arrival tracking." },
-  { icon: CreditCard, title: "Payment confirmation", body: "Never send card numbers. Share only the payment email, amount, and LDA confirmation number." },
+  { icon: CreditCard, title: "Payment confirmation", body: "Never send card numbers or pay privately. Share only the payment email, amount, and LDA confirmation number." },
   { icon: CircleHelp, title: "Urgent issues", body: "If the lesson is today, your instructor is late, or payment is stuck, use the assistant and mark it urgent." }
 ];
 
@@ -75,7 +76,7 @@ export default async function LearnerSupportPage({ searchParams }: LearnerSuppor
 
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-black tracking-normal">Learner actions</h2>
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
+          <div className="mt-8 grid gap-5 lg:grid-cols-4">
             {learnerActions.map((action) => {
               const Icon = action.icon;
               return (
