@@ -81,8 +81,19 @@ const safetyItems = [
 
 export default async function HomePage() {
   const account = await getHeaderAccountSummary();
-  const learnerEntryHref = account ? account.dashboardHref : "/auth/login?role=learner";
-  const learnerSignUpHref = account ? account.dashboardHref : "/auth/sign-up?role=learner";
+  const learnerEntryHref =
+    account?.role === "learner"
+      ? "/learner-dashboard"
+      : account?.role === "instructor"
+        ? "/auth/sign-up?role=learner&message=You are signed in as an instructor. Sign up for a learner account with a different email to use learner features."
+        : "/auth/login?role=learner";
+  const instructorEntryHref =
+    account?.role === "instructor"
+      ? "/instructor-dashboard"
+      : account?.role === "learner"
+        ? "/auth/sign-up?role=instructor&message=You are signed in as a learner. Sign up for an instructor account with a different email, or request a learner-to-instructor transfer."
+        : "/instructor";
+  const learnerSignUpHref = account?.role === "learner" ? "/learner-dashboard" : "/auth/sign-up?role=learner";
 
   return (
     <>
@@ -92,7 +103,7 @@ export default async function HomePage() {
             <Brand size="home" />
             <nav className="hidden items-center gap-4 xl:flex">
               <Link href={learnerEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
-              <Link href="/instructor" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
+              <Link href={instructorEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="#discover" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
               <Link href="#safety" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
               <Link href="/about" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
@@ -206,7 +217,7 @@ export default async function HomePage() {
             <h2 className="text-4xl font-black tracking-normal sm:text-5xl">Discover what you can do with LDA</h2>
             <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {suggestionCards.map((card) => (
-                <Link key={card.title} href={card.href.startsWith("/auth/login?role=learner") ? learnerEntryHref : card.href} className="group grid min-h-[210px] gap-5 overflow-hidden rounded bg-zinc-100 p-5 text-black hover:bg-zinc-200 sm:grid-cols-[1fr_150px] sm:p-6">
+                <Link key={card.title} href={card.href.startsWith("/auth/login?role=learner") ? learnerEntryHref : card.href === "/instructor" ? instructorEntryHref : card.href} className="group grid min-h-[210px] gap-5 overflow-hidden rounded bg-zinc-100 p-5 text-black hover:bg-zinc-200 sm:grid-cols-[1fr_150px] sm:p-6">
                   <div className="flex flex-col items-start">
                     <h3 className="text-2xl font-black">{card.title}</h3>
                     <p className="mt-4 max-w-xs text-base leading-7 text-zinc-800">{card.body}</p>
