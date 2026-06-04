@@ -5,7 +5,6 @@ import {
   CalendarDays,
   CarFront,
   CheckCircle2,
-  ChevronDown,
   Headphones,
   HelpCircle,
   Lock,
@@ -135,14 +134,14 @@ export default async function HomePage() {
           <div className="flex min-w-0 items-center gap-9">
             <Brand size="home" />
             <nav className="hidden items-center gap-7 xl:flex">
-              <Link href={learnerEntryHref} className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">
-                Learner <ChevronDown size={14} />
+              <Link href={learnerEntryHref} className="rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">
+                Learner
               </Link>
-              <Link href={instructorEntryHref} className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">
-                Instructor <ChevronDown size={14} />
+              <Link href={instructorEntryHref} className="rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">
+                Instructor
               </Link>
-              <Link href="#services" className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">
-                Services <ChevronDown size={14} />
+              <Link href="#services" className="rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">
+                Services
               </Link>
               <Link href="/safety" className="rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">Safety</Link>
               <Link href="/about" className="rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">About</Link>
