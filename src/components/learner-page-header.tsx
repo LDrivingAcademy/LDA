@@ -2,14 +2,22 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Brand } from "@/components/brand";
 
-export function LearnerPageHeader({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
+type LearnerPageHeaderProps = {
+  eyebrow: string;
+  title: string;
+  body: string;
+  backHref?: string;
+  backLabel?: string;
+};
+
+export function LearnerPageHeader({ eyebrow, title, body, backHref = "/", backLabel = "Back to home page" }: LearnerPageHeaderProps) {
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
         <div className="flex w-full items-center justify-between gap-5 px-[15px] py-4">
           <Brand />
-          <Link href="/dashboard" className="lda-pill lda-pill-sm">
-            <ArrowLeft size={17} /> Back to dashboard
+          <Link href={backHref} className="lda-pill lda-pill-sm">
+            <ArrowLeft size={17} /> {backLabel}
           </Link>
         </div>
       </header>
