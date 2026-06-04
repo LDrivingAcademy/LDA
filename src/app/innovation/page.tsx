@@ -18,7 +18,39 @@ const operatingLayers = [
   "Book: choose slots, protect payment evidence, confirm pickup, and keep every booking reference inside LDA.",
   "Learn: track lesson notes, weak skills, next focus, recommended videos, progress updates, and pass readiness.",
   "Run: give instructors a calendar, availability controls, client records, payout visibility, retention signals, and support evidence.",
-  "Protect: detect off-platform requests, preserve cancellation evidence, reduce leakage, and keep learner-instructor trust accountable."
+  "Protect: detect off-platform requests, preserve cancellation evidence, reduce leakage, and keep learner-instructor trust accountable.",
+  "Evolve: monitor quality, catch faults, retest fixes, and keep the platform current as learner and instructor expectations move."
+];
+
+const reliabilityStandards = [
+  {
+    title: "Instant clarity",
+    body: "Every important state should be obvious: who is teaching, where the lesson is, what it costs, what is booked, what is pending, and what happens next.",
+    icon: RadioTower
+  },
+  {
+    title: "Operational trust",
+    body: "Bookings, payments, cancellations, progress records, support events, and instructor actions should leave a clean evidence trail inside LDA.",
+    icon: ShieldCheck
+  },
+  {
+    title: "One-tap workflows",
+    body: "Learners and instructors should move through common jobs with as little friction as possible: book, confirm, track, update, cancel, report, and rebook.",
+    icon: CheckCircle2
+  },
+  {
+    title: "Always-current product",
+    body: "The product should keep improving through monitoring, bug reports, deployment checks, user feedback, and regular relevance reviews.",
+    icon: Sparkles
+  }
+];
+
+const qualityLoop = [
+  "Monitor the live website, local checks, deployment status, and user-reported friction.",
+  "Report issues clearly with the affected page, flow, likely cause, and user impact.",
+  "Fix the fault without changing the intended learner or instructor flow.",
+  "Retest the page and any connected flows until the issue is closed.",
+  "Use every fix to harden the platform standard so the same class of issue is less likely to return."
 ];
 
 const moatModules = [
@@ -59,7 +91,8 @@ const deliveryPhases = [
   "Phase 2: Add in-app messaging with off-platform phrase warnings, booking-safe templates, and learner report shortcuts.",
   "Phase 3: Add instructor growth intelligence: retention, conversion, ranking health, demand heatmaps, cancellation quality, and repeat-booking prompts.",
   "Phase 4: Build mobile-first learner and instructor apps around live lessons, notifications, payments, progress, documents, and availability.",
-  "Phase 5: Launch advanced AI support for lesson planning, weak-skill detection, instructor recommendations, owner risk monitoring, and marketplace forecasting."
+  "Phase 5: Launch advanced AI support for lesson planning, weak-skill detection, instructor recommendations, owner risk monitoring, and marketplace forecasting.",
+  "Phase 6: Keep LDA future-proof through AutoGuard-style monitoring, weekly quality passes, deployment checks, accessibility reviews, and product relevance updates."
 ];
 
 export default function InnovationPage() {
@@ -78,7 +111,7 @@ export default function InnovationPage() {
               The one-stop driving platform learners and instructors should not want to live without.
             </h1>
             <p className="mt-5 max-w-4xl text-lg font-semibold leading-8 text-zinc-300">
-              LDA is being built as a high-performance operating system for learning to drive and running a driving-instructor business: matching, booking, payment, progress, safety, live tracking, support, ranking, retention, and marketplace protection in one place.
+              LDA is being built as a high-performance operating system for learning to drive and running a driving-instructor business: matching, booking, payment, progress, safety, live tracking, support, ranking, retention, quality monitoring, and marketplace protection in one place.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link href="/auth/sign-up?role=learner" className="lda-pill">
@@ -96,17 +129,41 @@ export default function InnovationPage() {
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <div className="text-sm font-black uppercase text-brand">The LDA stack</div>
-            <h2 className="mt-3 text-4xl font-black tracking-normal">Find. Book. Learn. Run. Protect.</h2>
+            <h2 className="mt-3 text-4xl font-black tracking-normal">Find. Book. Learn. Run. Protect. Evolve.</h2>
             <p className="mt-4 text-lg leading-8 text-zinc-700">
-              The goal is not to copy a driving school. The goal is to build the connected system around everything that happens before, during, and after every lesson.
+              The goal is not to copy a driving school. The goal is to build the connected system around everything that happens before, during, and after every lesson, then keep improving it so it stays relevant.
             </p>
           </div>
-          <div className="mt-8 grid gap-3 lg:grid-cols-5">
+          <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {operatingLayers.map((layer) => (
               <div key={layer} className="rounded border border-zinc-200 bg-white p-4 text-sm font-black leading-6 shadow-sm">
                 {layer}
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-black text-white">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <div className="text-sm font-black uppercase text-red-200">Iconic product standard</div>
+            <h2 className="mt-3 text-4xl font-black tracking-normal">Ride-hailing grade clarity for driving lessons.</h2>
+            <p className="mt-4 text-lg leading-8 text-zinc-300">
+              The platform should feel calm, fast, obvious, and dependable. Learners should know what is happening. Instructors should know what to do next. LDA should quietly handle the operational detail behind both sides.
+            </p>
+          </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {reliabilityStandards.map((standard) => {
+              const Icon = standard.icon;
+              return (
+                <article key={standard.title} className="rounded border border-zinc-800 bg-zinc-950 p-5 shadow-sm">
+                  <Icon className="text-brand" />
+                  <h3 className="mt-4 text-xl font-black">{standard.title}</h3>
+                  <p className="mt-3 text-sm font-semibold leading-6 text-zinc-300">{standard.body}</p>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -164,16 +221,35 @@ export default function InnovationPage() {
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
           <div>
-            <div className="text-sm font-black uppercase text-brand">Build standard</div>
-            <h2 className="mt-3 text-3xl font-black">Professional, defensible, and hard to copy.</h2>
+            <div className="text-sm font-black uppercase text-brand">Quality loop</div>
+            <h2 className="mt-3 text-3xl font-black">Monitor, report, fix, retest, improve.</h2>
             <p className="mt-4 text-sm font-semibold leading-6 text-zinc-700">
-              Every feature should either increase learner trust, reduce instructor admin, improve lesson outcomes, protect platform revenue, or make LDA data more useful over time.
+              LDA should stay future-proof by treating reliability as a product feature, not an afterthought. Every issue found should become a tighter system standard.
             </p>
           </div>
           <div className="grid gap-3">
-            {deliveryPhases.map((phase) => (
-              <div key={phase} className="rounded border border-zinc-200 bg-white p-4 text-sm font-black leading-6 shadow-sm">{phase}</div>
+            {qualityLoop.map((step) => (
+              <div key={step} className="rounded border border-zinc-200 bg-white p-4 text-sm font-black leading-6 shadow-sm">{step}</div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-zinc-200 bg-zinc-50">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
+            <div>
+              <div className="text-sm font-black uppercase text-brand">Build standard</div>
+              <h2 className="mt-3 text-3xl font-black">Professional, defensible, and hard to copy.</h2>
+              <p className="mt-4 text-sm font-semibold leading-6 text-zinc-700">
+                Every feature should either increase learner trust, reduce instructor admin, improve lesson outcomes, protect platform revenue, or make LDA data more useful over time.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              {deliveryPhases.map((phase) => (
+                <div key={phase} className="rounded border border-zinc-200 bg-white p-4 text-sm font-black leading-6 shadow-sm">{phase}</div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
