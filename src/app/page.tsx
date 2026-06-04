@@ -212,8 +212,8 @@ export default async function HomePage() {
 
 function HeaderAccountBlock({ account, compact = false }: { account: HeaderAccountSummary; compact?: boolean }) {
   return (
-    <div className={`min-w-0 text-right leading-tight ${compact ? "max-w-[128px]" : "max-w-[190px]"}`}>
-      <div className="truncate text-sm font-black text-white">{account.name}</div>
+    <div className={`flex min-w-0 flex-col items-center text-center leading-tight ${compact ? "max-w-[128px]" : "max-w-[190px]"}`}>
+      <div className="max-w-full truncate text-sm font-black text-white">{account.name}</div>
       <Link href={account.dashboardHref} className="mt-1 inline-flex max-w-full items-center justify-center truncate rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 transition hover:border-red-500/80 hover:text-white hover:ring-2 hover:ring-brand">
         {account.subscriptionLabel}
       </Link>
