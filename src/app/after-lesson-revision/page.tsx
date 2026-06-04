@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BookOpenCheck, CheckCircle2, Video } from "lucide-react";
 import { LearnerPageHeader } from "@/components/learner-page-header";
+import { getPageBackLink, type PageSourceSearchParams, withDashboardSource } from "@/lib/page-back-link";
 
 const revisionItems = [
   "Instructor notes from completed lessons",
@@ -15,13 +16,21 @@ const lessonNotes = [
   { title: "Meeting traffic", status: "Next focus", note: "Prepare for judgement gaps and parked-car priority decisions." }
 ];
 
-export default function AfterLessonRevisionPage() {
+type AfterLessonRevisionPageProps = {
+  searchParams?: PageSourceSearchParams;
+};
+
+export default async function AfterLessonRevisionPage({ searchParams }: AfterLessonRevisionPageProps) {
+  const { backHref, backLabel, fromDashboard } = await getPageBackLink(searchParams);
+
   return (
     <main className="min-h-screen bg-white text-black">
       <LearnerPageHeader
         eyebrow="After lesson revision"
         title="Revise what your instructor covered."
         body="This page is focused only on post-lesson notes, completed skills, and videos your instructor wants you to review before the next lesson."
+        backHref={backHref}
+        backLabel={backLabel}
       />
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
         <div className="grid gap-4">
@@ -46,7 +55,7 @@ export default function AfterLessonRevisionPage() {
               </div>
             ))}
           </div>
-          <Link href="/roadworthy" className="lda-pill lda-pill-sm mt-5">
+          <Link href={withDashboardSource("/roadworthy", fromDashboard)} className="lda-pill lda-pill-sm mt-5">
             <Video size={17} /> Open tips directory
           </Link>
         </aside>
