@@ -132,9 +132,6 @@ export default function ContactPage() {
                 The quickest answers come when support can see exactly which booking, account, or payment you mean.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <a href="mailto:info@ldrivingacademy.co.uk?subject=LDA%20support%20request" className="lda-pill">
-                  Start email
-                </a>
                 <Link href="/cancellation-policy" className="lda-pill">
                   View policies
                 </Link>
