@@ -2,9 +2,12 @@ import {
   isRateLimited,
   jsonNoStore,
   rateLimitResponse,
+  getAppOrigin,
+  readJsonBody,
   safeAmountPence,
   safeCurrency,
   safeEmail,
+  safeStripeConnectedAccountId,
   safeText
 } from "@/lib/security";
 import { applyStripeCheckoutPaymentMethods } from "@/lib/stripe-checkout";
@@ -26,39 +29,18 @@ function normalisePaymentPreference(value?: string) {
     .replaceAll(" ", "_");
 }
 
-function normaliseAppUrl(request: Request) {
-  const configuredUrl = process.env.APP_WEBSITE_URL?.trim();
-  const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
-  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
-  const candidates = [
-    configuredUrl,
-    configuredUrl && !configuredUrl.startsWith("http") ? `https://${configuredUrl}` : undefined,
-    forwardedHost ? `${forwardedProto}://${forwardedHost}` : undefined,
-    "https://ldrivingacademy.co.uk"
-  ];
-
-  for (const candidate of candidates) {
-    if (!candidate) continue;
-
-    try {
-      const url = new URL(candidate);
-      return url.origin;
-    } catch {
-      // Try the next candidate. A malformed APP_WEBSITE_URL should not block checkout.
-    }
-  }
-
-  return "https://ldrivingacademy.co.uk";
-}
-
 export async function POST(request: Request) {
   if (isRateLimited(request, "booking-checkout", 20)) {
     return rateLimitResponse();
   }
 
-  const body = (await request.json()) as CheckoutRequest;
+  const body = await readJsonBody<CheckoutRequest>(request);
+  if (!body) {
+    return jsonNoStore({ error: "Invalid checkout request." }, { status: 400 });
+  }
+
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-  const appUrl = normaliseAppUrl(request);
+  const appUrl = getAppOrigin(request);
   const currency = safeCurrency(process.env.STRIPE_DEFAULT_CURRENCY, "gbp");
   const amountPence = safeAmountPence(body.amountPence, 4200, 1000, 30000);
   const instructorName = safeText(body.instructorName, "your driving instructor", 80);
@@ -81,7 +63,12 @@ export async function POST(request: Request) {
     success_url: `${appUrl}/learner-dashboard?payment=success&booking=${encodeURIComponent(bookingId)}`,
     cancel_url: `${appUrl}/learner-dashboard?payment=cancelled&booking=${encodeURIComponent(bookingId)}`,
     "metadata[booking_id]": bookingId,
+    "metadata[lda_protected_booking]": "true",
+    "metadata[platform_policy_version]": "anti_circumvention_launch",
     "metadata[payment_preference]": paymentPreference,
+    "payment_intent_data[metadata][booking_id]": bookingId,
+    "payment_intent_data[metadata][lda_protected_booking]": "true",
+    "payment_intent_data[metadata][platform_policy_version]": "anti_circumvention_launch",
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": currency,
     "line_items[0][price_data][unit_amount]": String(amountPence),
@@ -94,8 +81,9 @@ export async function POST(request: Request) {
 
   applyStripeCheckoutPaymentMethods(params);
 
-  if (body.stripeConnectedAccountId) {
-    params.set("payment_intent_data[transfer_data][destination]", body.stripeConnectedAccountId);
+  const connectedAccountId = safeStripeConnectedAccountId(body.stripeConnectedAccountId);
+  if (connectedAccountId) {
+    params.set("payment_intent_data[transfer_data][destination]", connectedAccountId);
     params.set("payment_intent_data[application_fee_amount]", String(applicationFeeAmount));
   }
 
