@@ -50,6 +50,13 @@ const suggestionCards: {
     cta: "Details"
   },
   {
+    title: "Innovation OS",
+    body: "See how LDA is becoming the one-stop driving platform for matching, booking, progress, safety, payments, and instructor growth.",
+    href: "/innovation",
+    image: "match",
+    cta: "Explore LDA OS"
+  },
+  {
     title: "Instructor",
     body: "Apply as an ADI/PDI, upload verification, set availability, and manage paid bookings.",
     href: "/instructor",
@@ -105,6 +112,7 @@ export default async function HomePage() {
               <Link href={learnerEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
               <Link href={instructorEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
               <Link href="#discover" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
+              <Link href="/innovation" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Innovation</Link>
               <Link href="#safety" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
               <Link href="/about" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
                 About
@@ -165,12 +173,23 @@ export default async function HomePage() {
         <section className="bg-white">
           <div className="mx-auto grid max-w-7xl items-stretch gap-8 px-4 pb-0 pt-7 sm:px-6 lg:grid-cols-[560px_1fr] lg:px-8 lg:pb-0 lg:pt-10">
             <div className="flex flex-col py-2 lg:pt-8">
+              <div className="mb-4 inline-flex w-fit items-center gap-2 rounded border border-red-500/30 bg-red-50 px-3 py-2 text-sm font-black text-brand">
+                <Sparkles size={16} /> Intelligent Lesson OS
+              </div>
               <h1 className="max-w-xl text-5xl font-black tracking-normal sm:text-6xl">
-                Learn to drive with LDA
+                LDA is the one-stop driving platform.
               </h1>
               <p className="mt-5 max-w-lg text-lg leading-8 text-zinc-700">
-                Book verified local driving instructors, compare upfront prices, choose a lesson time, and pay online in a few clear steps.
+                Learn, book, pay, track, progress, message support, and build an instructor business in one connected high-tech system.
               </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/innovation" className="lda-pill">
+                  Explore LDA OS
+                </Link>
+                <Link href={learnerEntryHref} className="lda-pill bg-black text-white hover:bg-zinc-800">
+                  Start learning
+                </Link>
+              </div>
               <div className="mt-auto hidden pt-8 lg:block">
                 <OnDemandLessonCard futureLessonsHref={learnerSignUpHref} />
               </div>
