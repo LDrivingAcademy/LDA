@@ -2,18 +2,14 @@ import { Sparkles } from "lucide-react";
 import { PageTopBar } from "@/components/page-top-bar";
 import { SiteFooter } from "@/components/site-footer";
 import { SmartMatchExperience } from "@/components/smart-match-experience";
+import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 
 type SmartMatchPageProps = {
-  searchParams?: Promise<{
-    from?: string;
-  }>;
+  searchParams?: PageSourceSearchParams;
 };
 
 export default async function SmartMatchPage({ searchParams }: SmartMatchPageProps) {
-  const params = await searchParams;
-  const fromDashboard = params?.from === "dashboard";
-  const backHref = fromDashboard ? "/learner-dashboard" : "/";
-  const backLabel = fromDashboard ? "Back to dashboard" : "Back to homepage";
+  const { backHref, backLabel } = await getPageBackLink(searchParams);
 
   return (
     <>
