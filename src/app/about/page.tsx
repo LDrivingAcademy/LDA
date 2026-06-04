@@ -22,8 +22,8 @@ const marketplaceCards = [
     title: "For instructors",
     body: "Apply as an ADI/PDI, upload verification, set availability, manage bookings, and track payout status.",
     icon: BadgeCheck,
-    href: "/instructor",
-    cta: "Instructor area"
+    href: "/auth/login?role=instructor",
+    cta: "Instructor login"
   },
   {
     title: "For trust",
