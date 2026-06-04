@@ -64,6 +64,9 @@ const lessonPreferenceOptions = [
   { value: "pre-lesson written plan", label: "Plan before lesson" }
 ];
 
+const selectedOptionClass = "border-brand bg-white text-black ring-2 ring-brand";
+const unselectedOptionClass = "border-zinc-200 bg-white text-black hover:border-brand/70";
+
 export function SmartMatchExperience() {
   const [input, setInput] = useState<SmartMatchInput>({
     postcode: "EN5",
@@ -170,7 +173,7 @@ export function SmartMatchExperience() {
             <div className="text-xs font-black uppercase text-zinc-400">Support preferences</div>
             <div className="mt-2 flex flex-wrap gap-2">
               {supportOptions.map((option) => (
-                <button key={option.value} type="button" onClick={() => toggleArray("learningSupport", option.value)} className={`rounded-full border px-3 py-2 text-xs font-black ${input.learningSupport?.includes(option.value) ? "border-brand bg-brand text-white" : "border-zinc-800 bg-black text-zinc-300"}`}>
+                <button key={option.value} type="button" onClick={() => toggleArray("learningSupport", option.value)} className={`rounded-full border px-3 py-2 text-xs font-black transition ${input.learningSupport?.includes(option.value) ? selectedOptionClass : unselectedOptionClass}`}>
                   {option.label}
                 </button>
               ))}
@@ -180,7 +183,7 @@ export function SmartMatchExperience() {
             <div className="text-xs font-black uppercase text-zinc-400">How should lessons be adapted?</div>
             <div className="mt-2 flex flex-wrap gap-2">
               {lessonPreferenceOptions.map((option) => (
-                <button key={option.value} type="button" onClick={() => togglePreference(option.value)} className={`rounded-full border px-3 py-2 text-xs font-black ${input.lessonPreferences?.includes(option.value) ? "border-brand bg-brand text-white" : "border-zinc-800 bg-black text-zinc-300"}`}>
+                <button key={option.value} type="button" onClick={() => togglePreference(option.value)} className={`rounded-full border px-3 py-2 text-xs font-black transition ${input.lessonPreferences?.includes(option.value) ? selectedOptionClass : unselectedOptionClass}`}>
                   {option.label}
                 </button>
               ))}
@@ -192,7 +195,7 @@ export function SmartMatchExperience() {
               {goalOptions.map((option) => {
                 const Icon = option.icon;
                 return (
-                  <button key={option.value} type="button" onClick={() => toggleArray("goals", option.value)} className={`inline-flex items-center gap-2 rounded border px-3 py-2 text-xs font-black ${input.goals?.includes(option.value) ? "border-brand bg-brand text-white" : "border-zinc-800 bg-black text-zinc-300"}`}>
+                  <button key={option.value} type="button" onClick={() => toggleArray("goals", option.value)} className={`inline-flex items-center gap-2 rounded border px-3 py-2 text-xs font-black transition ${input.goals?.includes(option.value) ? selectedOptionClass : unselectedOptionClass}`}>
                     <Icon size={15} /> {option.label}
                   </button>
                 );
