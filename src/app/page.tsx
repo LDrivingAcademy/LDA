@@ -189,10 +189,10 @@ export default async function HomePage() {
                 Find expert instructors, book lessons that fit your schedule, and learn with confidence.
               </p>
               <div className="mt-9 grid gap-4 sm:grid-cols-2">
-                <Link href={learnerEntryHref} className="inline-flex min-h-16 items-center justify-center gap-4 rounded bg-brand px-6 py-4 text-base font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 hover:ring-2 hover:ring-red-300">
+                <Link href={learnerEntryHref} className="inline-flex min-h-16 items-center justify-center gap-4 rounded-full bg-brand px-6 py-4 text-base font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 hover:ring-2 hover:ring-red-300">
                   <Search size={23} /> Find instructors <ArrowRight size={22} />
                 </Link>
-                <Link href={bookOnDemandHref} className="inline-flex min-h-16 items-center justify-center gap-4 rounded border border-zinc-400 bg-white px-6 py-4 text-base font-black text-black transition hover:border-brand hover:ring-2 hover:ring-brand/50">
+                <Link href={bookOnDemandHref} className="inline-flex min-h-16 items-center justify-center gap-4 rounded-full border border-zinc-400 bg-white px-6 py-4 text-base font-black text-black transition hover:border-brand hover:ring-2 hover:ring-brand/50">
                   <CalendarCheck size={23} /> Book on-demand
                 </Link>
               </div>
