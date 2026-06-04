@@ -143,9 +143,9 @@ export default async function DashboardPage() {
       </header>
 
       <section className="bg-black text-white">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-black tracking-normal sm:text-5xl">
-            {isInstructor ? "LDA instructor dashboard" : "LDA learner dashboard"}
+        <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-black tracking-normal sm:text-4xl">
+            {isInstructor ? "LDA Instructor Dashboard" : "LDA Learner Dashboard"}
           </h1>
         </div>
       </section>
