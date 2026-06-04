@@ -1,16 +1,20 @@
 import Link from "next/link";
 import {
+  ArrowRight,
   CalendarCheck,
-  CarFront,
-  Clock3,
+  CalendarDays,
+  CheckCircle2,
+  ChevronDown,
+  Headphones,
   HelpCircle,
-  RadioTower,
-  Share2,
-  Sparkles,
-  UsersRound
+  Lock,
+  MapPin,
+  MessageSquare,
+  Search,
+  ShieldCheck,
+  Star
 } from "lucide-react";
 import { Brand } from "@/components/brand";
-import { FeedbackButton } from "@/components/feedback-button";
 import { LanguageSelector } from "@/components/language-selector";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
@@ -18,57 +22,35 @@ import { getHeaderAccountSummary, type HeaderAccountSummary } from "@/lib/curren
 
 export const dynamic = "force-dynamic";
 
-type CardVisualType = "car" | "calendar" | "match" | "instructor" | "tracking" | "social";
+const heroTrustPoints = ["DVSA-approved instructors", "Secure payments", "Flexible scheduling"];
 
-const suggestionCards: {
-  title: string;
-  body: string;
-  href: string;
-  image: CardVisualType;
-  cta: string;
-}[] = [
+const platformHighlights = [
   {
-    title: "Find instructors",
-    body: "Compare verified local instructors by price, car, transmission, distance, teaching style, and availability.",
-    href: "/auth/login?role=learner",
-    image: "car",
-    cta: "Find instructors"
+    title: "DVSA-approved instructors",
+    body: "Learn with qualified, verified instructors ready for UK learner journeys.",
+    icon: ShieldCheck
   },
   {
-    title: "Plan lessons",
-    body: "Reserve clear time slots with upfront price, pickup postcode, booking reference, and cancellation terms.",
-    href: "/auth/login?role=learner",
-    image: "calendar",
-    cta: "Plan a lesson"
+    title: "Secure & flexible payments",
+    body: "Pay securely online with clear pricing and platform booking records.",
+    icon: Lock
   },
   {
-    title: "Smart Match",
-    body: "Let LDA match around confidence, support needs, reviews, skills, price, location, and real availability.",
-    href: "/smart-match",
-    image: "match",
-    cta: "View SmartMatch"
+    title: "Lessons on your terms",
+    body: "Book on-demand or schedule future lessons around your availability.",
+    icon: CalendarDays
   },
   {
-    title: "Become an instructor",
-    body: "Apply as an ADI/PDI, upload verification, set availability, manage bookings, and build repeat learner demand.",
-    href: "/instructor",
-    image: "instructor",
-    cta: "Apply now"
-  },
-  {
-    title: "Live tracking",
-    body: "Preview learner confidence tools for distance, ETA, instructor arrival, pickup visibility, and accepted lessons.",
-    href: "/tracking",
-    image: "tracking",
-    cta: "Track lesson"
-  },
-  {
-    title: "Subscribe & socials",
-    body: "Follow LDA for learner tips, instructor updates, platform releases, deals, and launch news.",
-    href: "/social",
-    image: "social",
-    cta: "Follow LDA"
+    title: "Support when you need it",
+    body: "Get help with bookings, payments, verification, and account questions.",
+    icon: Headphones
   }
+];
+
+const matchHighlights = [
+  { label: "Best local matches", icon: MapPin },
+  { label: "Top-rated instructors", icon: Star },
+  { label: "Lessons that fit your schedule", icon: CalendarCheck }
 ];
 
 export default async function HomePage() {
@@ -90,23 +72,27 @@ export default async function HomePage() {
   return (
     <>
       <header className="sticky top-0 z-30 bg-black text-white">
-        <div className="flex w-full items-center justify-between gap-8 px-[15px] py-4">
-          <div className="flex min-w-0 items-center gap-5">
+        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-10">
+          <div className="flex min-w-0 items-center gap-9">
             <Brand size="home" />
-            <nav className="hidden items-center gap-4 xl:flex">
-              <Link href={learnerEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
-              <Link href={instructorEntryHref} className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Instructor</Link>
-              <Link href="#discover" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
-              <Link href="/safety" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Safety</Link>
-              <Link href="/about" className="rounded-full px-2.5 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
-                About
+            <nav className="hidden items-center gap-7 xl:flex">
+              <Link href={learnerEntryHref} className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">
+                Learner <ChevronDown size={14} />
               </Link>
+              <Link href={instructorEntryHref} className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">
+                Instructor <ChevronDown size={14} />
+              </Link>
+              <Link href="#services" className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">
+                Services <ChevronDown size={14} />
+              </Link>
+              <Link href="/safety" className="rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">Safety</Link>
+              <Link href="/about" className="rounded-full px-2 py-2 text-sm font-bold text-white hover:ring-2 hover:ring-brand">About</Link>
             </nav>
           </div>
           <div className="ml-auto hidden items-center justify-end gap-7 xl:flex">
             <LanguageSelector />
-            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">
-              <HelpCircle size={17} /> Help
+            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 whitespace-nowrap text-sm font-bold text-white hover:ring-2 hover:ring-brand">
+              <HelpCircle size={18} /> Help
             </Link>
             {account ? (
               <>
@@ -115,8 +101,8 @@ export default async function HomePage() {
               </>
             ) : (
               <>
-                <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand">Log in</Link>
-                <Link href="/auth/sign-up?role=learner" className="rounded-full bg-brand px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-red-300">Sign up</Link>
+                <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 whitespace-nowrap text-sm font-bold text-white hover:ring-2 hover:ring-brand">Log in</Link>
+                <Link href="/auth/sign-up?role=learner" className="rounded-full border border-red-500/60 bg-red-600 px-4 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-red-300">Sign up</Link>
               </>
             )}
           </div>
@@ -124,10 +110,7 @@ export default async function HomePage() {
             {account ? (
               <HeaderAccountBlock account={account} compact />
             ) : (
-              <>
-                <Link href="/auth/login?role=learner" className="hidden rounded-full px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-brand sm:inline-flex">Log in</Link>
-                <Link href="/auth/sign-up?role=learner" className="rounded-full bg-brand px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-red-300">Sign up</Link>
-              </>
+              <Link href="/auth/sign-up?role=learner" className="rounded-full bg-brand px-3 py-2 whitespace-nowrap text-sm font-black text-white hover:ring-2 hover:ring-red-300">Sign up</Link>
             )}
             <MainMenu account={account} />
           </div>
@@ -136,75 +119,115 @@ export default async function HomePage() {
 
       <main className="bg-white text-black">
         <section className="bg-white">
-          <div className="mx-auto grid max-w-7xl items-stretch gap-8 px-4 pb-0 pt-7 sm:px-6 lg:grid-cols-[560px_1fr] lg:px-8 lg:pb-0 lg:pt-10">
-            <div className="flex flex-col py-2 lg:pt-8">
-              <h1 className="max-w-xl text-5xl font-black tracking-normal sm:text-6xl">
-                Book driving lessons with LDA.
+          <div className="mx-auto grid max-w-[1500px] items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-10 lg:py-14">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-xs font-black uppercase tracking-normal text-zinc-800 shadow-sm ring-1 ring-zinc-200">
+                <ShieldCheck size={16} /> Trusted by learners across the UK
+              </div>
+              <h1 className="mt-8 max-w-3xl text-5xl font-black leading-[1.05] tracking-normal text-black sm:text-6xl lg:text-7xl">
+                Book driving lessons with <span className="text-brand">LDA.</span>
               </h1>
-              <p className="mt-5 max-w-lg text-lg font-black leading-8 text-zinc-800">
-                Find instructors. Book lessons. Pay securely.
+              <p className="mt-7 max-w-xl text-xl font-semibold leading-8 text-zinc-700">
+                Find expert instructors, book lessons that fit your schedule, and learn with confidence.
               </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link href={learnerEntryHref} className="lda-pill">
-                  Find instructors
+              <div className="mt-9 grid gap-4 sm:grid-cols-2">
+                <Link href={learnerEntryHref} className="inline-flex min-h-16 items-center justify-center gap-4 rounded bg-brand px-6 py-4 text-base font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 hover:ring-2 hover:ring-red-300">
+                  <Search size={23} /> Find instructors <ArrowRight size={22} />
+                </Link>
+                <Link href="/lesson-now" className="inline-flex min-h-16 items-center justify-center gap-4 rounded border border-zinc-400 bg-white px-6 py-4 text-base font-black text-black transition hover:border-brand hover:ring-2 hover:ring-brand/50">
+                  <CalendarCheck size={23} /> Book on-demand
                 </Link>
               </div>
-              <div className="mt-auto hidden pt-8 lg:block">
-                <OnDemandLessonCard futureLessonsHref={learnerSignUpHref} />
+              <div className="mt-10 flex flex-wrap gap-x-8 gap-y-4 text-sm font-bold text-zinc-800">
+                {heroTrustPoints.map((point) => (
+                  <div key={point} className="inline-flex items-center gap-2">
+                    <CheckCircle2 size={21} className="text-brand" /> {point}
+                  </div>
+                ))}
               </div>
             </div>
 
-            <section className="overflow-hidden rounded bg-white text-white shadow-sm lg:h-full lg:self-stretch">
-              <div className="relative flex h-full min-h-[520px] flex-col justify-end p-5 sm:p-8 lg:min-h-0">
+            <section className="relative overflow-hidden rounded bg-black text-white shadow-2xl ring-1 ring-zinc-200">
+              <div className="relative min-h-[540px] p-5 sm:p-7 lg:min-h-[610px]">
                 <img
                   src="/learner-instructor.jpg"
                   alt="Learner driver behind the wheel with an instructor in the passenger seat"
                   className="absolute inset-0 h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/5" />
-                <Link href="/smart-match" className="lda-pill lda-pill-sm absolute left-5 top-5 z-20 pointer-events-auto sm:left-auto sm:right-8 sm:top-8">
-                  LDA SmartMatch
-                </Link>
-                <div className="relative z-10 pt-24">
-                  <h2 className="max-w-4xl text-4xl font-black tracking-normal text-white drop-shadow-lg sm:text-5xl">
-                    Book with the confidence of a live platform.
-                  </h2>
-                  <p className="mt-4 max-w-2xl text-base font-bold leading-7 text-white drop-shadow">
-                    SmartMatch compares distance, price, availability, instructor profile, and learner preferences.
-                  </p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                <div className="absolute inset-x-5 bottom-5 overflow-hidden rounded bg-black/72 p-5 shadow-2xl backdrop-blur-md ring-1 ring-white/10 sm:inset-x-7 sm:bottom-7 sm:grid sm:grid-cols-[1fr_260px] sm:gap-6 sm:p-7">
+                  <div>
+                    <Link href="/smart-match" className="inline-flex rounded-full bg-brand px-5 py-2 text-xs font-black uppercase text-white shadow-lg shadow-red-600/25 hover:bg-red-700">
+                      LDA SmartMatch
+                    </Link>
+                    <h2 className="mt-5 text-3xl font-black leading-tight text-white">
+                      Matched for you.<br />Built for success.
+                    </h2>
+                    <p className="mt-4 max-w-xl text-sm font-semibold leading-6 text-zinc-200">
+                      SmartMatch compares distance, price, availability, instructor profile, and learner preferences to help you find the right fit.
+                    </p>
+                  </div>
+                  <div className="mt-6 grid gap-4 border-white/20 sm:mt-0 sm:border-l sm:pl-6">
+                    {matchHighlights.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <div key={item.label} className="flex items-center gap-4 text-sm font-black text-white">
+                          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-brand">
+                            <Icon size={21} />
+                          </span>
+                          {item.label}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </section>
           </div>
         </section>
 
-        <section className="bg-white px-4 pb-8 sm:px-6 lg:hidden">
-          <OnDemandLessonCard className="mx-auto max-w-7xl md:grid-cols-[1fr_auto] md:items-center" futureLessonsHref={learnerSignUpHref} />
+        <section id="services" className="bg-white px-4 pb-10 sm:px-6 lg:px-10">
+          <div className="mx-auto grid max-w-[1500px] overflow-hidden rounded border border-zinc-200 bg-white shadow-sm md:grid-cols-2 xl:grid-cols-4">
+            {platformHighlights.map((item) => {
+              const Icon = item.icon;
+              return (
+                <article key={item.title} className="grid gap-4 border-b border-zinc-200 p-6 md:border-r xl:border-b-0">
+                  <div className="grid h-14 w-14 place-items-center rounded bg-red-50 text-brand ring-1 ring-red-100">
+                    <Icon size={29} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-black">{item.title}</h3>
+                    <p className="mt-2 text-sm font-semibold leading-6 text-zinc-600">{item.body}</p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </section>
 
-        <section id="discover" className="bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <h2 className="text-4xl font-black tracking-normal sm:text-5xl">Everything learners and instructors need to move.</h2>
-            </div>
-            <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {suggestionCards.map((card) => (
-                <Link key={card.title} href={card.href.startsWith("/auth/login?role=learner") ? learnerEntryHref : card.href === "/instructor" ? instructorEntryHref : card.href} className="group grid min-h-[220px] gap-5 overflow-hidden rounded bg-zinc-100 p-5 text-black hover:bg-zinc-200 sm:grid-cols-[1fr_150px] sm:p-6">
-                  <div className="flex flex-col items-start">
-                    <h3 className="text-2xl font-black">{card.title}</h3>
-                    <p className="mt-4 max-w-xs text-base leading-7 text-zinc-800">{card.body}</p>
-                    <span className="lda-pill lda-pill-sm mt-auto">
-                      {card.cta}
-                    </span>
-                  </div>
-                  <CardVisual type={card.image} />
-                </Link>
-              ))}
+        <section className="bg-white px-4 pb-16 sm:px-6 lg:px-10">
+          <div className="mx-auto flex max-w-[1500px] flex-col items-center gap-3 text-center text-sm font-bold text-zinc-700">
+            <div className="text-base font-black text-zinc-800">Trusted by learners across the UK</div>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <span>Excellent</span>
+              <span className="inline-flex gap-1 text-white">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span key={star} className="grid h-6 w-6 place-items-center rounded-sm bg-emerald-500 text-xs font-black">★</span>
+                ))}
+              </span>
+              <span>4.8 out of 5</span>
+              <span className="inline-flex items-center gap-1 text-emerald-600"><Star size={17} fill="currentColor" /> Trustpilot</span>
             </div>
           </div>
         </section>
+
+        <Link href="/contact" className="fixed bottom-6 right-6 z-30 hidden items-center gap-4 rounded-full bg-white px-5 py-3 text-base font-bold text-black shadow-2xl ring-1 ring-zinc-200 transition hover:ring-brand md:inline-flex">
+          <span className="grid h-12 w-12 place-items-center rounded-full bg-brand text-white shadow-lg shadow-red-600/20">
+            <MessageSquare size={22} />
+          </span>
+          Need help?
+        </Link>
       </main>
-      <FeedbackButton />
       <SiteFooter />
     </>
   );
@@ -217,49 +240,6 @@ function HeaderAccountBlock({ account, compact = false }: { account: HeaderAccou
       <Link href={account.dashboardHref} className="mt-1 inline-flex max-w-full items-center justify-center truncate rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 transition hover:border-red-500/80 hover:text-white hover:ring-2 hover:ring-brand">
         {account.subscriptionLabel}
       </Link>
-    </div>
-  );
-}
-
-function OnDemandLessonCard({ className = "", futureLessonsHref = "/auth/sign-up?role=learner" }: { className?: string; futureLessonsHref?: string }) {
-  return (
-    <div className={`grid gap-4 rounded border border-zinc-200 bg-zinc-50 p-5 shadow-sm ${className}`}>
-      <div>
-        <div className="inline-flex items-center gap-2 text-sm font-black uppercase text-brand">
-          <Clock3 size={17} /> On-demand lesson
-        </div>
-        <h2 className="mt-2 text-2xl font-black tracking-normal">Need a lesson soon?</h2>
-        <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-zinc-700">
-          Enter pickup details, verify your provisional licence, pay securely, then receive a booking reference and tracking link.
-        </p>
-      </div>
-      <div className="grid w-full gap-3 justify-self-start sm:w-80">
-        <Link href="/lesson-now" className="lda-pill w-full">
-          Book on-demand
-        </Link>
-        <Link href={futureLessonsHref} className="lda-pill w-full bg-black text-white hover:bg-zinc-800">
-          Schedule future lesson
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function CardVisual({ type }: { type: CardVisualType }) {
-  const visual = {
-    car: <CarFront size={68} />,
-    calendar: <CalendarCheck size={68} />,
-    match: <Sparkles size={68} />,
-    instructor: <UsersRound size={68} />,
-    tracking: <RadioTower size={68} />,
-    social: <Share2 size={68} />
-  }[type];
-
-  return (
-    <div className="relative grid place-items-start text-black sm:place-items-center">
-      <div className="grid h-20 w-20 place-items-center rounded bg-white text-brand shadow-sm transition group-hover:scale-105 sm:h-24 sm:w-24">
-        {visual}
-      </div>
     </div>
   );
 }
