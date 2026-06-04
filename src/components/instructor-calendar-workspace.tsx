@@ -11,10 +11,11 @@ import {
   PauseCircle,
   PlusCircle,
   ShieldCheck,
+  XCircle,
   UserRound
 } from "lucide-react";
 
-type LessonStatus = "booked" | "pending" | "free" | "blocked";
+type LessonStatus = "booked" | "pending" | "free" | "blocked" | "cancelled";
 
 type InstructorSlot = {
   id: string;
@@ -119,7 +120,8 @@ const statusStyles: Record<LessonStatus, { label: string; className: string }> =
   booked: { label: "Booked", className: "border-emerald-200 bg-emerald-50 text-emerald-800" },
   pending: { label: "Being booked", className: "border-amber-200 bg-amber-50 text-amber-800" },
   free: { label: "Free", className: "border-sky-200 bg-sky-50 text-sky-800" },
-  blocked: { label: "Unavailable", className: "border-zinc-200 bg-zinc-100 text-zinc-700" }
+  blocked: { label: "Unavailable", className: "border-zinc-200 bg-zinc-100 text-zinc-700" },
+  cancelled: { label: "Cancelled", className: "border-red-200 bg-red-50 text-red-800" }
 };
 
 function isoDate(year: number, monthIndex: number, day: number) {
@@ -163,7 +165,7 @@ function statusCounts(slots: InstructorSlot[]) {
       counts[slot.status] += 1;
       return counts;
     },
-    { booked: 0, pending: 0, free: 0, blocked: 0 } satisfies Record<LessonStatus, number>
+    { booked: 0, pending: 0, free: 0, blocked: 0, cancelled: 0 } satisfies Record<LessonStatus, number>
   );
 }
 
@@ -184,8 +186,32 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
       return hours + (endHour * 60 + endMinute - startHour * 60 - startMinute) / 60;
     }, 0);
 
-  function updateSlotStatus(slotId: string, status: LessonStatus) {
-    setSlots((current) => current.map((slot) => (slot.id === slotId ? { ...slot, status } : slot)));
+  function updateInstructorAvailability(slotId: string, status: "free" | "blocked") {
+    setSlots((current) => current.map((slot) => {
+      if (slot.id !== slotId || (slot.status !== "free" && slot.status !== "blocked")) {
+        return slot;
+      }
+
+      return {
+        ...slot,
+        status,
+        note: status === "free" ? "Available for learner booking" : "Marked unavailable by instructor"
+      };
+    }));
+  }
+
+  function cancelBookedLesson(slotId: string) {
+    setSlots((current) => current.map((slot) => {
+      if (slot.id !== slotId || slot.status !== "booked") {
+        return slot;
+      }
+
+      return {
+        ...slot,
+        status: "cancelled",
+        note: "Instructor cancellation requested. Learner notification, refund review, and cancellation policy checks are pending."
+      };
+    }));
   }
 
   function addFreeSlot() {
@@ -216,9 +242,9 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
           </div>
           <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_340px] lg:items-end">
             <div>
-              <h1 className="max-w-4xl text-5xl font-black tracking-normal sm:text-6xl">Plan your LDA work around your own time.</h1>
+              <h1 className="max-w-4xl text-5xl font-black tracking-normal sm:text-6xl">Manage bookings and availability.</h1>
               <p className="mt-4 max-w-3xl text-lg font-semibold leading-8 text-zinc-300">
-                View booked lessons, open availability, checkout holds, and unavailable time before accepting more learner demand.
+                See booked lessons, checkout holds, free slots, and unavailable time before opening more learner availability.
               </p>
             </div>
             <aside className="rounded border border-zinc-800 bg-zinc-950 p-5">
@@ -254,39 +280,44 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-7 border-b border-zinc-200 bg-zinc-50 text-center text-xs font-black uppercase text-zinc-500">
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                <div key={day} className="px-2 py-3">{day}</div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7">
-              {monthCells.map((cell) => {
-                const daySlots = slots.filter((slot) => slot.date === cell.iso);
-                const counts = statusCounts(daySlots);
-                const isSelected = cell.iso === selectedDate;
+            <div className="lda-mobile-scroll sm:m-0 sm:overflow-visible sm:p-0">
+              <div>
+                <div className="grid grid-cols-7 border-b border-zinc-200 bg-zinc-50 text-center text-xs font-black uppercase text-zinc-500">
+                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+                    <div key={day} className="px-2 py-3">{day}</div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7">
+                  {monthCells.map((cell) => {
+                    const daySlots = slots.filter((slot) => slot.date === cell.iso);
+                    const counts = statusCounts(daySlots);
+                    const isSelected = cell.iso === selectedDate;
 
-                return (
-                  <button
-                    key={cell.iso}
-                    type="button"
-                    disabled={!cell.day}
-                    onClick={() => cell.day && setSelectedDate(cell.iso)}
-                    className={`min-h-28 border-b border-r border-zinc-200 p-2 text-left transition ${isSelected ? "bg-red-50 ring-2 ring-inset ring-brand" : cell.day ? "bg-white hover:bg-zinc-50" : "bg-zinc-50"}`}
-                  >
-                    {cell.day ? (
-                      <>
-                        <div className="text-sm font-black">{cell.day}</div>
-                        <div className="mt-3 grid gap-1">
-                          {counts.booked ? <StatusDot label={`${counts.booked} booked`} className="bg-emerald-500" /> : null}
-                          {counts.pending ? <StatusDot label={`${counts.pending} holding`} className="bg-amber-500" /> : null}
-                          {counts.free ? <StatusDot label={`${counts.free} free`} className="bg-sky-500" /> : null}
-                          {counts.blocked ? <StatusDot label={`${counts.blocked} off`} className="bg-zinc-500" /> : null}
-                        </div>
-                      </>
-                    ) : null}
-                  </button>
-                );
-              })}
+                    return (
+                      <button
+                        key={cell.iso}
+                        type="button"
+                        disabled={!cell.day}
+                        onClick={() => cell.day && setSelectedDate(cell.iso)}
+                        className={`min-h-28 border-b border-r border-zinc-200 p-2 text-left transition ${isSelected ? "bg-red-50 ring-2 ring-inset ring-brand" : cell.day ? "bg-white hover:bg-zinc-50" : "bg-zinc-50"}`}
+                      >
+                        {cell.day ? (
+                          <>
+                            <div className="text-sm font-black">{cell.day}</div>
+                            <div className="mt-3 grid gap-1">
+                              {counts.booked ? <StatusDot label={`${counts.booked} booked`} className="bg-emerald-500" /> : null}
+                              {counts.pending ? <StatusDot label={`${counts.pending} holding`} className="bg-amber-500" /> : null}
+                              {counts.free ? <StatusDot label={`${counts.free} free`} className="bg-sky-500" /> : null}
+                              {counts.blocked ? <StatusDot label={`${counts.blocked} off`} className="bg-zinc-500" /> : null}
+                              {counts.cancelled ? <StatusDot label={`${counts.cancelled} cancelled`} className="bg-red-500" /> : null}
+                            </div>
+                          </>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </section>
         </div>
@@ -309,12 +340,16 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
                           {statusStyles[slot.status].label}
                         </div>
                       </div>
-                      <select value={slot.status} onChange={(event) => updateSlotStatus(slot.id, event.target.value as LessonStatus)} className="rounded border border-zinc-300 bg-white px-2 py-2 text-sm font-bold">
-                        <option value="free">Free</option>
-                        <option value="pending">Being booked</option>
-                        <option value="booked">Booked</option>
-                        <option value="blocked">Unavailable</option>
-                      </select>
+                      {slot.status === "free" || slot.status === "blocked" ? (
+                        <select value={slot.status} onChange={(event) => updateInstructorAvailability(slot.id, event.target.value as "free" | "blocked")} className="rounded border border-zinc-300 bg-white px-2 py-2 text-sm font-bold">
+                          <option value="free">Free</option>
+                          <option value="blocked">Unavailable</option>
+                        </select>
+                      ) : (
+                        <div className="rounded border border-zinc-200 bg-white px-3 py-2 text-xs font-black uppercase text-zinc-500">
+                          System controlled
+                        </div>
+                      )}
                     </div>
                     {slot.learner ? (
                       <div className="mt-4 grid gap-2 text-sm font-bold text-zinc-700">
@@ -324,6 +359,16 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
                       </div>
                     ) : null}
                     {slot.note ? <p className="mt-3 text-sm font-semibold leading-6 text-zinc-600">{slot.note}</p> : null}
+                    {slot.status === "booked" ? (
+                      <div className="mt-4 rounded border border-red-200 bg-white p-3">
+                        <p className="text-xs font-bold leading-5 text-zinc-600">
+                          Cancelling a confirmed lesson notifies the learner, may trigger a refund or cancellation fee review, and repeated short-notice cancellations may affect instructor account standing. Valid safety, vehicle, illness, or learner no-show reasons can be reviewed by LDA support.
+                        </p>
+                        <button type="button" onClick={() => cancelBookedLesson(slot.id)} className="lda-pill lda-pill-sm mt-3">
+                          <XCircle size={17} /> Cancel lesson
+                        </button>
+                      </div>
+                    ) : null}
                   </article>
                 ))
               ) : (
