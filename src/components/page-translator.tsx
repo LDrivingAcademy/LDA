@@ -14,10 +14,14 @@ function getStoredLanguage() {
     return { selected: "en-GB", custom: "" };
   }
 
-  return {
-    selected: window.localStorage.getItem("lda-language") || "en-GB",
-    custom: window.localStorage.getItem("lda-custom-language") || ""
-  };
+  try {
+    return {
+      selected: window.localStorage.getItem("lda-language") || "en-GB",
+      custom: window.localStorage.getItem("lda-custom-language") || ""
+    };
+  } catch {
+    return { selected: "en-GB", custom: "" };
+  }
 }
 
 function shouldSkipElement(element: Element | null) {
@@ -34,6 +38,10 @@ function shouldSkipElement(element: Element | null) {
 
 function getTextNodes(root: ParentNode) {
   const nodes: Text[] = [];
+  if (typeof document === "undefined" || typeof NodeFilter === "undefined") {
+    return nodes;
+  }
+
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       const textNode = node as Text;
@@ -107,8 +115,12 @@ export function PageTranslator() {
     const targetLanguage = googleCodeForLanguage(selected, custom) || sourceLanguage;
     const htmlLanguage = selected === "custom" && custom ? custom : selected;
 
-    document.documentElement.lang = htmlLanguage;
-    document.documentElement.dir = isRtlLanguage(selected, custom) ? "rtl" : "ltr";
+    try {
+      document.documentElement.lang = htmlLanguage;
+      document.documentElement.dir = isRtlLanguage(selected, custom) ? "rtl" : "ltr";
+    } catch {
+      return;
+    }
 
     const nodes = getTextNodes(document.body);
     nodes.forEach((node) => {
@@ -176,7 +188,7 @@ export function PageTranslator() {
     window.addEventListener("lda-language-change", onLanguageChange);
     window.addEventListener("storage", onLanguageChange);
 
-    const observer = new MutationObserver(() => {
+    const observer = typeof MutationObserver === "undefined" ? null : new MutationObserver(() => {
       const { selected, custom } = getStoredLanguage();
       const targetLanguage = googleCodeForLanguage(selected, custom) || sourceLanguage;
       if (targetLanguage !== sourceLanguage) {
@@ -184,13 +196,13 @@ export function PageTranslator() {
       }
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer?.observe(document.body, { childList: true, subtree: true });
     scheduleTranslation(120);
 
     return () => {
       window.removeEventListener("lda-language-change", onLanguageChange);
       window.removeEventListener("storage", onLanguageChange);
-      observer.disconnect();
+      observer?.disconnect();
       if (timer.current) {
         window.clearTimeout(timer.current);
       }
