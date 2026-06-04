@@ -46,7 +46,7 @@ export function InstructorSupportContent({ entry }: { entry: "public" | "dashboa
             </div>
           ) : (
             <Link href="/dashboard" className="lda-pill lda-pill-sm shrink-0 whitespace-normal text-center leading-5 sm:whitespace-nowrap">
-              Back to instructor dashboard
+              Back to dashboard
             </Link>
           )}
           <div className={entry === "public" ? "md:hidden" : "hidden"}>
