@@ -101,9 +101,6 @@ export default async function ProgressTrackerPage({ searchParams }: ProgressTrac
               <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-zinc-300">
                 Instructors can record what was covered, send learner feedback, and add tips or videos before the next lesson.
               </p>
-              <Link href={backHref} className="lda-pill lda-pill-sm mt-6">
-                <ArrowLeft size={17} /> {backLabel}
-              </Link>
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 {benefits.map((benefit) => (
                   <div key={benefit} className="flex items-start gap-3 rounded bg-zinc-950 p-4 text-sm font-bold leading-6 text-zinc-200">
