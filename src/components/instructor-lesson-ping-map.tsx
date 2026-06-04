@@ -17,13 +17,7 @@ declare global {
 }
 
 const PING_WINDOW_MINUTES = 20;
-const MIN_PROFESSIONAL_MAP_ZOOM = 8;
-const LOCAL_MAP_RESTRICTION = {
-  north: 52.25,
-  south: 51.1,
-  west: -0.8,
-  east: 0.35
-};
+const MIN_WORLD_MAP_ZOOM = 2;
 const learnerPickup: Point = {
   lat: 51.6523,
   lng: -0.1995,
@@ -215,7 +209,7 @@ export function InstructorLessonPingMap() {
         const map = new maps.Map(mapElementRef.current, {
           center: learnerPickup,
           zoom: 13,
-          minZoom: MIN_PROFESSIONAL_MAP_ZOOM,
+          minZoom: MIN_WORLD_MAP_ZOOM,
           backgroundColor: "#eef2ef",
           disableDefaultUI: false,
           mapTypeControl: false,
@@ -223,10 +217,6 @@ export function InstructorLessonPingMap() {
           fullscreenControl: true,
           clickableIcons: false,
           gestureHandling: "greedy",
-          restriction: {
-            latLngBounds: LOCAL_MAP_RESTRICTION,
-            strictBounds: false
-          },
           styles: [
             {
               featureType: "poi.business",
@@ -259,9 +249,6 @@ export function InstructorLessonPingMap() {
         });
 
         map.fitBounds(bounds, 72);
-        if (map.getZoom?.() < MIN_PROFESSIONAL_MAP_ZOOM) {
-          map.setZoom(MIN_PROFESSIONAL_MAP_ZOOM);
-        }
         mapRef.current = map;
         setMapStatus("ready");
       })
