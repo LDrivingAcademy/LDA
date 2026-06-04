@@ -3,6 +3,7 @@ import {
   ArrowRight,
   CalendarCheck,
   CalendarDays,
+  CarFront,
   CheckCircle2,
   ChevronDown,
   Headphones,
@@ -10,9 +11,13 @@ import {
   Lock,
   MapPin,
   MessageSquare,
+  RadioTower,
   Search,
+  Share2,
   ShieldCheck,
-  Star
+  Sparkles,
+  Star,
+  UsersRound
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { LanguageSelector } from "@/components/language-selector";
@@ -21,6 +26,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { getHeaderAccountSummary, type HeaderAccountSummary } from "@/lib/current-account";
 
 export const dynamic = "force-dynamic";
+
+type CardVisualType = "car" | "calendar" | "match" | "instructor" | "tracking" | "social";
 
 const heroTrustPoints = ["DVSA-approved instructors", "Secure payments", "Flexible scheduling"];
 
@@ -53,6 +60,57 @@ const matchHighlights = [
   { label: "Lessons that fit your schedule", icon: CalendarCheck }
 ];
 
+const suggestionCards: {
+  title: string;
+  body: string;
+  href: string;
+  image: CardVisualType;
+  cta: string;
+}[] = [
+  {
+    title: "Find instructors",
+    body: "Compare verified local instructors by price, car, transmission, distance, teaching style, and availability.",
+    href: "/auth/login?role=learner",
+    image: "car",
+    cta: "Find instructors"
+  },
+  {
+    title: "Plan lessons",
+    body: "Reserve clear time slots with upfront price, pickup postcode, booking reference, and cancellation terms.",
+    href: "/auth/login?role=learner",
+    image: "calendar",
+    cta: "Plan a lesson"
+  },
+  {
+    title: "Smart Match",
+    body: "Let LDA match around confidence, support needs, reviews, skills, price, location, and real availability.",
+    href: "/smart-match",
+    image: "match",
+    cta: "View SmartMatch"
+  },
+  {
+    title: "Become an instructor",
+    body: "Apply as an ADI/PDI, upload verification, set availability, manage bookings, and build repeat learner demand.",
+    href: "/instructor",
+    image: "instructor",
+    cta: "Apply now"
+  },
+  {
+    title: "Live tracking",
+    body: "Preview learner confidence tools for distance, ETA, instructor arrival, pickup visibility, and accepted lessons.",
+    href: "/tracking",
+    image: "tracking",
+    cta: "Track lesson"
+  },
+  {
+    title: "Subscribe & socials",
+    body: "Follow LDA for learner tips, instructor updates, platform releases, deals, and launch news.",
+    href: "/social",
+    image: "social",
+    cta: "Follow LDA"
+  }
+];
+
 export default async function HomePage() {
   const account = await getHeaderAccountSummary();
   const learnerEntryHref =
@@ -67,7 +125,6 @@ export default async function HomePage() {
       : account?.role === "learner"
         ? "/auth/sign-up?role=instructor&message=You are signed in as a learner. Sign up for an instructor account with a different email, or request a learner-to-instructor transfer."
         : "/instructor";
-  const learnerSignUpHref = account?.role === "learner" ? "/learner-dashboard" : "/auth/sign-up?role=learner";
 
   return (
     <>
@@ -205,6 +262,28 @@ export default async function HomePage() {
           </div>
         </section>
 
+        <section className="bg-white px-4 pb-14 sm:px-6 lg:px-10">
+          <div className="mx-auto max-w-[1500px]">
+            <div className="max-w-3xl">
+              <h2 className="text-4xl font-black tracking-normal sm:text-5xl">Everything learners and instructors need to move.</h2>
+            </div>
+            <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {suggestionCards.map((card) => (
+                <Link key={card.title} href={card.href.startsWith("/auth/login?role=learner") ? learnerEntryHref : card.href === "/instructor" ? instructorEntryHref : card.href} className="group grid min-h-[220px] gap-5 overflow-hidden rounded bg-zinc-100 p-5 text-black hover:bg-zinc-200 sm:grid-cols-[1fr_150px] sm:p-6">
+                  <div className="flex flex-col items-start">
+                    <h3 className="text-2xl font-black">{card.title}</h3>
+                    <p className="mt-4 max-w-xs text-base leading-7 text-zinc-800">{card.body}</p>
+                    <span className="mt-auto inline-flex items-center rounded-full bg-brand px-4 py-2 text-sm font-black text-white">
+                      {card.cta}
+                    </span>
+                  </div>
+                  <CardVisual type={card.image} />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="bg-white px-4 pb-16 sm:px-6 lg:px-10">
           <div className="mx-auto flex max-w-[1500px] flex-col items-center gap-3 text-center text-sm font-bold text-zinc-700">
             <div className="text-base font-black text-zinc-800">Trusted by learners across the UK</div>
@@ -240,6 +319,25 @@ function HeaderAccountBlock({ account, compact = false }: { account: HeaderAccou
       <Link href={account.dashboardHref} className="mt-1 inline-flex max-w-full items-center justify-center truncate rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 transition hover:border-red-500/80 hover:text-white hover:ring-2 hover:ring-brand">
         {account.subscriptionLabel}
       </Link>
+    </div>
+  );
+}
+
+function CardVisual({ type }: { type: CardVisualType }) {
+  const visual = {
+    car: <CarFront size={68} />,
+    calendar: <CalendarCheck size={68} />,
+    match: <Sparkles size={68} />,
+    instructor: <UsersRound size={68} />,
+    tracking: <RadioTower size={68} />,
+    social: <Share2 size={68} />
+  }[type];
+
+  return (
+    <div className="relative grid place-items-start text-black sm:place-items-center">
+      <div className="grid h-20 w-20 place-items-center rounded bg-white text-brand shadow-sm transition group-hover:scale-105 sm:h-24 sm:w-24">
+        {visual}
+      </div>
     </div>
   );
 }
