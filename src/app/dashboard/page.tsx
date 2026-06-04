@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, CalendarCheck, CheckCircle2, FileCheck2, RadioTower, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarCheck, CheckCircle2, FileCheck2, Sparkles } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { FastSignOutButton } from "@/components/fast-sign-out-button";
 import { InstructorLessonPingMap } from "@/components/instructor-lesson-ping-map";
@@ -11,16 +11,16 @@ import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 
-const learnerCommandItems = [
-  "Next lesson and pickup details",
-  "Progress and weak-skill focus",
-  "SmartMatch and protected booking tools"
+const learnerDashboardItems = [
+  "Upcoming lessons and pickup details",
+  "Progress and revision focus",
+  "SmartMatch and booking tools"
 ];
 
-const instructorCommandItems = [
-  "Today’s availability and booked slots",
+const instructorDashboardItems = [
+  "Availability and booked slots",
   "Learner progress records",
-  "Verification, payout, and support visibility"
+  "Verification and support visibility"
 ];
 
 export default async function DashboardPage() {
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
   const displayName = profile?.full_name || user.email || "Learner";
   const verificationStatus = instructorProfile?.verification_status ?? "not started";
-  const commandItems = isInstructor ? instructorCommandItems : learnerCommandItems;
+  const dashboardItems = isInstructor ? instructorDashboardItems : learnerDashboardItems;
   const statusRequestHref = `mailto:info@ldrivingacademy.co.uk?subject=${encodeURIComponent(
     "Instructor verification status request"
   )}&body=${encodeURIComponent(
@@ -119,20 +119,17 @@ export default async function DashboardPage() {
       <section className="bg-black text-white">
         <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_420px] lg:px-8">
           <div>
-            <div className="inline-flex items-center gap-2 rounded border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm font-black text-red-100">
-              <RadioTower size={16} /> {isInstructor ? "Instructor command centre" : "Learner command centre"}
-            </div>
-            <h1 className="mt-4 text-4xl font-black tracking-normal sm:text-5xl">
-              {isInstructor ? "Run your LDA day with clarity." : "Your lesson journey, clear and protected."}
+            <h1 className="text-4xl font-black tracking-normal sm:text-5xl">
+              {isInstructor ? "LDA instructor dashboard" : "LDA learner dashboard"}
             </h1>
             <p className="mt-4 max-w-3xl text-base font-semibold leading-7 text-zinc-300">
               {isInstructor
-                ? "Keep availability, learners, progress, verification, and support actions in one professional workspace."
-                : "See what is booked, what needs attention, how you are progressing, and where LDA can support your next step."}
+                ? "Manage your availability, learners, progress records, verification, and support actions from one place."
+                : "Manage your lessons, bookings, progress, and support from one place."}
             </p>
           </div>
           <div className="grid gap-3">
-            {commandItems.map((item) => (
+            {dashboardItems.map((item) => (
               <div key={item} className="flex items-start gap-3 rounded border border-zinc-800 bg-zinc-950 p-4 text-sm font-black text-zinc-100">
                 <CheckCircle2 className="mt-0.5 shrink-0 text-brand" size={18} />
                 {item}
@@ -142,7 +139,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-3 lg:px-8">
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-2 lg:px-8">
         <article className="flex flex-col rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
           <CalendarCheck className="text-brand" />
           <h2 className="mt-4 text-xl font-black">{isInstructor ? "Plan your working day" : "Plan your learning route"}</h2>
@@ -199,16 +196,6 @@ export default async function DashboardPage() {
             </Link>
           </article>
         )}
-        <article className="flex flex-col rounded border border-zinc-200 bg-zinc-50 p-5 text-black shadow-sm">
-          <ShieldCheck className="text-brand" />
-          <h2 className="mt-4 text-xl font-black">Protected LDA record</h2>
-          <p className="mt-2 text-zinc-600">
-            Keep booking references, progress notes, support requests, cancellation evidence, and platform actions inside LDA.
-          </p>
-          <Link href={isInstructor ? "/instructor-support-dashboard?from=dashboard" : "/support/learner?from=dashboard"} className="lda-pill lda-pill-sm mt-auto self-start">
-            Open support <ArrowRight size={16} />
-          </Link>
-        </article>
       </section>
 
       {isInstructor ? <InstructorDashboard /> : <LearnerBookingDashboard learnerEmail={profile?.email ?? user.email} learnerPhone={profile?.phone} />}
