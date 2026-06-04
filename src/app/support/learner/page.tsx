@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpenCheck, CalendarCheck, CircleHelp, Clock3, CreditCard, ListChecks, MapPin, ShieldAlert } from "lucide-react";
+import { ArrowLeft, BookOpenCheck, CalendarCheck, CircleHelp, Clock3, CreditCard, ListChecks, MapPin, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { LanguageSelector } from "@/components/language-selector";
 import { LearnerSupportAssistant } from "@/components/learner-support-assistant";
@@ -11,7 +11,7 @@ const learnerActions = [
   { title: "Book lessons", body: "Find instructors, compare prices, and continue to the normal learner booking flow.", href: "/auth/login?role=learner", cta: "Start booking", icon: CalendarCheck },
   { title: "Manage bookings", body: "View upcoming, completed, cancelled, and rescheduled lessons from your learner dashboard.", href: "/dashboard", cta: "Open dashboard", icon: ListChecks },
   { title: "Payment help", body: "Check confirmation references, failed payments, refunds, and duplicate charge questions.", href: "/cancellation-policy", cta: "Payment policy", icon: CreditCard },
-  { title: "Report off-platform request", body: "Tell LDA if an instructor asks you to pay by cash, bank transfer, private link, or book outside your LDA dashboard.", href: "mailto:info@ldrivingacademy.co.uk?subject=Report%20off-platform%20booking%20request", cta: "Report request", icon: ShieldAlert }
+  { title: "Report off-platform request", body: "Tell LDA if an instructor asks you to pay by cash, bank transfer, private link, or book outside your LDA dashboard.", href: "mailto:info@ldrivingacademy.co.uk?subject=Report%20off-platform%20booking%20request", cta: "Report request", icon: ShieldCheck }
 ];
 
 const supportTopics = [
