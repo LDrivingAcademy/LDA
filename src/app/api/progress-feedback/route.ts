@@ -1,4 +1,3 @@
-import { sendProgressFeedbackEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isRateLimited, jsonNoStore, rateLimitResponse, safeEmail, safeText } from "@/lib/security";
@@ -18,12 +17,87 @@ function hasText(value?: string) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 async function readProgressRequest(request: Request) {
   try {
     return (await request.json()) as ProgressFeedbackRequest;
   } catch {
     return null;
   }
+}
+
+async function sendProgressUpdatedNotification(input: {
+  learnerEmail: string;
+  learnerName: string;
+  instructorName: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    return { skipped: true };
+  }
+
+  const fromAddress = process.env.RESEND_FROM_EMAIL ?? "info@ldrivingacademy.co.uk";
+  const from = fromAddress.includes("<") && fromAddress.includes(">") ? fromAddress : `L Driving Academy <${fromAddress}>`;
+  const replyTo = process.env.RESEND_REPLY_TO_EMAIL ?? process.env.APP_SUPPORT_EMAIL ?? "info@ldrivingacademy.co.uk";
+  const progressUrl = `${process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk"}/progress-tracker`;
+  const learnerName = escapeHtml(input.learnerName);
+  const instructorName = escapeHtml(input.instructorName);
+  const escapedUrl = escapeHtml(progressUrl);
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
+      <h1>Your LDA progress tracker has been updated</h1>
+      <p>Hello ${learnerName},</p>
+      <p>${instructorName} has updated your LDA progress tracker.</p>
+      <p>Sign in to your learner dashboard to view the latest progress notes, completed topics, next lesson focus, and recommended resources.</p>
+      <p style="margin: 28px 0;">
+        <a href="${escapedUrl}" style="display:inline-block;background:#ed1b24;color:#fff;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:999px;">
+          View progress tracker
+        </a>
+      </p>
+      <p>For privacy, this email does not include your lesson progress details.</p>
+    </div>
+  `;
+  const text = [
+    `Hello ${input.learnerName},`,
+    "",
+    `${input.instructorName} has updated your LDA progress tracker.`,
+    "Sign in to your learner dashboard to view the latest progress notes, completed topics, next lesson focus, and recommended resources.",
+    "",
+    progressUrl,
+    "",
+    "For privacy, this email does not include your lesson progress details."
+  ].join("\n");
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from,
+      to: input.learnerEmail,
+      subject: "Your LDA progress tracker has been updated",
+      html,
+      text,
+      reply_to: replyTo
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Progress notification email failed with status ${response.status}`);
+  }
+
+  return response.json();
 }
 
 export async function POST(request: Request) {
@@ -116,14 +190,18 @@ export async function POST(request: Request) {
       return jsonNoStore({ error: recordError.message }, { status: 500 });
     }
 
-    await sendProgressFeedbackEmail(payload);
+    await sendProgressUpdatedNotification({
+      learnerEmail: payload.learnerEmail,
+      learnerName: payload.learnerName,
+      instructorName: payload.instructorName
+    });
     return jsonNoStore({
       mode: process.env.RESEND_API_KEY ? "live" : "demo",
       message: process.env.RESEND_API_KEY
-        ? "Progress feedback email sent."
-        : "Progress feedback saved in demo mode. Add RESEND_API_KEY to send real emails."
+        ? "Progress saved to the learner profile and the learner has been notified."
+        : "Progress saved to the learner profile. Add RESEND_API_KEY to send notification emails."
     });
   } catch (error) {
-    return jsonNoStore({ error: error instanceof Error ? error.message : "Feedback email failed." }, { status: 500 });
+    return jsonNoStore({ error: error instanceof Error ? error.message : "Progress notification failed." }, { status: 500 });
   }
 }
