@@ -17,7 +17,7 @@ declare global {
 }
 
 const PING_WINDOW_MINUTES = 20;
-const MIN_PROFESSIONAL_MAP_ZOOM = 10;
+const MIN_PROFESSIONAL_MAP_ZOOM = 8;
 const LOCAL_MAP_RESTRICTION = {
   north: 52.25,
   south: 51.1,
