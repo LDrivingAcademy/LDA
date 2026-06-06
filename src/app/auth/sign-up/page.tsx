@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, CarFront, GraduationCap, MailCheck, ShieldCheck } from "lucide-react";
 import { PageTopBar } from "@/components/page-top-bar";
+import { PasswordInput } from "@/components/password-input";
 import { SignUpPasswordHelper } from "@/components/auth/sign-up-password-helper";
 import { getHeaderAccountSummary } from "@/lib/current-account";
 import { signOut, signUp } from "../actions";
@@ -92,7 +93,7 @@ export default async function SignUpPage({
                   </label>
                   <label className="grid gap-1">
                     <span className="text-sm font-bold text-zinc-600">Create password</span>
-                    <input id="lda-signup-password" required name="password" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
+                    <PasswordInput id="lda-signup-password" required name="password" minLength={8} autoComplete="new-password" className="w-full rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
                   </label>
                   <button className="lda-pill mt-2">
                     <MailCheck size={18} /> Create account by email
