@@ -512,6 +512,32 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
 
   return (
     <section id="learner-journey" className="mx-auto grid max-w-7xl gap-6 bg-white px-4 pb-10 text-black sm:px-6 lg:px-8">
+      <section className="grid gap-5">
+        <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
+                <MapPin size={16} /> Nearby instructor map
+              </div>
+              <h2 className="mt-3 text-2xl font-black">View instructors around your pickup area.</h2>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">{locationStatus}</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link href={trackingHref} className="lda-pill lda-pill-sm">
+                Live tracking
+              </Link>
+            </div>
+          </div>
+          <NearbyInstructorGoogleMap
+            postcode={postcode}
+            instructors={filteredInstructors}
+            selectedInstructorId={selectedInstructorId ?? ""}
+            userPosition={userPosition}
+            onSelectInstructor={handleInstructorSelection}
+          />
+        </article>
+      </section>
+
       <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
         <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
           <SlidersHorizontal size={16} /> Search filters
@@ -562,32 +588,6 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
           <span className="text-xs font-black uppercase text-zinc-600">Price selector: up to {formatMoney(maxPrice * 100)}/hr</span>
           <input type="range" min="30" max="60" step="1" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} className="accent-red-600" />
         </label>
-      </section>
-
-      <section className="grid gap-5">
-        <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-                <MapPin size={16} /> Nearby instructor map
-              </div>
-              <h2 className="mt-3 text-2xl font-black">View instructors around your pickup area.</h2>
-              <p className="mt-2 text-sm leading-6 text-zinc-600">{locationStatus}</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Link href={trackingHref} className="lda-pill lda-pill-sm">
-                Live tracking
-              </Link>
-            </div>
-          </div>
-          <NearbyInstructorGoogleMap
-            postcode={postcode}
-            instructors={filteredInstructors}
-            selectedInstructorId={selectedInstructorId ?? ""}
-            userPosition={userPosition}
-            onSelectInstructor={handleInstructorSelection}
-          />
-        </article>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[1fr_420px]">
