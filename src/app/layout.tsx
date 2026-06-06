@@ -16,10 +16,11 @@ export const metadata: Metadata = {
   description: "A UK learner-driver marketplace for verified driving instructors, transparent pricing, booking, and online payments.",
   icons: {
     icon: [
+      { url: "/lda-icon-l.svg", type: "image/svg+xml", sizes: "96x96" },
       { url: "/favicon.svg", type: "image/svg+xml", sizes: "96x96" }
     ],
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg"
+    shortcut: "/lda-icon-l.svg",
+    apple: "/lda-icon-l.svg"
   },
   openGraph: {
     title: "L Driving Academy",
