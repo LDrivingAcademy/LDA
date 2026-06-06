@@ -1,0 +1,5 @@
+Contact: mailto:info@ldrivingacademy.co.uk
+Preferred-Languages: en
+Canonical: https://ldrivingacademy.co.uk/.well-known/security.txt
+Policy: https://ldrivingacademy.co.uk/safety
+Acknowledgments: https://ldrivingacademy.co.uk/safety
