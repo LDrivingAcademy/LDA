@@ -1,4 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-label="L Driving Academy">
+  <defs>
+    <linearGradient id="ldaPreviewRed" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff1f1f"/>
+      <stop offset="52%" stop-color="#e30613"/>
+      <stop offset="100%" stop-color="#940008"/>
+    </linearGradient>
+    <linearGradient id="ldaPreviewSilver" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="48%" stop-color="#f7f7f7"/>
+      <stop offset="100%" stop-color="#b8b8b8"/>
+    </linearGradient>
+  </defs>
   <rect width="1200" height="1200" fill="#000000"/>
-  <path d="M350 220h250v520h380v240H350Z" fill="#e30613"/>
+  <g transform="translate(-185.1 238) scale(.33)">
+    <path d="M998 1434 1219 760h318l-136 414h609l-85 260H998Z" fill="url(#ldaPreviewRed)"/>
+    <path d="M1860 760h395c253 0 417 134 417 342 0 202-162 332-415 332h-397V760Zm312 236v202h96c67 0 109-38 109-101 0-62-42-101-109-101h-96Z" fill="url(#ldaPreviewSilver)"/>
+    <path d="M2724 1434 3090 760h306l368 674h-333l-45-92h-292l-45 92h-325Zm489-329h158l-79-163-79 163Z" fill="url(#ldaPreviewSilver)"/>
+  </g>
 </svg>
