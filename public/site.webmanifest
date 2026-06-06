@@ -1,0 +1,29 @@
+{
+  "name": "L Driving Academy",
+  "short_name": "LDA",
+  "description": "A UK learner-driver marketplace for verified driving instructors, transparent pricing, booking, and online payments.",
+  "icons": [
+    {
+      "src": "/lda-icon-l.svg",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/lda-search-preview.svg",
+      "sizes": "1200x1200",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "display": "standalone",
+  "start_url": "/"
+}
