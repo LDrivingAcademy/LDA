@@ -1,7 +1,27 @@
 export const LDA_GOOGLE_MAP_STYLES = [
   {
     featureType: "administrative",
+    elementType: "geometry",
+    stylers: [{ visibility: "off" }]
+  },
+  {
+    featureType: "administrative",
+    elementType: "geometry.fill",
+    stylers: [{ visibility: "off" }]
+  },
+  {
+    featureType: "administrative",
     elementType: "geometry.stroke",
+    stylers: [{ visibility: "off" }]
+  },
+  {
+    featureType: "administrative.country",
+    elementType: "geometry",
+    stylers: [{ visibility: "off" }]
+  },
+  {
+    featureType: "administrative.country",
+    elementType: "geometry.fill",
     stylers: [{ visibility: "off" }]
   },
   {
@@ -11,7 +31,6 @@ export const LDA_GOOGLE_MAP_STYLES = [
   },
   {
     featureType: "administrative.province",
-    elementType: "geometry.stroke",
     stylers: [{ visibility: "off" }]
   },
   {
