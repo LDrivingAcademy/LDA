@@ -1,6 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="L Driving Academy">
-  <rect width="96" height="96" rx="18" fill="#090909"/>
-  <path d="M24 70V22h15v35h33v13H24Z" fill="#ffffff"/>
-  <path d="M55 22c11 0 19 8 19 19s-8 19-19 19h-8V47h8c4 0 7-2 7-6s-3-6-7-6h-8V22h8Z" fill="#d71920"/>
-  <path d="M23 76h50" stroke="#d71920" stroke-width="7" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="ldaIconRed" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff2b2b"/>
+      <stop offset="50%" stop-color="#e30613"/>
+      <stop offset="100%" stop-color="#8f0008"/>
+    </linearGradient>
+    <linearGradient id="ldaIconSilver" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#f4f4f4"/>
+      <stop offset="100%" stop-color="#b8b8b8"/>
+    </linearGradient>
+    <filter id="ldaIconShadow" x="-20%" y="-45%" width="140%" height="190%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1" flood-color="#000000" flood-opacity=".85"/>
+    </filter>
+  </defs>
+  <circle cx="48" cy="48" r="45" fill="#050505"/>
+  <circle cx="48" cy="48" r="43.5" fill="none" stroke="#2b2f36" stroke-width="3"/>
+  <g filter="url(#ldaIconShadow)" transform="translate(-17.5 17.85) scale(.0275)">
+    <path d="M998 1434 1219 760h318l-136 414h609l-85 260H998Z" fill="url(#ldaIconRed)"/>
+    <path d="M1860 760h395c253 0 417 134 417 342 0 202-162 332-415 332h-397V760Zm312 236v202h96c67 0 109-38 109-101 0-62-42-101-109-101h-96Z" fill="url(#ldaIconSilver)"/>
+    <path d="M2724 1434 3090 760h306l368 674h-333l-45-92h-292l-45 92h-325Zm489-329h158l-79-163-79 163Z" fill="url(#ldaIconSilver)"/>
+  </g>
 </svg>
