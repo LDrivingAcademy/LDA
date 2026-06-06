@@ -11,16 +11,11 @@ export function Brand({ size = "page" }: { size?: BrandSize }) {
   return (
     <Link
       href="/"
-      className={`flex ${brandSizes[size]} shrink-0 items-center justify-start overflow-hidden bg-black focus-ring`}
-      aria-label="L Driving Academy home"
+      className={`block ${brandSizes[size]} shrink-0 bg-black focus-ring`}
+      aria-label="Home"
+      data-logo-slot="lda-brand"
     >
-      <img
-        src="/lda-logo-transparent.svg"
-        alt="L Driving Academy"
-        width={4096}
-        height={2363}
-        className="h-full w-full object-contain object-left"
-      />
+      <span className="sr-only">Home</span>
     </Link>
   );
 }
