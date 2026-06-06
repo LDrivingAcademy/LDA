@@ -26,8 +26,14 @@ export const metadata: Metadata = {
     title: "L Driving Academy",
     description: "A UK learner-driver marketplace for verified driving instructors, transparent pricing, booking, and online payments.",
     siteName: "L Driving Academy",
-    images: [{ url: "/lda-logo-transparent.svg", width: 4096, height: 2363, alt: "L Driving Academy" }],
+    images: [{ url: "/lda-search-preview.svg", width: 1200, height: 1200, alt: "L Driving Academy" }],
     type: "website"
+  },
+  twitter: {
+    card: "summary",
+    title: "L Driving Academy",
+    description: "A UK learner-driver marketplace for verified driving instructors, transparent pricing, booking, and online payments.",
+    images: [{ url: "/lda-search-preview.svg", width: 1200, height: 1200, alt: "L Driving Academy" }]
   }
 };
 
