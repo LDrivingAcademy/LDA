@@ -1,5 +1,6 @@
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { PageTopBar } from "@/components/page-top-bar";
+import { PasswordInput } from "@/components/password-input";
 import { createClient } from "@/lib/supabase/server";
 import { updatePassword } from "../actions";
 
@@ -43,11 +44,11 @@ export default async function UpdatePasswordPage({
               </label>
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">New password</span>
-                <input required name="password" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="New password" />
+                <PasswordInput required name="password" minLength={8} autoComplete="new-password" className="w-full rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="New password" />
               </label>
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">Confirm password</span>
-                <input required name="confirmPassword" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Confirm password" />
+                <PasswordInput required name="confirmPassword" minLength={8} autoComplete="new-password" className="w-full rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Confirm password" />
               </label>
               <button className="lda-pill mt-2">
                 <KeyRound size={18} /> Change password
