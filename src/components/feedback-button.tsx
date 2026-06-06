@@ -1,12 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MessageSquareText, Send, X } from "lucide-react";
 
 export function FeedbackButton() {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    function openFeedback() {
+      setOpen(true);
+    }
+
+    function openFeedbackFromHash() {
+      if (window.location.hash === "#lda-feedback") {
+        openFeedback();
+      }
+    }
+
+    openFeedbackFromHash();
+
+    window.addEventListener("lda:open-feedback", openFeedback);
+    window.addEventListener("hashchange", openFeedbackFromHash);
+
+    return () => {
+      window.removeEventListener("lda:open-feedback", openFeedback);
+      window.removeEventListener("hashchange", openFeedbackFromHash);
+    };
+  }, []);
 
   async function submitFeedback(formData: FormData) {
     setStatus("sending");
@@ -35,7 +57,7 @@ export function FeedbackButton() {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-50">
+    <div id="lda-feedback" className="fixed bottom-5 right-5 z-50">
       {status === "sent" && !open ? (
         <div className="max-w-xs rounded border border-red-500/30 bg-black px-4 py-3 text-sm font-black text-white shadow-2xl">
           Thank you for the feedback.
