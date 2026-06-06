@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="900 660 2860 1120" role="img" aria-label="LDA Driving Academy">
+  <defs>
+    <linearGradient id="ldaBannerRed" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff2b2b"/>
+      <stop offset="48%" stop-color="#e30613"/>
+      <stop offset="100%" stop-color="#8f0008"/>
+    </linearGradient>
+    <linearGradient id="ldaBannerSilver" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="45%" stop-color="#f4f4f4"/>
+      <stop offset="100%" stop-color="#a8a8a8"/>
+    </linearGradient>
+    <filter id="ldaBannerShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="34" stdDeviation="22" flood-color="#000000" flood-opacity=".62"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#ffffff" flood-opacity=".22"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#ldaBannerShadow)">
+    <path d="M998 1434 1219 760h318l-136 414h609l-85 260H998Z" fill="url(#ldaBannerRed)"/>
+    <path d="M1157 1434 1378 760h318l-136 414h609l-85 260h-927Z" fill="none" stroke="#ff5a5a" stroke-width="18" opacity=".35"/>
+    <path d="M1860 760h395c253 0 417 134 417 342 0 202-162 332-415 332h-397V760Zm312 236v202h96c67 0 109-38 109-101 0-62-42-101-109-101h-96Z" fill="url(#ldaBannerSilver)"/>
+    <path d="M2724 1434 3090 760h306l368 674h-333l-45-92h-292l-45 92h-325Zm489-329h158l-79-163-79 163Z" fill="url(#ldaBannerSilver)"/>
+  </g>
+
+  <text x="2048" y="1665" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="164" font-weight="900" letter-spacing="34">
+    DRIVING ACADEMY
+  </text>
+</svg>
