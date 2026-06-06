@@ -136,7 +136,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const [availabilityDate, setAvailabilityDate] = useState("2026-05-14");
   const [sortBy, setSortBy] = useState("relevance");
   const [selectedInstructorId, setSelectedInstructorId] = useState<string | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState("09:30");
+  const [selectedSlot, setSelectedSlot] = useState("");
   const [checkoutState, setCheckoutState] = useState<"idle" | "loading" | "error" | "confirmed">("idle");
   const [checkoutError, setCheckoutError] = useState("");
   const [confirmationRef, setConfirmationRef] = useState("");
@@ -280,6 +280,10 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
 
     const bookedInstructor = instructors.find((instructor) => instructor.id === bookingDetails.instructorId) ?? instructors[0];
 
+    setSelectedInstructorId(bookingDetails.instructorId);
+    if (bookingDetails.date) setAvailabilityDate(bookingDetails.date);
+    if (bookingDetails.time) setSelectedSlot(bookingDetails.time);
+    if (bookingDetails.pickup) setPostcode(bookingDetails.pickup);
     setConfirmationRef(booking);
     setCheckoutState("confirmed");
     setBookingRecords((records) => {
@@ -340,13 +344,10 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
     });
   }, [distance, maxPrice, sortBy, transmission]);
 
-  const selectedInstructor =
-    (selectedInstructorId ? filteredInstructors.find((instructor) => instructor.id === selectedInstructorId) : null) ??
-    filteredInstructors[0] ??
-    instructors[0];
-  const availableSlots = selectedInstructor.slots[availabilityDate] ?? [];
-  const lessonSummary = `${availabilityDate} at ${selectedSlot || "selected time"} from ${postcode}. ${selectedInstructor.car}, ${selectedInstructor.transmission}.`;
-  const canPay = Boolean(selectedInstructorId && selectedInstructor && selectedSlot && postcode);
+  const selectedInstructor = selectedInstructorId ? (filteredInstructors.find((instructor) => instructor.id === selectedInstructorId) ?? null) : null;
+  const availableSlots = selectedInstructor?.slots[availabilityDate] ?? [];
+  const lessonSummary = selectedInstructor ? `${availabilityDate} at ${selectedSlot || "selected time"} from ${postcode}. ${selectedInstructor.car}, ${selectedInstructor.transmission}.` : "";
+  const canPay = Boolean(selectedInstructor && selectedSlot && postcode);
   const trackingBooking =
     bookingRecords.find((record) => record.status === "upcoming" || record.status === "pending") ??
     bookingRecords[0] ??
@@ -360,6 +361,17 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
       setSelectedInstructorId(null);
     }
   }, [filteredInstructors, selectedInstructorId]);
+
+  useEffect(() => {
+    checkoutRequestRef.current = null;
+
+    if (!selectedInstructor) {
+      setSelectedSlot("");
+      return;
+    }
+
+    setSelectedSlot((currentSlot) => (availableSlots.includes(currentSlot) ? currentSlot : availableSlots[0] ?? ""));
+  }, [availabilityDate, availableSlots, postcode, selectedInstructor]);
 
   function handleInstructorSelection(instructorId: string) {
     setSelectedInstructorId((current) => {
@@ -410,6 +422,8 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   }
 
   function checkoutSignature() {
+    if (!selectedInstructor) return "";
+
     return JSON.stringify({
       instructorId: selectedInstructor.id,
       instructorName: selectedInstructor.name,
@@ -420,6 +434,8 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   }
 
   function savePendingBooking(reference: string) {
+    if (!selectedInstructor) return;
+
     writeStoredValue(
       `lda-booking-${reference}`,
       JSON.stringify({
@@ -438,6 +454,10 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   }
 
   function createCheckoutSession(reference: string) {
+    if (!selectedInstructor) {
+      return Promise.reject({ error: "Choose an instructor before checkout." });
+    }
+
     return fetch("/api/bookings/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -455,7 +475,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   }
 
   function warmCheckoutSession() {
-    if (!canPay || checkoutState === "loading") return;
+    if (!canPay || !selectedInstructor || checkoutState === "loading") return;
 
     const signature = checkoutSignature();
     if (checkoutRequestRef.current?.signature === signature) return;
@@ -470,7 +490,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   }
 
   async function startCheckout() {
-    if (!canPay) return;
+    if (!canPay || !selectedInstructor) return;
     setCheckoutState("loading");
     setCheckoutError("");
 
@@ -648,62 +668,77 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
         </div>
 
         <aside className="grid gap-5">
-          <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-              <CalendarCheck size={16} /> Book {selectedInstructor.name}
-            </div>
-            <div className="mt-4 rounded border border-zinc-200 bg-zinc-50 p-4">
-              <div className="text-xs font-black uppercase text-zinc-600">Selected date</div>
-              <div className="mt-2 text-xl font-black">{availabilityDate}</div>
-              <div className="mt-1 text-sm text-zinc-600">{selectedInstructor.car}</div>
-            </div>
-            <div className="mt-4 grid gap-2">
-              <div className="text-xs font-black uppercase text-zinc-600">Available slots</div>
-              {availableSlots.length ? (
-                <div className="grid grid-cols-2 gap-2">
-                  {availableSlots.map((slot) => (
-                    <button key={slot} type="button" onClick={() => setSelectedSlot(slot)} className={`rounded border px-3 py-2 text-sm font-black ${selectedSlot === slot ? "border-brand bg-brand text-white" : "border-zinc-300 bg-white text-zinc-800"}`}>
-                      {slot}
-                    </button>
-                  ))}
+          {selectedInstructor ? (
+            <>
+              <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
+                  <CalendarCheck size={16} /> Book {selectedInstructor.name}
                 </div>
-              ) : (
-                <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-bold text-zinc-600">No slots on this date. Pick another date.</div>
-              )}
-            </div>
-          </section>
+                <div className="mt-4 rounded border border-zinc-200 bg-zinc-50 p-4">
+                  <div className="text-xs font-black uppercase text-zinc-600">Selected date</div>
+                  <div className="mt-2 text-xl font-black">{availabilityDate}</div>
+                  <div className="mt-1 text-sm text-zinc-600">{selectedInstructor.car}</div>
+                </div>
+                <div className="mt-4 grid gap-2">
+                  <div className="text-xs font-black uppercase text-zinc-600">Available slots</div>
+                  {availableSlots.length ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      {availableSlots.map((slot) => (
+                        <button key={slot} type="button" onClick={() => setSelectedSlot(slot)} className={`rounded border px-3 py-2 text-sm font-black ${selectedSlot === slot ? "border-brand bg-brand text-white" : "border-zinc-300 bg-white text-zinc-800"}`}>
+                          {slot}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-bold text-zinc-600">No slots on this date. Pick another date.</div>
+                  )}
+                </div>
+              </section>
 
-          <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
-              <CreditCard size={16} /> Confirm and pay
-            </div>
-            <div className="mt-4 grid gap-3 rounded border border-zinc-200 bg-zinc-50 p-4 text-sm">
-              <div><span className="font-black text-zinc-600">Instructor:</span> {selectedInstructor.name}</div>
-              <div><span className="font-black text-zinc-600">Pickup:</span> {postcode}</div>
-              <div><span className="font-black text-zinc-600">Lesson:</span> {availabilityDate} at {selectedSlot || "choose a slot"}</div>
-              <div><span className="font-black text-zinc-600">Upfront price:</span> {formatMoney(selectedInstructor.price)} with no hidden booking fee</div>
-            </div>
-            <p className="mt-3 text-xs leading-5 text-zinc-500">
-              Stripe Checkout securely handles card entry and any eligible payment methods enabled on the LDA Stripe account.
-            </p>
-            <button
-              disabled={!canPay || checkoutState === "loading"}
-              onPointerEnter={warmCheckoutSession}
-              onFocus={warmCheckoutSession}
-              onTouchStart={warmCheckoutSession}
-              onClick={() => startCheckout()}
-              className="lda-pill mt-5 w-full"
-            >
-              <CreditCard size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : "Checkout"}
-            </button>
-            {checkoutState === "error" ? <p className="mt-3 text-sm font-bold text-brand">{checkoutError || "Checkout could not open. Check Stripe keys in Vercel."}</p> : null}
-            {checkoutState === "confirmed" ? (
-              <div className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-4 text-sm leading-6 text-red-100">
-                <MailCheck className="mb-2" />
-                Thank you for booking {selectedInstructor.name}. Your unique booking reference is <span className="font-black">{confirmationRef}</span>. Only share it with your instructor when they arrive.
+              {selectedSlot ? (
+                <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
+                    <CreditCard size={16} /> Confirm and pay
+                  </div>
+                  <div className="mt-4 grid gap-3 rounded border border-zinc-200 bg-zinc-50 p-4 text-sm">
+                    <div><span className="font-black text-zinc-600">Instructor:</span> {selectedInstructor.name}</div>
+                    <div><span className="font-black text-zinc-600">Pickup:</span> {postcode}</div>
+                    <div><span className="font-black text-zinc-600">Lesson:</span> {availabilityDate} at {selectedSlot}</div>
+                    <div><span className="font-black text-zinc-600">Upfront price:</span> {formatMoney(selectedInstructor.price)} with no hidden booking fee</div>
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-zinc-500">
+                    Stripe Checkout securely handles card entry and any eligible payment methods enabled on the LDA Stripe account.
+                  </p>
+                  <button
+                    disabled={!canPay || checkoutState === "loading"}
+                    onPointerEnter={warmCheckoutSession}
+                    onFocus={warmCheckoutSession}
+                    onTouchStart={warmCheckoutSession}
+                    onClick={() => startCheckout()}
+                    className="lda-pill mt-5 w-full"
+                  >
+                    <CreditCard size={18} /> {checkoutState === "loading" ? "Opening secure checkout..." : "Checkout"}
+                  </button>
+                  {checkoutState === "error" ? <p className="mt-3 text-sm font-bold text-brand">{checkoutError || "Checkout could not open. Check Stripe keys in Vercel."}</p> : null}
+                  {checkoutState === "confirmed" ? (
+                    <div className="mt-4 rounded border border-red-500/30 bg-red-500/10 p-4 text-sm leading-6 text-red-100">
+                      <MailCheck className="mb-2" />
+                      Thank you for booking {selectedInstructor.name}. Your unique booking reference is <span className="font-black">{confirmationRef}</span>. Only share it with your instructor when they arrive.
+                    </div>
+                  ) : null}
+                </section>
+              ) : null}
+            </>
+          ) : (
+            <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-2 text-sm font-black uppercase text-brand">
+                <CalendarCheck size={16} /> Choose an instructor first
               </div>
-            ) : null}
-          </section>
+              <p className="mt-3 text-sm font-bold leading-6 text-zinc-600">
+                Select a driving instructor from the list. LDA will then show that instructor's available slots for {availabilityDate} and build the checkout summary from your real selection.
+              </p>
+            </section>
+          )}
         </aside>
       </section>
     </section>
