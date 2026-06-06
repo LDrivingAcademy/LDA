@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, KeyRound, RotateCcw, ShieldCheck } from "lucide-react";
 import { changeAccountPassword } from "@/app/account/change-password/actions";
+import { PasswordInput } from "@/components/password-input";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -74,15 +75,15 @@ export default async function ChangePasswordPage({ searchParams }: ChangePasswor
           <form action={changeAccountPassword} className="mt-5 grid gap-3">
             <label className="grid gap-1">
               <span className="text-sm font-bold text-zinc-600">Current password</span>
-              <input required name="currentPassword" type="password" autoComplete="current-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Current password" />
+              <PasswordInput required name="currentPassword" autoComplete="current-password" className="w-full rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Current password" />
             </label>
             <label className="grid gap-1">
               <span className="text-sm font-bold text-zinc-600">New password</span>
-              <input required name="newPassword" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
+              <PasswordInput required name="newPassword" minLength={8} autoComplete="new-password" className="w-full rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Minimum 8 characters" />
             </label>
             <label className="grid gap-1">
               <span className="text-sm font-bold text-zinc-600">Confirm new password</span>
-              <input required name="confirmPassword" type="password" minLength={8} autoComplete="new-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Confirm new password" />
+              <PasswordInput required name="confirmPassword" minLength={8} autoComplete="new-password" className="w-full rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Confirm new password" />
             </label>
             <button className="lda-pill mt-2 w-full">
               <KeyRound size={18} /> Change password
