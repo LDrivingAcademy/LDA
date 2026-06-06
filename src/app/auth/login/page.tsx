@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { CarFront, GraduationCap, KeyRound, ShieldCheck } from "lucide-react";
 import { LoginRememberHelper } from "@/components/auth/login-remember-helper";
 import { PageTopBar } from "@/components/page-top-bar";
+import { PasswordInput } from "@/components/password-input";
 import { getHeaderAccountSummary } from "@/lib/current-account";
 import { signIn } from "../actions";
 
@@ -72,7 +73,7 @@ export default async function LoginPage({
               </label>
               <label className="grid gap-1">
                 <span className="text-sm font-bold text-zinc-600">Password</span>
-                <input id="lda-login-password" required name="password" type="password" autoComplete="current-password" className="rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Your password" />
+                <PasswordInput id="lda-login-password" required name="password" autoComplete="current-password" className="w-full rounded border border-zinc-300 bg-white px-3 py-3 text-black placeholder:text-zinc-600" placeholder="Your password" />
               </label>
               <label className="flex items-start gap-3 rounded border border-zinc-300 bg-white p-3 text-sm font-bold leading-6 text-zinc-700">
                 <input name="rememberMe" type="checkbox" defaultChecked={Boolean(rememberedIdentifier)} className="mt-1 accent-red-600" />
