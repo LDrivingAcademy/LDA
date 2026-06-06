@@ -190,9 +190,6 @@ export default async function LearnerJourneyPage({ searchParams }: LearnerJourne
                 <Link href="#journey-sections" className="lda-pill lda-pill-sm">
                   View journey sections <ArrowRight size={17} />
                 </Link>
-                <Link href={backHref} className="lda-pill lda-pill-sm">
-                  <ArrowLeft size={17} /> Return to booking
-                </Link>
               </div>
             </div>
 
