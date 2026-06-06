@@ -9,6 +9,7 @@ const menuLinks = [
   { href: "/about", label: "About" },
   { href: "/instructor", label: "Become an Instructor" },
   { href: "/cancellation-policy", label: "Cancellation policy" },
+  { href: "/#lda-feedback", label: "Feedback" },
   { href: "/contact", label: "Help" },
   { href: "/auth/login?role=instructor", label: "Instructor log in" },
   { href: "/auth/sign-up?role=instructor", label: "Instructor sign up" },
@@ -40,6 +41,7 @@ export function MainMenu({ account }: { account?: MainMenuAccount | null }) {
           ...(account.role === "learner" ? [{ href: "/account/instructor-transfer", label: "Become an instructor" }] : []),
           { href: "/safety", label: "Safety" },
           { href: "/cancellation-policy", label: "Cancellation policy" },
+          { href: "/#lda-feedback", label: "Feedback" },
           { href: "/about", label: "About" },
           { href: "/contact", label: "Help" }
         ])
@@ -89,7 +91,17 @@ export function MainMenu({ account }: { account?: MainMenuAccount | null }) {
             <LanguageSelector />
           </div>
           {activeLinks.map((link) => (
-            <Link key={`${link.href}-${link.label}`} href={link.href} onClick={() => setIsOpen(false)} className="block px-4 py-3 text-sm font-black hover:bg-red-500/10 hover:text-brand">
+            <Link
+              key={`${link.href}-${link.label}`}
+              href={link.href}
+              onClick={() => {
+                if (link.href.includes("#lda-feedback")) {
+                  window.dispatchEvent(new Event("lda:open-feedback"));
+                }
+                setIsOpen(false);
+              }}
+              className="block px-4 py-3 text-sm font-black hover:bg-red-500/10 hover:text-brand"
+            >
               {link.label}
             </Link>
           ))}
