@@ -183,7 +183,7 @@ export default async function HomePage() {
                 <ShieldCheck size={16} /> Trusted by learners across the UK
               </div>
               <h1 className="mt-8 max-w-3xl text-5xl font-black leading-[1.05] tracking-normal text-black sm:text-6xl lg:text-7xl">
-                Book driving lessons with <span className="text-brand">LDA.</span>
+                Book driving lessons with <span className="text-brand">L</span>DA.
               </h1>
               <p className="mt-7 max-w-xl text-xl font-semibold leading-8 text-zinc-700">
                 Find expert instructors, book lessons that fit your schedule, and learn with confidence.
