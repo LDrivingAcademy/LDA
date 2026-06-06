@@ -17,16 +17,16 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/lda-logo-520.svg", type: "image/svg+xml", sizes: "520x300" }
+      { url: "/lda-logo-transparent.svg", type: "image/svg+xml", sizes: "4096x2363" }
     ],
     shortcut: "/favicon.svg",
-    apple: "/lda-logo-520.svg"
+    apple: "/lda-logo-transparent.svg"
   },
   openGraph: {
     title: "L Driving Academy",
     description: "A UK learner-driver marketplace for verified driving instructors, transparent pricing, booking, and online payments.",
     siteName: "L Driving Academy",
-    images: [{ url: "/lda-logo-520.svg", width: 520, height: 300, alt: "L Driving Academy" }],
+    images: [{ url: "/lda-logo-transparent.svg", width: 4096, height: 2363, alt: "L Driving Academy" }],
     type: "website"
   }
 };
