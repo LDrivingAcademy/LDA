@@ -14,7 +14,19 @@ async function countRows(supabase: NonNullable<Awaited<ReturnType<typeof createC
 }
 
 export default async function AdminPage() {
-  const demoRole = (await cookies()).get("lda_demo_role")?.value;
+  const cookieStore = await cookies();
+  const hasOwnerGateway = cookieStore.get("lda_admin_gateway")?.value === "granted";
+
+  if (!hasOwnerGateway) {
+    return (
+      <AdminMessage
+        title="Owner gateway required"
+        body="Open the private owner gateway link first. Direct admin dashboard access is blocked."
+      />
+    );
+  }
+
+  const demoRole = cookieStore.get("lda_demo_role")?.value;
 
   if (demoRole === "admin") {
     return <AdminDemoDashboard />;
