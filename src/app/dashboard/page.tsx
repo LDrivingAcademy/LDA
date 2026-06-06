@@ -14,38 +14,56 @@ import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 const instructorDashboardSections = [
   {
     title: "Today's Lessons",
+    bio: "See the lessons that need attention today, from confirmed bookings to pickup details and lesson status.",
+    href: "/instructor-calendar?from=dashboard",
     items: ["Upcoming lessons", "Pupil names", "Lesson times and durations", "Pick-up locations", "Lesson status"]
   },
   {
     title: "Pupil Management",
+    bio: "Keep your active learners, new enquiries, test-ready pupils, and lesson history organised in one place.",
+    href: "/progress-tracker?from=dashboard",
     items: ["Active pupils", "New enquiries", "Test-ready pupils", "Lesson history"]
   },
   {
     title: "Pupil Progress",
+    bio: "Track learner development against the DVSA syllabus and keep lesson evidence ready for the next session.",
+    href: "/progress-tracker?from=dashboard",
     items: ["DVSA syllabus progress", "Skills completed", "Areas needing improvement", "Mock test results", "Instructor notes"]
   },
   {
     title: "Diary / Calendar",
+    bio: "Manage your working week, availability, booking requests, rescheduled lessons, and upcoming test dates.",
+    href: "/instructor-calendar?from=dashboard",
     items: ["Weekly schedule", "Availability", "Booking requests", "Rescheduled lessons", "Test dates"]
   },
   {
     title: "Driving Test Information",
+    bio: "Keep practical test dates, centres, readiness notes, and pass or fail history visible before each milestone.",
+    href: "/progress-tracker?from=dashboard",
     items: ["Upcoming practical tests", "Test centre", "Test time and date", "Pass/fail history", "Student readiness status"]
   },
   {
     title: "Finance",
+    bio: "Review lesson earnings, outstanding payments, received payments, and payout-ready booking evidence.",
+    href: "/instructor-calendar?from=dashboard",
     items: ["Today's earnings", "Weekly/monthly earnings", "Outstanding payments", "Lesson payments received"]
   },
   {
     title: "Performance Metrics",
+    bio: "Monitor the signals that shape your LDA profile: pass rate, lessons delivered, retention, reviews, and cancellations.",
+    href: "/instructor-plus?from=dashboard",
     items: ["Pass rate", "Lessons delivered this week/month", "Student retention", "Reviews and ratings", "Cancellation rate"]
   },
   {
     title: "Messages & Notifications",
+    bio: "Keep learner enquiries, reminders, test prompts, and platform announcements easy to find.",
+    href: "/support/instructor/dashboard",
     items: ["New pupil enquiries", "Lesson reminders", "Test reminders", "Company announcements"]
   },
   {
     title: "Vehicle & Compliance",
+    bio: "Stay ahead of vehicle servicing, insurance expiry, ADI/PDI registration, and compliance reminders.",
+    href: "/instructor?from=dashboard",
     items: ["Vehicle service reminders", "Insurance expiry", "ADI/PDI registration"]
   }
 ];
@@ -221,15 +239,28 @@ function InstructorDashboardSections() {
     <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {instructorDashboardSections.map((section) => (
-          <article key={section.title} className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-            <h2 className="text-xl font-black text-black">{section.title}</h2>
-            <ul className="mt-4 grid gap-2 text-sm font-bold leading-6 text-zinc-700">
-              {section.items.map((item) => (
-                <li key={item} className="rounded bg-zinc-50 px-3 py-2">
-                  {item}
-                </li>
-              ))}
-            </ul>
+          <article key={section.title} className="flex min-h-[230px] flex-col rounded bg-zinc-100 p-5 text-black shadow-sm transition hover:bg-zinc-200 sm:p-6">
+            <h2 className="text-2xl font-black">{section.title}</h2>
+            <p className="mt-4 max-w-sm text-base leading-7 text-zinc-800">{section.bio}</p>
+            <details className="group mt-auto pt-5">
+              <summary className="lda-pill lda-pill-sm inline-flex cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <span className="group-open:hidden">View options</span>
+                <span className="hidden group-open:inline">Hide options</span>
+                <ArrowRight size={16} className="transition group-open:rotate-90" />
+              </summary>
+              <div className="mt-4 rounded border border-zinc-200 bg-white p-3 shadow-sm">
+                <ul className="grid gap-2 text-sm font-bold leading-6 text-zinc-700">
+                  {section.items.map((item) => (
+                    <li key={item}>
+                      <Link href={section.href} className="flex items-center justify-between gap-3 rounded bg-zinc-50 px-3 py-2 text-zinc-800 transition hover:bg-red-50 hover:text-brand">
+                        <span>{item}</span>
+                        <ArrowRight size={14} className="shrink-0" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </details>
           </article>
         ))}
       </div>
