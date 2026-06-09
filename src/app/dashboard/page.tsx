@@ -30,7 +30,7 @@ const instructorDashboardSections = [
   {
     title: "Finance",
     bio: "Review lesson earnings, outstanding payments, received payments, and payout-ready booking evidence.",
-    href: "/instructor-calendar?from=dashboard"
+    href: "/instructor-finance?from=dashboard"
   },
   {
     title: "Performance Metrics",
