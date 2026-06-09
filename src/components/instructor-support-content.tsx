@@ -4,7 +4,6 @@ import { Brand } from "@/components/brand";
 import { LanguageSelector } from "@/components/language-selector";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
-import { PlatformProtectionPanel } from "@/components/platform-protection-panel";
 
 const instructorActions = [
   { title: "Verification support", body: "ADI/PDI status, licence evidence, insurance documents, rejected applications, and approval status.", href: "mailto:info@ldrivingacademy.co.uk?subject=Instructor%20verification%20support", cta: "Email verification", icon: FileCheck2 },
@@ -115,9 +114,6 @@ export function InstructorSupportContent({ entry }: { entry: "public" | "dashboa
               );
             })}
           </div>
-        </section>
-        <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
-          <PlatformProtectionPanel audience="instructor" />
         </section>
       </main>
       <SiteFooter />
