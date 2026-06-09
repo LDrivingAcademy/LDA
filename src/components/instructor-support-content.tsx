@@ -39,17 +39,12 @@ export function InstructorSupportContent({ entry }: { entry: "public" | "dashboa
             ) : null}
           </div>
           {entry === "public" ? (
-            <>
-              <div className="hidden items-center gap-6 md:flex">
-                <LanguageSelector />
-                <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
-                  <CircleHelp size={17} /> Help
-                </Link>
-              </div>
-              <div className="md:hidden">
-                <MainMenu />
-              </div>
-            </>
+            <div className="hidden items-center gap-6 md:flex">
+              <LanguageSelector />
+              <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+                <CircleHelp size={17} /> Help
+              </Link>
+            </div>
           ) : (
             <Link
               href="/dashboard"
@@ -58,6 +53,9 @@ export function InstructorSupportContent({ entry }: { entry: "public" | "dashboa
               <span aria-hidden="true">{"<-"}</span> Back to dashboard
             </Link>
           )}
+          <div className={entry === "public" ? "md:hidden" : "hidden"}>
+            <MainMenu />
+          </div>
         </div>
       </header>
 
