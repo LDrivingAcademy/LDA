@@ -315,7 +315,7 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
                               {counts.booked ? <StatusDot label={`${counts.booked} booked`} className="bg-emerald-500" /> : null}
                               {counts.pending ? <StatusDot label={`${counts.pending} holding`} className="bg-amber-500" /> : null}
                               {counts.free ? <StatusDot label={`${counts.free} free`} className="bg-sky-500" /> : null}
-                              {counts.blocked ? <StatusDot label={`${counts.blocked} off`} className="bg-zinc-500" /> : null}
+                              {counts.blocked ? <StatusDot label={counts.blocked === 1 ? "day off" : `${counts.blocked} unavailable`} className="bg-zinc-500" /> : null}
                               {counts.cancelled ? <StatusDot label={`${counts.cancelled} cancelled`} className="bg-red-500" /> : null}
                             </div>
                           </>
