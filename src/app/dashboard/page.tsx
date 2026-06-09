@@ -19,8 +19,8 @@ const instructorDashboardSections = [
   },
   {
     title: "Pupil Management",
-    bio: "Keep your active learners, new enquiries, test-ready pupils, and lesson history organised in one place.",
-    href: "/progress-tracker?from=dashboard"
+    bio: "Keep active pupils and test-ready pupils organised in one focused workspace.",
+    href: "/pupil-management?from=dashboard"
   },
   {
     title: "Pupil Progress",
