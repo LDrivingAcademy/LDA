@@ -35,7 +35,7 @@ const instructorDashboardSections = [
   {
     title: "Performance Metrics",
     bio: "Monitor the signals that shape your LDA profile: pass rate, lessons delivered, retention, reviews, and cancellations.",
-    href: "/instructor-plus?from=dashboard"
+    href: "/instructor-performance?from=dashboard"
   },
   {
     title: "Messages & Notifications",
