@@ -24,6 +24,8 @@ type MainMenuAccount = {
   role: "instructor" | "learner";
   subscriptionHref: string;
   subscriptionLabel: string;
+  upgradeHref?: string;
+  upgradeLabel?: string;
 };
 
 function sortLinksByLabel<T extends { label: string }>(links: T[]) {
