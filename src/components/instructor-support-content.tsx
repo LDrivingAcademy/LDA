@@ -3,7 +3,6 @@ import { BadgeCheck, CalendarClock, CircleHelp, CreditCard, FileCheck2, Mail, Sh
 import { Brand } from "@/components/brand";
 import { LanguageSelector } from "@/components/language-selector";
 import { MainMenu } from "@/components/main-menu";
-import { PageTopBar } from "@/components/page-top-bar";
 import { SiteFooter } from "@/components/site-footer";
 import { PlatformProtectionPanel } from "@/components/platform-protection-panel";
 
@@ -26,32 +25,41 @@ export function InstructorSupportContent({ entry }: { entry: "public" | "dashboa
 
   return (
     <>
-      {entry === "dashboard" ? (
-        <PageTopBar backHref="/dashboard" backLabel="Back to dashboard" />
-      ) : (
-        <header className="sticky top-0 z-30 bg-black text-white">
-          <div className="flex w-full items-center justify-between gap-4 px-[15px] py-4">
-            <div className="flex min-w-0 items-center gap-7">
-              <Brand />
+      <header className="sticky top-0 z-30 bg-black text-white">
+        <div className="flex w-full items-center justify-between gap-4 px-[15px] py-4">
+          <div className="flex min-w-0 items-center gap-7">
+            <Brand />
+            {entry === "public" ? (
               <nav className="hidden items-center gap-7 lg:flex">
                 <Link href="/auth/login?role=learner" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Learner</Link>
                 <Link href="/instructor" className="rounded-full px-3 py-2 text-sm font-black text-white ring-2 ring-brand">Instructor</Link>
                 <Link href="/#discover" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">Services</Link>
                 <Link href="/about" className="rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">About</Link>
               </nav>
-            </div>
-            <div className="hidden items-center gap-6 md:flex">
-              <LanguageSelector />
-              <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
-                <CircleHelp size={17} /> Help
-              </Link>
-            </div>
-            <div className="md:hidden">
-              <MainMenu />
-            </div>
+            ) : null}
           </div>
-        </header>
-      )}
+          {entry === "public" ? (
+            <>
+              <div className="hidden items-center gap-6 md:flex">
+                <LanguageSelector />
+                <Link href="/contact" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black text-white hover:ring-2 hover:ring-brand">
+                  <CircleHelp size={17} /> Help
+                </Link>
+              </div>
+              <div className="md:hidden">
+                <MainMenu />
+              </div>
+            </>
+          ) : (
+            <Link
+              href="/dashboard"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-white hover:text-white hover:ring-2 hover:ring-brand"
+            >
+              <span aria-hidden="true">{"<-"}</span> Back to dashboard
+            </Link>
+          )}
+        </div>
+      </header>
 
       <main className="bg-white text-black">
         <section className="bg-black text-white">
