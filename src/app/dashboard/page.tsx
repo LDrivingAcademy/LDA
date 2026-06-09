@@ -13,7 +13,7 @@ import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 
 const instructorDashboardSections = [
   {
-    title: "Today's Lessons",
+    title: "Lessons/Diary",
     bio: "See the lessons that need attention today, from confirmed bookings to pickup details and lesson status.",
     href: "/instructor-calendar?from=dashboard"
   },
@@ -26,11 +26,6 @@ const instructorDashboardSections = [
     title: "Pupil Progress",
     bio: "Track learner development against the DVSA syllabus and keep lesson evidence ready for the next session.",
     href: "/progress-tracker?from=dashboard"
-  },
-  {
-    title: "Diary / Calendar",
-    bio: "Manage your working week, availability, booking requests, rescheduled lessons, and upcoming test dates.",
-    href: "/instructor-calendar?from=dashboard"
   },
   {
     title: "Driving Test Information",
@@ -234,7 +229,7 @@ function InstructorDashboardSections() {
             <h2 className="text-2xl font-black">{section.title}</h2>
             <p className="mt-4 max-w-sm text-base leading-7 text-zinc-800">{section.bio}</p>
             <Link href={section.href} className="lda-pill lda-pill-sm mt-auto self-start">
-              View <ArrowRight size={16} />
+              View
             </Link>
           </article>
         ))}
