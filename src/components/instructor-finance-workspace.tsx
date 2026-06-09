@@ -124,7 +124,7 @@ export function InstructorFinanceWorkspace() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-          <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <section className="flex h-full flex-col rounded border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-sm font-black uppercase text-brand">Payout account</div>
@@ -137,7 +137,7 @@ export function InstructorFinanceWorkspace() {
             <div className="mt-5 rounded border border-zinc-200 bg-zinc-50 p-4 text-sm font-bold leading-6 text-zinc-700">
               Current destination: <span className="font-black text-black">{payoutDestination}</span>. Full account details stay masked after saving.
             </div>
-            <form onSubmit={savePayout} className="mt-5 grid gap-4">
+            <form onSubmit={savePayout} className="mt-5 flex flex-1 flex-col gap-4">
               <label className="grid gap-2 text-sm font-black">
                 Payee name
                 <input value={payoutProfile.payeeName} onChange={(event) => setPayoutProfile({ ...payoutProfile, payeeName: event.target.value })} className="rounded border border-zinc-300 px-3 py-3 font-bold" />
@@ -164,13 +164,13 @@ export function InstructorFinanceWorkspace() {
                   <option>Monthly</option>
                 </select>
               </label>
-              <button type="submit" className="lda-pill lda-pill-sm self-start">
+              <button type="submit" className="lda-pill lda-pill-sm mt-auto self-start">
                 Save payout details
               </button>
             </form>
           </section>
 
-          <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <section className="flex h-full flex-col rounded border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-sm font-black uppercase text-brand">Tax profile</div>
@@ -183,7 +183,7 @@ export function InstructorFinanceWorkspace() {
             <p className="mt-4 text-sm font-bold leading-6 text-zinc-600">
               For UK self-employed instructors, UTR, National Insurance, VAT status, and accounting method are usually more relevant than a PAYE tax code. A tax code field is still available where needed.
             </p>
-            <form onSubmit={saveTax} className="mt-5 grid gap-4">
+            <form onSubmit={saveTax} className="mt-5 flex flex-1 flex-col gap-4">
               <label className="grid gap-2 text-sm font-black">
                 Trading status
                 <select value={taxProfile.tradingStatus} onChange={(event) => setTaxProfile({ ...taxProfile, tradingStatus: event.target.value })} className="rounded border border-zinc-300 px-3 py-3 font-bold">
@@ -227,7 +227,7 @@ export function InstructorFinanceWorkspace() {
                   <option>Traditional accounting</option>
                 </select>
               </label>
-              <button type="submit" className="lda-pill lda-pill-sm self-start">
+              <button type="submit" className="lda-pill lda-pill-sm mt-auto self-start">
                 Save tax profile
               </button>
             </form>
