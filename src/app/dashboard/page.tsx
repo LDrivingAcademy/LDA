@@ -104,9 +104,9 @@ export default async function DashboardPage() {
         : "Instructor";
   const instructorUpgrade =
     currentInstructorPackageId === "instructor"
-      ? { label: "Upgrade to Plus", href: "/instructor-plus/instructor-plus?from=dashboard" }
+      ? { label: "Upgrade to Plus", href: "/instructor-plus?from=dashboard" }
       : currentInstructorPackageId === "instructor-plus"
-        ? { label: "Upgrade to Pro", href: "/instructor-plus/instructor-pro?from=dashboard" }
+        ? { label: "Upgrade to Pro", href: "/instructor-plus?from=dashboard" }
         : null;
   const statusRequestHref = `mailto:info@ldrivingacademy.co.uk?subject=${encodeURIComponent(
     "Instructor verification status request"
