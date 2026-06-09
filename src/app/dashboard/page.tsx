@@ -28,11 +28,6 @@ const instructorDashboardSections = [
     href: "/progress-tracker?from=dashboard"
   },
   {
-    title: "Driving Test Information",
-    bio: "Keep practical test dates, centres, readiness notes, and pass or fail history visible before each milestone.",
-    href: "/progress-tracker?from=dashboard"
-  },
-  {
     title: "Finance",
     bio: "Review lesson earnings, outstanding payments, received payments, and payout-ready booking evidence.",
     href: "/instructor-calendar?from=dashboard"
