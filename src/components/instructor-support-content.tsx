@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { BadgeCheck, CalendarClock, CircleHelp, CreditCard, FileCheck2, Mail, ShieldCheck, UserCog } from "lucide-react";
+import { ArrowLeft, BadgeCheck, CalendarClock, CircleHelp, CreditCard, FileCheck2, Mail, ShieldCheck, UserCog } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { LanguageSelector } from "@/components/language-selector";
 import { MainMenu } from "@/components/main-menu";
 import { SiteFooter } from "@/components/site-footer";
+import { PlatformProtectionPanel } from "@/components/platform-protection-panel";
 
 const instructorActions = [
   { title: "Verification support", body: "ADI/PDI status, licence evidence, insurance documents, rejected applications, and approval status.", href: "mailto:info@ldrivingacademy.co.uk?subject=Instructor%20verification%20support", cta: "Email verification", icon: FileCheck2 },
@@ -45,8 +46,11 @@ export function InstructorSupportContent({ entry }: { entry: "public" | "dashboa
               </Link>
             </div>
           ) : (
-            <Link href="/dashboard" className="lda-pill lda-pill-sm shrink-0 whitespace-normal text-center leading-5 sm:whitespace-nowrap">
-              Back to dashboard
+            <Link
+              href="/dashboard"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-white hover:text-white hover:ring-2 hover:ring-brand"
+            >
+              <ArrowLeft size={16} /> Back to dashboard
             </Link>
           )}
           <div className={entry === "public" ? "md:hidden" : "hidden"}>
@@ -111,6 +115,9 @@ export function InstructorSupportContent({ entry }: { entry: "public" | "dashboa
               );
             })}
           </div>
+        </section>
+        <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+          <PlatformProtectionPanel audience="instructor" />
         </section>
       </main>
       <SiteFooter />
