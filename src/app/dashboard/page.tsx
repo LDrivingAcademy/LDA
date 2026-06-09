@@ -10,6 +10,7 @@ import { LearnerDashboardMenu } from "@/components/learner-dashboard-menu";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
+import { currentInstructorPackageId } from "@/lib/instructor-packages";
 
 const instructorDashboardSections = [
   {
@@ -95,6 +96,18 @@ export default async function DashboardPage() {
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
   const displayName = profile?.full_name || user.email || "Learner";
   const verificationStatus = instructorProfile?.verification_status ?? "not started";
+  const instructorPackageLabel =
+    currentInstructorPackageId === "instructor-plus"
+      ? "Instructor Plus"
+      : currentInstructorPackageId === "instructor-pro"
+        ? "Instructor Pro"
+        : "Instructor";
+  const instructorUpgrade =
+    currentInstructorPackageId === "instructor"
+      ? { label: "Upgrade to Plus", href: "/instructor-plus/instructor-plus?from=dashboard" }
+      : currentInstructorPackageId === "instructor-plus"
+        ? { label: "Upgrade to Pro", href: "/instructor-plus/instructor-pro?from=dashboard" }
+        : null;
   const statusRequestHref = `mailto:info@ldrivingacademy.co.uk?subject=${encodeURIComponent(
     "Instructor verification status request"
   )}&body=${encodeURIComponent(
@@ -116,9 +129,16 @@ export default async function DashboardPage() {
               <div className="mt-1 truncate text-xl font-black">{displayName}</div>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 {isInstructor ? (
-                  <Link href="/instructor-plus?from=dashboard" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
-                    Instructor
-                  </Link>
+                  <>
+                    <Link href="/instructor-plus?from=dashboard" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
+                      {instructorPackageLabel}
+                    </Link>
+                    {instructorUpgrade ? (
+                      <Link href={instructorUpgrade.href} className="rounded-full border border-red-500/40 bg-transparent px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
+                        {instructorUpgrade.label}
+                      </Link>
+                    ) : null}
+                  </>
                 ) : (
                   <>
                     <Link href="/learner-plus?from=dashboard" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
