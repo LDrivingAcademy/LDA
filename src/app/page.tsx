@@ -320,6 +320,11 @@ function HeaderAccountBlock({ account, compact = false }: { account: HeaderAccou
       <Link href={account.dashboardHref} className="mt-1 inline-flex max-w-full items-center justify-center truncate rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 transition hover:border-red-500/80 hover:text-white hover:ring-2 hover:ring-brand">
         {account.subscriptionLabel}
       </Link>
+      {account.upgradeHref && account.upgradeLabel ? (
+        <Link href={account.upgradeHref} className="mt-1 inline-flex max-w-full items-center justify-center truncate rounded-full border border-red-500/40 bg-transparent px-3 py-1 text-[11px] font-black uppercase text-red-100 transition hover:border-red-500/80 hover:text-white hover:ring-2 hover:ring-brand">
+          {account.upgradeLabel}
+        </Link>
+      ) : null}
     </div>
   );
 }
