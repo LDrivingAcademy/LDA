@@ -45,7 +45,7 @@ const instructorDashboardSections = [
   {
     title: "Vehicle & Compliance",
     bio: "Stay ahead of vehicle servicing, insurance expiry, ADI/PDI registration, and compliance reminders.",
-    href: "/instructor?from=dashboard"
+    href: "/instructor-vehicle-compliance?from=dashboard"
   }
 ];
 
