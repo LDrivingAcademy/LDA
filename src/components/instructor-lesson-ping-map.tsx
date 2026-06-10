@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CarFront, Clock3, LocateFixed, MapPin, Navigation, RadioTower } from "lucide-react";
 import { LDA_GOOGLE_MAP_STYLES } from "@/lib/google-map-style";
+import { getResponsiveWorldMinZoom, watchResponsiveWorldViewport } from "@/lib/google-map-viewport";
 
 type Point = {
   lat: number;
@@ -18,7 +19,6 @@ declare global {
 }
 
 const PING_WINDOW_MINUTES = 20;
-const MIN_WORLD_MAP_ZOOM = 2;
 const learnerPickup: Point = {
   lat: 51.6523,
   lng: -0.1995,
@@ -197,6 +197,7 @@ export function InstructorLessonPingMap() {
 
   useEffect(() => {
     let cancelled = false;
+    let cleanupResponsiveViewport: (() => void) | null = null;
 
     loadGoogleMaps()
       .then(() => {
@@ -210,7 +211,7 @@ export function InstructorLessonPingMap() {
         const map = new maps.Map(mapElementRef.current, {
           center: learnerPickup,
           zoom: 13,
-          minZoom: MIN_WORLD_MAP_ZOOM,
+          minZoom: getResponsiveWorldMinZoom(mapElementRef.current),
           backgroundColor: "#eef2ef",
           disableDefaultUI: false,
           mapTypeControl: false,
@@ -245,6 +246,7 @@ export function InstructorLessonPingMap() {
         });
 
         map.fitBounds(bounds, 72);
+        cleanupResponsiveViewport = watchResponsiveWorldViewport(map, mapElementRef.current, maps);
         mapRef.current = map;
         setMapStatus("ready");
       })
@@ -252,6 +254,7 @@ export function InstructorLessonPingMap() {
 
     return () => {
       cancelled = true;
+      cleanupResponsiveViewport?.();
     };
   }, []);
 
@@ -315,7 +318,7 @@ export function InstructorLessonPingMap() {
           </div>
           <div className="rounded border border-zinc-200 bg-zinc-50 p-4">
             <div className="flex items-center gap-2 text-sm font-bold text-zinc-500"><CarFront size={16} /> Route estimate</div>
-            <div className="mt-1 font-black">{milesAway.toFixed(1)} miles · {etaMinutes} min</div>
+            <div className="mt-1 font-black">{milesAway.toFixed(1)} miles Â· {etaMinutes} min</div>
           </div>
           <button
             type="button"
