@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { CookieConsent } from "@/components/cookie-consent";
 import { PageTranslator } from "@/components/page-translator";
 import { RoutePrefetcher } from "@/components/route-prefetcher";
+import { VehicleAiAssistant } from "@/components/vehicle-ai-assistant";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -56,6 +57,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <RoutePrefetcher />
         <CookieConsent />
         <PageTranslator />
+        <VehicleAiAssistant />
       </body>
     </html>
   );
