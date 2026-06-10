@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.25.0",
   "engines": {
     "node": ">=20.9.0"
   },
@@ -10,7 +11,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "monitor": "node scripts/monitor-website.mjs",
+    "monitor:once": "node scripts/monitor-website.mjs --once",
+    "monitor:stress": "node scripts/monitor-website.mjs --stress",
+    "auto-guard": "node scripts/auto-guard.mjs",
+    "auto-guard:once": "node scripts/auto-guard.mjs --once"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
