@@ -1,5 +1,7 @@
 import { jsonNoStore, isRateLimited, rateLimitResponse, readJsonBody, safeText } from "@/lib/security";
 
+export const dynamic = "force-dynamic";
+
 type VehicleAiRequest = {
   role?: "learner" | "instructor" | "visitor";
   vehicleType?: "manual" | "automatic" | "electric" | "hybrid" | "unknown";
