@@ -37,7 +37,8 @@ export const learnerPackages: LearnerPackage[] = [
       "Search approved local instructors",
       "Book and pay securely through LDA",
       "Booking history and cancellation tools",
-      "Instructor ratings and written reviews"
+      "Instructor ratings and written reviews",
+      "Core LDA AI for safety, lesson, and vehicle questions"
     ],
     breakdown: [
       {
@@ -59,9 +60,9 @@ export const learnerPackages: LearnerPackage[] = [
     slug: "learner-plus",
     rank: 2,
     name: "Learner Plus",
-    price: "From £7.99/month",
-    monthlyPrice: "£7.99 per month",
-    yearlyPrice: "£79 per year",
+    price: "From Â£7.99/month",
+    monthlyPrice: "Â£7.99 per month",
+    yearlyPrice: "Â£79 per year",
     label: "Current plan",
     highlighted: true,
     summary: "More guidance, stronger SmartMatch weighting, and priority learner support.",
@@ -73,12 +74,17 @@ export const learnerPackages: LearnerPackage[] = [
       "Premium LDA SmartMatch weighting",
       "Priority learner support for booking issues",
       "Deeper progress tracker recommendations",
-      "Early access to lesson bundles and launch offers"
+      "Early access to lesson bundles and launch offers",
+      "Plus LDA AI for personalised lesson plans, support preferences, and Smart Match coaching"
     ],
     breakdown: [
       {
         heading: "Smarter matching",
         body: "SmartMatch can prioritise support preferences, instructor strengths, availability, rating quality, and lesson goals when suggesting instructors."
+      },
+      {
+        heading: "Adaptive AI support",
+        body: "Learner Plus is designed for deeper LDA AI personalisation across confidence, support needs, lesson timing, instructor style, and progress planning."
       },
       {
         heading: "Better revision support",
@@ -95,9 +101,9 @@ export const learnerPackages: LearnerPackage[] = [
     slug: "learner-pro",
     rank: 3,
     name: "Learner Pro",
-    price: "From £14.99/month",
-    monthlyPrice: "£14.99 per month",
-    yearlyPrice: "£149 per year",
+    price: "From Â£14.99/month",
+    monthlyPrice: "Â£14.99 per month",
+    yearlyPrice: "Â£149 per year",
     label: "Full support",
     stripePriceEnv: {
       monthly: "STRIPE_LEARNER_PRO_MONTHLY_PRICE_ID",
@@ -108,7 +114,8 @@ export const learnerPackages: LearnerPackage[] = [
       "Advanced theory and hazard practice plans",
       "Practical test readiness checklist",
       "First-car and insurance quote support",
-      "Personalised revision and confidence coaching"
+      "Personalised revision and confidence coaching",
+      "Pro LDA AI for first-car checks, insurance prep, and connector-ready vehicle-history guidance"
     ],
     breakdown: [
       {
@@ -122,6 +129,10 @@ export const learnerPackages: LearnerPackage[] = [
       {
         heading: "After passing",
         body: "Designed to unlock first-car guidance, insurance quote support, Pass Plus pathways, motorway confidence, and post-test road confidence."
+      },
+      {
+        heading: "Pro AI journey support",
+        body: "Learner Pro is prepared for richer AI assistance around car shortlists, insurance quote packs, traffic-aware lesson timing, seller red flags, and verified partner-data checks once providers are connected."
       }
     ]
   }
