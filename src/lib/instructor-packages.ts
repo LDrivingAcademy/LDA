@@ -39,6 +39,8 @@ export const instructorPackages: InstructorPackage[] = [
       "Publish an approved instructor profile",
       "Manage availability and booking requests",
       "Track confirmed bookings and payout status",
+      "Build protected LDA learner history, reviews, and repeat-booking signals",
+      "Core LDA AI for vehicle, lesson, and safety guidance",
     ],
     breakdown: [
       {
@@ -47,11 +49,15 @@ export const instructorPackages: InstructorPackage[] = [
       },
       {
         heading: "Booking basics",
-        body: "Manage availability, accept or decline bookings, and keep upcoming lessons visible in one instructor dashboard.",
+        body: "Manage availability, accept or decline bookings, keep upcoming lessons visible in one instructor dashboard, and keep LDA-introduced learners inside the protected booking flow.",
       },
       {
         heading: "Payout readiness",
         body: "Prepared for Stripe Connect payout status and earnings tracking once instructor payments are fully enabled.",
+      },
+      {
+        heading: "Client growth record",
+        body: "Completed LDA lessons can support learner history, progress notes, reviews, repeat bookings, support records, and future ranking signals.",
       },
     ],
   },
@@ -60,9 +66,9 @@ export const instructorPackages: InstructorPackage[] = [
     slug: "instructor-plus",
     rank: 2,
     name: "Instructor Plus",
-    price: "From £12.99/month",
-    monthlyPrice: "£12.99 per month",
-    yearlyPrice: "£129 per year",
+    price: "From Â£12.99/month",
+    monthlyPrice: "Â£12.99 per month",
+    yearlyPrice: "Â£129 per year",
     label: "Growth tools",
     highlighted: true,
     summary:
@@ -76,6 +82,8 @@ export const instructorPackages: InstructorPackage[] = [
       "Enhanced availability and quiet-hours controls",
       "SmartMatch teaching-strength badges",
       "Priority instructor support for booking issues",
+      "Stronger repeat-learner and conversion signals",
+      "Plus LDA AI for learner-plan summaries, support needs, and message condensation",
     ],
     breakdown: [
       {
@@ -87,8 +95,16 @@ export const instructorPackages: InstructorPackage[] = [
         body: "Prepared for badges such as Pass Plus, night driving, motorway confidence, accessibility support, and learner anxiety support.",
       },
       {
+        heading: "Adaptive AI workflow",
+        body: "Instructor Plus is designed to help summarise learner needs, prepare lesson plans, condense long messages, and connect recurring learner questions back into SmartMatch.",
+      },
+      {
         heading: "Booking support",
         body: "Instructor Plus can prioritise support for scheduling, cancellation, dispute, and payout questions once live operations begin.",
+      },
+      {
+        heading: "Retention tools",
+        body: "Designed to help instructors convert first bookings into repeat learners through progress records, reminders, reviews, and platform-managed lesson history.",
       },
     ],
   },
@@ -97,9 +113,9 @@ export const instructorPackages: InstructorPackage[] = [
     slug: "instructor-pro",
     rank: 3,
     name: "Instructor Pro",
-    price: "From £24.99/month",
-    monthlyPrice: "£24.99 per month",
-    yearlyPrice: "£249 per year",
+    price: "From Â£24.99/month",
+    monthlyPrice: "Â£24.99 per month",
+    yearlyPrice: "Â£249 per year",
     label: "Studio support",
     summary:
       "Advanced instructor growth tools for high-volume instructors and specialist lesson services.",
@@ -112,6 +128,8 @@ export const instructorPackages: InstructorPackage[] = [
       "Multi-area route and demand planning",
       "Premium matching for Pass Plus and specialist lessons",
       "Early access to instructor growth tools",
+      "Demand, retention, and leakage-risk insights",
+      "Pro LDA AI for compliance reminders, demand insight, and connector-ready operations checks",
     ],
     breakdown: [
       {
@@ -125,6 +143,14 @@ export const instructorPackages: InstructorPackage[] = [
       {
         heading: "Growth planning",
         body: "Designed to support multi-area coverage, demand heatmaps, repeat learner planning, and future team-style instructor operations.",
+      },
+      {
+        heading: "Pro AI operations",
+        body: "Instructor Pro is prepared for proactive MOT, tax, insurance, service, learner-message, demand, and availability insights once account-level reminders and partner checks are connected.",
+      },
+      {
+        heading: "Clientele operations",
+        body: "Prepared for repeat-learner management, ranking health, off-platform leakage warnings, and high-volume instructor support workflows.",
       },
     ],
   },
