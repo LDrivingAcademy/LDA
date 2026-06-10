@@ -8,6 +8,8 @@ type ProgressFeedbackRequest = {
   instructorName?: string;
   lessonReference?: string;
   completedSkills?: string[];
+  totalChecklistSkills?: number;
+  testReadySignedOff?: boolean;
   instructorNotes?: string;
   nextLessonFocus?: string;
   recommendedVideos?: string;
@@ -100,6 +102,78 @@ async function sendProgressUpdatedNotification(input: {
   return response.json();
 }
 
+async function sendTestReadyNotification(input: {
+  learnerEmail: string;
+  learnerName: string;
+  instructorName: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    return { skipped: true };
+  }
+
+  const fromAddress = process.env.RESEND_FROM_EMAIL ?? "info@ldrivingacademy.co.uk";
+  const from = fromAddress.includes("<") && fromAddress.includes(">") ? fromAddress : `L Driving Academy <${fromAddress}>`;
+  const replyTo = process.env.RESEND_REPLY_TO_EMAIL ?? process.env.APP_SUPPORT_EMAIL ?? "info@ldrivingacademy.co.uk";
+  const progressUrl = `${process.env.APP_WEBSITE_URL ?? "https://ldrivingacademy.co.uk"}/progress-tracker`;
+  const bookingUrl = "https://www.gov.uk/book-driving-test";
+  const learnerName = escapeHtml(input.learnerName);
+  const instructorName = escapeHtml(input.instructorName);
+  const escapedProgressUrl = escapeHtml(progressUrl);
+  const escapedBookingUrl = escapeHtml(bookingUrl);
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
+      <h1>Your instructor has marked you test-ready</h1>
+      <p>Hello ${learnerName},</p>
+      <p>${instructorName} has signed off your LDA progress checklist and marked you as ready to start your practical test booking journey.</p>
+      <p>Sign in to LDA to review your completed progress record, then use the official GOV.UK service to book your driving test yourself.</p>
+      <p style="margin: 28px 0;">
+        <a href="${escapedProgressUrl}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:999px;margin-right:8px;">
+          View LDA progress
+        </a>
+        <a href="${escapedBookingUrl}" style="display:inline-block;background:#ed1b24;color:#fff;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:999px;">
+          Book on GOV.UK
+        </a>
+      </p>
+      <p>For safety and compliance, LDA and your instructor do not book the test for you. GOV.UK says learner drivers must book, change, swap, or cancel their own car driving test.</p>
+    </div>
+  `;
+  const text = [
+    `Hello ${input.learnerName},`,
+    "",
+    `${input.instructorName} has signed off your LDA progress checklist and marked you as ready to start your practical test booking journey.`,
+    "Sign in to LDA to review your completed progress record, then use the official GOV.UK service to book your driving test yourself.",
+    "",
+    `LDA progress: ${progressUrl}`,
+    `Official GOV.UK booking: ${bookingUrl}`,
+    "",
+    "For safety and compliance, LDA and your instructor do not book the test for you. GOV.UK says learner drivers must book, change, swap, or cancel their own car driving test."
+  ].join("\n");
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from,
+      to: input.learnerEmail,
+      subject: "Your instructor has marked you test-ready",
+      html,
+      text,
+      reply_to: replyTo
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Test-ready email failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export async function POST(request: Request) {
   if (isRateLimited(request, "progress-feedback", 20)) {
     return rateLimitResponse();
@@ -167,10 +241,16 @@ export async function POST(request: Request) {
     instructorName,
     lessonReference: safeText(input.lessonReference, "", 80),
     completedSkills: (input.completedSkills ?? []).slice(0, 40).map((skill) => safeText(skill, "", 80)),
+    totalChecklistSkills: Math.max(0, Math.min(Number(input.totalChecklistSkills ?? 0), 40)),
+    testReadySignedOff: Boolean(input.testReadySignedOff),
     instructorNotes: safeText(input.instructorNotes, "No notes added.", 4000),
     nextLessonFocus: safeText(input.nextLessonFocus, "No next-lesson focus added.", 1000),
     recommendedVideos: safeText(input.recommendedVideos, "", 1000)
   };
+  const hasInstructorSignedEverySkill =
+    payload.testReadySignedOff &&
+    payload.totalChecklistSkills > 0 &&
+    payload.completedSkills.length === payload.totalChecklistSkills;
 
   try {
     const { error: recordError } = await admin.from("lesson_progress_records").insert({
@@ -195,11 +275,22 @@ export async function POST(request: Request) {
       learnerName: payload.learnerName,
       instructorName: payload.instructorName
     });
+    if (hasInstructorSignedEverySkill) {
+      await sendTestReadyNotification({
+        learnerEmail: payload.learnerEmail,
+        learnerName: payload.learnerName,
+        instructorName: payload.instructorName
+      });
+    }
     return jsonNoStore({
       mode: process.env.RESEND_API_KEY ? "live" : "demo",
       message: process.env.RESEND_API_KEY
-        ? "Progress saved to the learner profile and the learner has been notified."
-        : "Progress saved to the learner profile. Add RESEND_API_KEY to send notification emails."
+        ? hasInstructorSignedEverySkill
+          ? "Progress saved. The learner has been notified that their instructor marked them test-ready and given the official GOV.UK booking link."
+          : "Progress saved to the learner profile and the learner has been notified."
+        : hasInstructorSignedEverySkill
+          ? "Progress saved. Add RESEND_API_KEY to send the test-ready learner email."
+          : "Progress saved to the learner profile. Add RESEND_API_KEY to send notification emails."
     });
   } catch (error) {
     return jsonNoStore({ error: error instanceof Error ? error.message : "Progress notification failed." }, { status: 500 });
