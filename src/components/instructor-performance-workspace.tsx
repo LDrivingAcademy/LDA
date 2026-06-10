@@ -14,6 +14,7 @@ import {
   UsersRound,
   XCircle
 } from "lucide-react";
+import { PerformanceAiCoach } from "@/components/performance-ai-coach";
 
 type ReviewTone = "positive" | "neutral" | "negative";
 
@@ -84,6 +85,29 @@ const coachingSignals = [
   "Evening lessons have the highest cancellation risk.",
   "Test-ready pupils perform best when mock-test results are logged within 24 hours.",
   "Retention improves when the next lesson focus is sent after every session."
+];
+
+const progressEfficiencyRows = [
+  {
+    label: "Average lesson gap",
+    value: "9 days",
+    insight: "Healthy spacing for most learners. Watch pupils who drift beyond 14 days between lessons."
+  },
+  {
+    label: "Syllabus pace",
+    value: "3.2 topics/month",
+    insight: "Good progress speed. If a pupil repeats the same topic for three lessons, switch the lesson structure."
+  },
+  {
+    label: "Drive-time balance",
+    value: "74%",
+    insight: "Strong practical time. Negative reviews suggest confident learners want even shorter recap blocks."
+  },
+  {
+    label: "Readiness risk",
+    value: "2 pupils",
+    insight: "Two pupils are booking test-focused lessons without enough mock-test evidence in the tracker."
+  }
 ];
 
 function toneClass(tone: PerformanceRow["tone"]) {
@@ -189,6 +213,24 @@ export function InstructorPerformanceWorkspace({ instructorName }: { instructorN
 
           <section className="rounded border border-zinc-200 bg-white shadow-sm">
             <div className="border-b border-zinc-200 p-4">
+              <h2 className="text-2xl font-black">Pupil progress intelligence</h2>
+              <p className="mt-1 text-sm font-bold text-zinc-500">
+                LDA AI separates slow learner consistency from inefficient lesson structure.
+              </p>
+            </div>
+            <div className="grid gap-4 p-4 md:grid-cols-2">
+              {progressEfficiencyRows.map((row) => (
+                <article key={row.label} className="rounded border border-zinc-200 bg-zinc-50 p-4">
+                  <div className="text-sm font-black uppercase text-zinc-500">{row.label}</div>
+                  <div className="mt-2 text-4xl font-black">{row.value}</div>
+                  <p className="mt-4 text-sm font-bold leading-6 text-zinc-700">{row.insight}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded border border-zinc-200 bg-white shadow-sm">
+            <div className="border-b border-zinc-200 p-4">
               <h2 className="text-2xl font-black">Private learner reviews</h2>
               <p className="mt-1 text-sm font-bold text-zinc-500">
                 Good and negative reviews update these metrics and stay visible only to the instructor.
@@ -241,6 +283,8 @@ export function InstructorPerformanceWorkspace({ instructorName }: { instructorN
               ))}
             </div>
           </section>
+
+          <PerformanceAiCoach />
 
           <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
             <ShieldCheck className="text-brand" />
