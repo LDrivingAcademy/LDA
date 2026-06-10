@@ -1,39 +1,60 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
+  BadgePoundSterling,
+  Bell,
   Bot,
   Brain,
   CalendarClock,
   CarFront,
   ChevronDown,
+  ClipboardCheck,
+  FileSearch,
   MapPinned,
+  MessageSquare,
   Mic,
   MicOff,
   Minimize2,
   RotateCcw,
   Route,
   Send,
+  ShieldCheck,
   Sparkles,
   Target,
   Wrench
 } from "lucide-react";
 
+type AiMode = "demo" | "live";
+
 type VehicleAiResponse = {
   answer: string;
   nextSteps: string[];
-  mode: "demo" | "live";
+  mode: AiMode;
   safetyCritical: boolean;
   topics: string[];
+  links?: Array<{ label: string; href: string }>;
+  connectorNote?: string;
 };
 
 type VehicleRole = "learner" | "instructor" | "visitor";
 type VehicleType = "manual" | "automatic" | "electric" | "hybrid" | "unknown";
 type ConfidenceLevel = "new" | "building" | "confident";
-type AssistantFocus = "vehicle" | "lesson-plan" | "schedule" | "smart-match";
-type LessonGoal = "first-lesson" | "confidence" | "test-ready" | "manual-control" | "city-driving" | "instructor-ops";
+type AssistantFocus =
+  | "vehicle"
+  | "lesson-plan"
+  | "schedule"
+  | "smart-match"
+  | "car-buyer"
+  | "insurance"
+  | "compliance"
+  | "messages"
+  | "platform";
+type LessonGoal = "first-lesson" | "confidence" | "test-ready" | "manual-control" | "city-driving" | "instructor-ops" | "first-car";
 type LessonWindow = "weekday-morning" | "weekday-midday" | "weekday-evening" | "weekend";
+type AiTier = "core" | "plus" | "pro";
 
 type BrowserSpeechRecognition = {
   lang: string;
@@ -68,6 +89,9 @@ type AdaptiveProfile = {
   preferredGoal: LessonGoal;
   preferredArea: string;
   preferredWindow: LessonWindow;
+  preferredBudget: string;
+  preferredSupportNeed: string;
+  aiTier: AiTier;
   questionCount: number;
   spokenQuestionCount: number;
   planCount: number;
@@ -75,7 +99,7 @@ type AdaptiveProfile = {
   lastQuestions: string[];
 };
 
-const adaptiveProfileKey = "lda.vehicle-ai.profile.v2";
+const adaptiveProfileKey = "lda.vehicle-ai.profile.v3";
 
 const defaultAdaptiveProfile: AdaptiveProfile = {
   confidence: "building",
@@ -85,6 +109,9 @@ const defaultAdaptiveProfile: AdaptiveProfile = {
   preferredGoal: "confidence",
   preferredArea: "",
   preferredWindow: "weekday-midday",
+  preferredBudget: "",
+  preferredSupportNeed: "",
+  aiTier: "plus",
   questionCount: 0,
   spokenQuestionCount: 0,
   planCount: 0,
@@ -93,10 +120,10 @@ const defaultAdaptiveProfile: AdaptiveProfile = {
 };
 
 const quickPrompts = [
+  "Check if this first car looks sensible for me.",
   "Build me a personalised lesson plan for this week.",
   "Suggest the best lesson time around my area.",
-  "Use Smart Match to explain what instructor style suits me.",
-  "How do I stop stalling in a manual car?"
+  "Summarise this long learner message for me."
 ];
 
 const roleOptions: { label: string; value: VehicleRole }[] = [
@@ -117,7 +144,12 @@ const focusOptions: { label: string; value: AssistantFocus; icon: typeof CarFron
   { label: "Vehicle help", value: "vehicle", icon: CarFront },
   { label: "Lesson plan", value: "lesson-plan", icon: Target },
   { label: "Best lesson time", value: "schedule", icon: CalendarClock },
-  { label: "Smart Match coach", value: "smart-match", icon: Route }
+  { label: "Smart Match coach", value: "smart-match", icon: Route },
+  { label: "First-car check", value: "car-buyer", icon: FileSearch },
+  { label: "Insurance guide", value: "insurance", icon: BadgePoundSterling },
+  { label: "Compliance alerts", value: "compliance", icon: ClipboardCheck },
+  { label: "Message summary", value: "messages", icon: MessageSquare },
+  { label: "AI tier value", value: "platform", icon: ShieldCheck }
 ];
 
 const goalOptions: { label: string; value: LessonGoal }[] = [
@@ -126,6 +158,7 @@ const goalOptions: { label: string; value: LessonGoal }[] = [
   { label: "Test ready", value: "test-ready" },
   { label: "Manual control", value: "manual-control" },
   { label: "City driving", value: "city-driving" },
+  { label: "First car", value: "first-car" },
   { label: "Instructor operations", value: "instructor-ops" }
 ];
 
@@ -136,15 +169,25 @@ const windowOptions: { label: string; value: LessonWindow }[] = [
   { label: "Weekend", value: "weekend" }
 ];
 
+const tierOptions: { label: string; value: AiTier }[] = [
+  { label: "Core AI", value: "core" },
+  { label: "Plus AI", value: "plus" },
+  { label: "Pro AI", value: "pro" }
+];
+
 const safetyPattern =
   /\b(brake|brakes|steering|tyre blowout|flat tyre|smoke|burning|overheat|overheating|engine light|warning light|red light|airbag|abs|crash|accident|fuel leak|oil leak|no control|unsafe|danger|dangerous)\b/i;
 const transmissionPattern = /\b(clutch|gear|gears|bite point|stall|stalling|hill start|automatic|manual|paddle|transmission|neutral|park|drive)\b/i;
 const checksPattern = /\b(show me|tell me|cockpit|mirrors|blind spot|oil|coolant|washer|lights|horn|demister|wipers|brake fluid|tyre pressure)\b/i;
 const evPattern = /\b(electric|ev|hybrid|battery|charging|regen|regenerative|range|charge)\b/i;
-const compliancePattern = /\b(mot|tax|insurance|service|servicing|adi|pdi|licence|license|expiry|compliance|maintenance|defect|record)\b/i;
+const compliancePattern = /\b(mot|tax|insurance|service|servicing|adi|pdi|licence|license|expiry|compliance|maintenance|defect|record|reminder)\b/i;
 const schedulePattern = /\b(schedule|time|slot|when|traffic|road condition|rush hour|morning|evening|weekend|availability|calendar|ideal lesson)\b/i;
-const coachingPattern = /\b(plan|lesson plan|coach|coaching|practice|improve|confidence|nervous|test ready|test-ready|mock test|syllabus|goal|progress)\b/i;
+const coachingPattern = /\b(plan|lesson plan|coach|coaching|practice|improve|confidence|nervous|test ready|test-ready|mock test|syllabus|goal|progress|disability|accessibility|support need)\b/i;
 const smartMatchPattern = /\b(smart match|smartmatch|match|instructor style|teaching style|support needs|preferences|best instructor|local instructor)\b/i;
+const carBuyerPattern = /\b(first car|autotrader|auto trader|buy car|car listing|mileage|miles|seller|dealer|registration|reg|keeper|hpi|write off|cat s|cat n|stolen|finance|mot history|vehicle history)\b/i;
+const insurancePattern = /\b(insurance|quote|premium|telematics|black box|named driver|excess|no claims|no-claims|cheapest cover)\b/i;
+const messagePattern = /\b(summarise|summarize|summary|condense|long message|notification|inbox|learner message|instructor message)\b/i;
+const platformPattern = /\b(subscription|package|tier|upgrade|pro ai|plus ai|core ai|2.99|insight|alerts)\b/i;
 
 function readAdaptiveProfile() {
   if (typeof window === "undefined") {
@@ -152,7 +195,10 @@ function readAdaptiveProfile() {
   }
 
   try {
-    const saved = window.localStorage.getItem(adaptiveProfileKey) ?? window.localStorage.getItem("lda.vehicle-ai.profile.v1");
+    const saved =
+      window.localStorage.getItem(adaptiveProfileKey) ??
+      window.localStorage.getItem("lda.vehicle-ai.profile.v2") ??
+      window.localStorage.getItem("lda.vehicle-ai.profile.v1");
     if (!saved) {
       return defaultAdaptiveProfile;
     }
@@ -187,6 +233,10 @@ function classify(question: string) {
   if (schedulePattern.test(question)) topics.push("Scheduling");
   if (coachingPattern.test(question)) topics.push("Coaching plan");
   if (smartMatchPattern.test(question)) topics.push("Smart Match");
+  if (carBuyerPattern.test(question)) topics.push("First-car check");
+  if (insurancePattern.test(question)) topics.push("Insurance");
+  if (messagePattern.test(question)) topics.push("Message summary");
+  if (platformPattern.test(question)) topics.push("AI tier");
   return topics.length ? [...new Set(topics)] : ["Vehicle guidance"];
 }
 
@@ -207,6 +257,18 @@ function strongestMemory(profile: AdaptiveProfile) {
   return topic;
 }
 
+function tierCopy(tier: AiTier) {
+  if (tier === "core") {
+    return "Core AI gives guided answers, safety triage, and basic learning support.";
+  }
+
+  if (tier === "pro") {
+    return "Pro AI is designed for deeper partner-data checks, proactive alerts, richer Smart Match weighting, and instructor operations insight once live connectors are approved.";
+  }
+
+  return "Plus AI gives stronger personalisation, lesson planning, Smart Match coaching, and richer first-car or insurance guidance.";
+}
+
 function adaptiveIntro(profile: AdaptiveProfile, topics: string[]) {
   const strongestTopic = strongestMemory(profile);
   const memoryLine = strongestTopic
@@ -214,8 +276,9 @@ function adaptiveIntro(profile: AdaptiveProfile, topics: string[]) {
     : "I'll start building your LDA AI profile from this question.";
   const topicLine = topics.length ? `Current focus: ${topics.join(", ")}.` : "";
   const areaLine = profile.preferredArea ? `Area profile: ${profile.preferredArea}.` : "";
+  const supportLine = profile.preferredSupportNeed ? `Support preference: ${profile.preferredSupportNeed}.` : "";
 
-  return `${confidenceCopy(profile.confidence)} ${memoryLine} ${topicLine} ${areaLine}`.trim();
+  return `${confidenceCopy(profile.confidence)} ${memoryLine} ${topicLine} ${areaLine} ${supportLine}`.trim();
 }
 
 function lessonGoalCopy(goal: LessonGoal) {
@@ -225,6 +288,7 @@ function lessonGoalCopy(goal: LessonGoal) {
     "test-ready": "tightening faults, judgement, independent driving, and mock-test readiness",
     "manual-control": "clutch control, gear choice, hill starts, junction timing, and smooth recovery after stalls",
     "city-driving": "lane discipline, hazards, busier junctions, parked cars, pedestrians, cyclists, and speed control",
+    "first-car": "choosing a safe, affordable first car with manageable insurance, running costs, and verified history",
     "instructor-ops": "running availability, compliance, learner progress, payments, and booking admin professionally"
   };
 
@@ -242,7 +306,7 @@ function lessonWindowCopy(window: LessonWindow) {
   return copy[window];
 }
 
-function buildPersonalPlan(role: VehicleRole, vehicleType: VehicleType, situation: string, question: string, profile: AdaptiveProfile, topics: string[]) {
+function buildPersonalPlan(role: VehicleRole, vehicleType: VehicleType, profile: AdaptiveProfile, topics: string[]): VehicleAiResponse {
   const intro = adaptiveIntro(profile, topics);
   const vehicleLabel = vehicleType === "unknown" ? "current vehicle" : `${vehicleType} vehicle`;
   const roleLine =
@@ -253,59 +317,189 @@ function buildPersonalPlan(role: VehicleRole, vehicleType: VehicleType, situatio
 
   return {
     answer:
-      `${intro}\n\n${roleLine} Your current goal is ${lessonGoalCopy(profile.preferredGoal)} in a ${vehicleLabel}. ${recentQuestionLine}\n\nA strong LDA plan would be: warm-up and cockpit confidence, one focused skill, one real-road application, a short reflection, then one next-lesson target. If the question is about your area or traffic, I would choose the lesson time and road type around confidence first, then difficulty second.`,
+      `${intro}\n\n${roleLine} Your current goal is ${lessonGoalCopy(profile.preferredGoal)} in a ${vehicleLabel}. ${recentQuestionLine}\n\nA strong LDA plan would be: warm-up and cockpit confidence, one focused skill, one real-road application, a short reflection, then one next-lesson target. If the learner has anxiety, accessibility needs, or hidden support needs, LDA AI should adapt pace, instructor style, road difficulty, and the way instructions are explained.`,
     nextSteps: [
       "Start the next lesson with a two-minute confidence check: what feels easy, what feels uncertain, and what must not be rushed.",
       `Set the session focus to ${lessonGoalCopy(profile.preferredGoal)}.`,
       role === "instructor"
-        ? "Record the learner's outcome, next focus, and any safety/compliance note in LDA before the next booking."
-        : "Ask Smart Match or your instructor to prioritise an instructor style that fits this goal, not only distance or price."
+        ? "Record the learner's outcome, next focus, and any support need in LDA before the next booking."
+        : "Use Smart Match to prioritise an instructor style that fits this goal, not only distance or price."
+    ],
+    mode: "demo",
+    safetyCritical: false,
+    topics,
+    links: [
+      { label: "Open SmartMatch", href: "/smart-match" },
+      { label: "Open progress tracker", href: "/progress-tracker?from=dashboard" }
     ]
   };
 }
 
-function buildScheduleAdvice(role: VehicleRole, profile: AdaptiveProfile, topics: string[]) {
+function buildScheduleAdvice(role: VehicleRole, profile: AdaptiveProfile, topics: string[]): VehicleAiResponse {
   const intro = adaptiveIntro(profile, topics);
   const area = profile.preferredArea || "your chosen pickup area";
   const recommendation =
     profile.confidence === "new"
-      ? "choose a quieter learning window first, then add busier traffic once your control improves"
+      ? "choose a quieter learning window first, then add busier traffic once control improves"
       : profile.confidence === "confident"
-        ? "use a mix of calmer slots and controlled busy-road practice so your skill transfers to real test conditions"
+        ? "use a mix of calmer slots and controlled busy-road practice so skill transfers to real test conditions"
         : "aim for predictable traffic first, then gradually introduce more demanding roads";
 
   return {
     answer:
-      `${intro}\n\nFor ${area}, LDA AI would start with your confidence level, lesson goal, instructor availability, and the kind of roads you need next. ${lessonWindowCopy(profile.preferredWindow)}. My recommendation is to ${recommendation}.\n\nThis is not live traffic routing yet, but it is designed to plug into live road-condition data later so LDA can suggest ideal slots from real availability, traffic patterns, and lesson goals.`,
+      `${intro}\n\nFor ${area}, LDA AI should combine confidence level, lesson goal, instructor availability, local road type, and traffic patterns. ${lessonWindowCopy(profile.preferredWindow)}. My recommendation is to ${recommendation}.\n\nThis release is connector-ready: once a traffic API is approved, this module can score real available lesson slots against route pressure, school-run patterns, rush-hour risk, and the learner's current confidence stage.`,
     nextSteps: [
       `Preferred window: ${windowOptions.find((option) => option.value === profile.preferredWindow)?.label ?? "Weekday midday"}.`,
       role === "instructor"
-        ? "Publish free slots in the calendar around calmer learner-friendly periods and reserve tougher traffic windows for confident pupils."
-        : "When booking, choose an instructor slot that matches your confidence stage before choosing the cheapest or earliest slot.",
+        ? "Publish free slots around calmer learner-friendly periods and reserve tougher traffic windows for confident pupils."
+        : "When booking, choose an instructor slot that matches confidence stage before choosing the cheapest or earliest slot.",
       "If the area is busy, start on quiet roads for the first 10 minutes, then move into the planned challenge route."
-    ]
+    ],
+    mode: "demo",
+    safetyCritical: false,
+    topics,
+    links: [
+      { label: "Book a lesson", href: "/lesson-now" },
+      { label: "Open instructor calendar", href: "/instructor-calendar?from=dashboard" }
+    ],
+    connectorNote: "Needs a traffic and routing API before it can make live traffic claims."
   };
 }
 
-function buildSmartMatchAdvice(role: VehicleRole, vehicleType: VehicleType, profile: AdaptiveProfile, topics: string[]) {
+function buildSmartMatchAdvice(role: VehicleRole, vehicleType: VehicleType, profile: AdaptiveProfile, topics: string[]): VehicleAiResponse {
   const intro = adaptiveIntro(profile, topics);
-  const vehicleLabel = vehicleType === "unknown" ? "your preferred car type" : `${vehicleType} lessons`;
+  const vehicleLabel = vehicleType === "unknown" ? "preferred car type" : `${vehicleType} lessons`;
   const style =
     profile.confidence === "new"
-      ? "calm, patient, highly structured, and good at explaining before asking you to act"
+      ? "calm, patient, highly structured, and good at explaining before asking the learner to act"
       : profile.confidence === "confident"
-        ? "direct, progress-focused, and comfortable challenging you with realistic test-standard routes"
+        ? "direct, progress-focused, and comfortable challenging the learner with realistic test-standard routes"
         : "balanced: calm enough to protect confidence, but clear enough to keep progress moving";
 
   return {
     answer:
-      `${intro}\n\nSmart Match should not only match by postcode. For you, it should weigh ${vehicleLabel}, instructor style, price, availability, support needs, lesson goal, and how you learn best. Based on your current profile, the strongest instructor fit is ${style}.\n\nThe more you ask LDA AI, the more the match profile can learn what matters: nervous junctions, manual control, test readiness, EV/hybrid questions, lesson timing, or instructor compliance needs.`,
+      `${intro}\n\nSmart Match should not only match by postcode. For this profile, it should weigh ${vehicleLabel}, instructor style, price, availability, support needs, lesson goal, reviews, and how the learner learns best. The strongest instructor fit is ${style}.\n\nFor learners with hidden disabilities or extra support needs, LDA AI should make the matching process feel calmer: predictable lesson pace, clear communication style, accessibility notes, and instructors who explicitly support those needs.`,
     nextSteps: [
-      "Use Smart Match with your confidence level, goal, vehicle type, and preferred lesson window already set.",
-      "Prefer instructors whose profile matches your learning style, not just the closest available slot.",
+      "Use Smart Match with confidence level, goal, vehicle type, support preference, and preferred lesson window already set.",
+      "Prefer instructors whose profile matches the learner's learning style, not just the closest available slot.",
       role === "instructor"
-        ? "Use learner goals and recurring AI topics to prepare the lesson before the pupil gets in the car."
-        : "After each lesson, ask the AI what to practise next so your match and plan keep improving."
+        ? "Use recurring AI topics to prepare the lesson before the pupil gets in the car."
+        : "After each lesson, ask LDA AI what to practise next so the match and plan keep improving."
+    ],
+    mode: "demo",
+    safetyCritical: false,
+    topics,
+    links: [{ label: "Open SmartMatch", href: "/smart-match" }]
+  };
+}
+
+function buildCarBuyerAdvice(profile: AdaptiveProfile, question: string, topics: string[]): VehicleAiResponse {
+  const intro = adaptiveIntro(profile, topics);
+  const hasListingDetails = /\b(\d{4}|\d{2}\s?plate|miles|mileage|£|gbp|cat|seller|dealer|reg|registration|mot)\b/i.test(question);
+  const budgetLine = profile.preferredBudget ? `Budget profile: ${profile.preferredBudget}. ` : "";
+
+  return {
+    answer:
+      `${intro}\n\n${budgetLine}For a first-car check, LDA AI should score four things before a learner contacts the seller: safety and insurance pressure, running costs, listing trust, and verified history. ${hasListingDetails ? "You have given some listing-style detail, so I would treat this as a pre-check and look for mileage, age, MOT history, category markers, seller wording, service history, and insurance group pressure." : "Paste the listing details, mileage, registration, price, seller type, service history, and any warning wording, and I can structure the check."}\n\nImportant: no AI should pretend it can prove hidden crash history without trusted external data. The professional version connects to vehicle-history, MOT/tax, finance/stolen/write-off, valuation, insurance, and seller-review providers, then labels each result as verified, warning, or needs manual proof.`,
+    nextSteps: [
+      "Check MOT history, advisory patterns, mileage consistency, tyre/brake advisories, and whether the listing price fits the age and mileage.",
+      "Check insurance pressure before falling in love with the car, especially engine size, trim, modifications, parking location, and telematics options.",
+      "Ask the seller for V5C checks, service history, invoice evidence, two keys, finance status, and whether the car has ever been written off."
+    ],
+    mode: "demo",
+    safetyCritical: false,
+    topics,
+    links: [
+      { label: "Open first-car guidance", href: "/first-car-guidance" },
+      { label: "Build insurance quote pack", href: "/insurance-support" }
+    ],
+    connectorNote: "Live listing, valuation, MOT/tax, finance, stolen, write-off, and seller trust checks need approved partner APIs before they can be verified."
+  };
+}
+
+function buildInsuranceAdvice(profile: AdaptiveProfile, topics: string[]): VehicleAiResponse {
+  const intro = adaptiveIntro(profile, topics);
+  const budgetLine = profile.preferredBudget ? `Budget profile: ${profile.preferredBudget}. ` : "";
+
+  return {
+    answer:
+      `${intro}\n\n${budgetLine}LDA AI should help learners prepare better insurance quote packs after passing: car shortlist, annual mileage, parking location, voluntary excess, telematics preference, named drivers, occupation/student status, start date, and no-claims position. It should not promise the cheapest quote until a live FCA-compliant quote partner is connected.\n\nThe strong product version compares first-car suitability against insurance pressure before the learner buys the car, so they do not pass their test and then discover the car is unaffordable to insure.`,
+    nextSteps: [
+      "Shortlist cars by insurance group, safety, reliability, engine size, and repair costs before checking live quotes.",
+      "Prepare the same quote details for each car so comparisons are fair.",
+      "Use LDA first-car guidance and insurance support together, not separately."
+    ],
+    mode: "demo",
+    safetyCritical: false,
+    topics,
+    links: [
+      { label: "Open insurance support", href: "/insurance-support" },
+      { label: "Open first-car guidance", href: "/first-car-guidance" }
+    ],
+    connectorNote: "Live quotes need an authorised insurance quote provider or affiliate/API integration."
+  };
+}
+
+function buildComplianceAdvice(role: VehicleRole, profile: AdaptiveProfile, topics: string[]): VehicleAiResponse {
+  const intro = adaptiveIntro(profile, topics);
+  const isInstructor = role === "instructor";
+
+  return {
+    answer:
+      `${intro}\n\n${isInstructor ? "For instructors, LDA AI should behave like an operations assistant: MOT, tax, insurance, service, tyre, defect, ADI/PDI, and licence evidence should be tracked before lessons are made available." : "For learners, LDA AI should explain what a roadworthy learning vehicle should feel like and when to raise a concern before driving."}\n\nA strong paid add-on or higher package can unlock proactive reminders, document expiry warnings, compliance insight summaries, and risk flags when a lesson is about to be accepted with missing evidence.`,
+    nextSteps: [
+      isInstructor ? "Keep expiry dates and document evidence in the vehicle compliance page." : "Raise warning lights, tyre concerns, brake issues, or unsafe defects before the lesson starts.",
+      "Use AI reminders for MOT, tax, insurance, servicing, defects, and registration evidence.",
+      "Do not run lessons if MOT, tax, insurance, roadworthiness, or instructor eligibility is in doubt."
+    ],
+    mode: "demo",
+    safetyCritical: false,
+    topics,
+    links: [
+      { label: "Open vehicle compliance", href: "/instructor-vehicle-compliance?from=dashboard" },
+      { label: "Open Roadworthy guide", href: "/roadworthy" }
+    ],
+    connectorNote: "Proactive reminders become live when account-level storage, document expiry data, and notification scheduling are connected."
+  };
+}
+
+function buildMessageAdvice(profile: AdaptiveProfile, question: string, topics: string[]): VehicleAiResponse {
+  const intro = adaptiveIntro(profile, topics);
+  const cleaned = question.trim().replace(/\s+/g, " ");
+  const shortSummary = cleaned.length > 220 ? `${cleaned.slice(0, 220)}...` : cleaned || "Paste a long learner or instructor message and I will condense it.";
+
+  return {
+    answer:
+      `${intro}\n\nApple-style message intelligence for LDA should do three jobs: summarise the message, pull out actions, and flag urgency. Based on what you provided, the condensed version would be:\n\n"${shortSummary}"\n\nThe production version can sit inside the notification hub so instructors and learners see the meaning quickly without losing the original message.`,
+    nextSteps: [
+      "Summarise long messages into one short paragraph.",
+      "Extract actions such as lesson change, pickup issue, payment question, progress concern, or support escalation.",
+      "Keep the original message available so AI never replaces the user's exact wording."
+    ],
+    mode: "demo",
+    safetyCritical: false,
+    topics,
+    links: [{ label: "Open notification hub", href: "/notification-hub?from=dashboard" }]
+  };
+}
+
+function buildPlatformAdvice(profile: AdaptiveProfile, topics: string[]): VehicleAiResponse {
+  const intro = adaptiveIntro(profile, topics);
+
+  return {
+    answer:
+      `${intro}\n\n${tierCopy(profile.aiTier)} The clean product structure is: Core AI for everyone, Plus AI for richer personalisation, and Pro AI for partner-data checks, proactive alerts, Smart Match depth, and instructor growth/compliance insight.\n\nThis also creates a sensible add-on path: a low-cost AI alerts product can send vehicle compliance reminders, MOT/tax/service warnings, insurance renewal prompts, first-car checks, and message summaries without forcing every user into a full package.`,
+    nextSteps: [
+      "Keep basic safety and guidance AI available to everyone so LDA feels helpful immediately.",
+      "Use Plus for deeper learner plans, Smart Match weighting, first-car support, and insurance preparation.",
+      "Use Pro or an AI add-on for live API checks, proactive reminders, compliance alerts, and instructor business intelligence."
+    ],
+    mode: "demo",
+    safetyCritical: false,
+    topics,
+    links: [
+      { label: "Learner packages", href: "/learner-plus" },
+      { label: "Instructor packages", href: "/instructor-plus" }
     ]
   };
 }
@@ -324,9 +518,6 @@ function buildVehicleResponse(
   const safetyCritical = safetyPattern.test(combinedQuestion);
   const topics = classify(combinedQuestion);
   const intro = adaptiveIntro(profile, topics);
-  const shouldPlan = focus === "lesson-plan" || coachingPattern.test(combinedQuestion);
-  const shouldSchedule = focus === "schedule" || schedulePattern.test(combinedQuestion);
-  const shouldSmartMatch = focus === "smart-match" || smartMatchPattern.test(combinedQuestion);
 
   if (safetyCritical) {
     return {
@@ -341,38 +532,41 @@ function buildVehicleResponse(
       ],
       mode: "demo",
       safetyCritical,
-      topics
+      topics,
+      links: [{ label: "Open Roadworthy guide", href: "/roadworthy" }]
     };
   }
 
-  if (shouldSchedule) {
-    const scheduleAdvice = buildScheduleAdvice(role, profile, topics);
-    return {
-      ...scheduleAdvice,
-      mode: "demo",
-      safetyCritical,
-      topics
-    };
+  if (focus === "car-buyer" || carBuyerPattern.test(combinedQuestion)) {
+    return buildCarBuyerAdvice(profile, combinedQuestion, topics);
   }
 
-  if (shouldSmartMatch) {
-    const smartMatchAdvice = buildSmartMatchAdvice(role, vehicleType, profile, topics);
-    return {
-      ...smartMatchAdvice,
-      mode: "demo",
-      safetyCritical,
-      topics
-    };
+  if (focus === "insurance" || insurancePattern.test(combinedQuestion)) {
+    return buildInsuranceAdvice(profile, topics);
   }
 
-  if (shouldPlan) {
-    const plan = buildPersonalPlan(role, vehicleType, situation, question, profile, topics);
-    return {
-      ...plan,
-      mode: "demo",
-      safetyCritical,
-      topics
-    };
+  if (focus === "messages" || messagePattern.test(combinedQuestion)) {
+    return buildMessageAdvice(profile, question, topics);
+  }
+
+  if (focus === "compliance" || compliancePattern.test(combinedQuestion)) {
+    return buildComplianceAdvice(role, profile, topics);
+  }
+
+  if (focus === "platform" || platformPattern.test(combinedQuestion)) {
+    return buildPlatformAdvice(profile, topics);
+  }
+
+  if (focus === "schedule" || schedulePattern.test(combinedQuestion)) {
+    return buildScheduleAdvice(role, profile, topics);
+  }
+
+  if (focus === "smart-match" || smartMatchPattern.test(combinedQuestion)) {
+    return buildSmartMatchAdvice(role, vehicleType, profile, topics);
+  }
+
+  if (focus === "lesson-plan" || coachingPattern.test(combinedQuestion)) {
+    return buildPersonalPlan(role, vehicleType, profile, topics);
   }
 
   if (transmissionPattern.test(combinedQuestion)) {
@@ -427,34 +621,22 @@ function buildVehicleResponse(
     };
   }
 
-  if (compliancePattern.test(combinedQuestion)) {
-    return {
-      answer:
-        roleLabel === "instructor"
-          ? `${intro}\n\nFor instructor use, vehicle compliance should stay visible before lessons: MOT, tax, insurance, servicing, tyres, lights, registration status, defects, and expiry reminders. LDA should be your operating record so a lesson is never accepted with a compliance gap.`
-          : `${intro}\n\nFor learners, you do not need to manage the instructor vehicle compliance record, but you should feel confident the car is roadworthy. If you notice a defect, warning light, tyre issue, or anything unsafe, ask the instructor before driving.`,
-      nextSteps: [
-        roleLabel === "instructor" ? "Update the vehicle compliance page after any service, MOT, insurance, or defect event." : "Raise any vehicle concern before the lesson starts.",
-        "Never ignore a warning light just because the lesson is already booked.",
-        "Keep photos or documents only where LDA asks for them and avoid sharing unnecessary personal data."
-      ],
-      mode: "demo",
-      safetyCritical,
-      topics
-    };
-  }
-
   return {
     answer:
-      `${intro}\n\nFor a ${roleLabel} using a ${vehicleLabel}, the safest way to learn a vehicle topic is to split it into three parts: what the control or system does, when it matters during a lesson, and what action to take if something feels wrong. I can also build lesson plans, suggest better lesson windows, and connect your profile to Smart Match so LDA becomes more personalised each time you use it.`,
+      `${intro}\n\nFor a ${roleLabel} using a ${vehicleLabel}, LDA AI can now branch across the platform: vehicle help, lesson plans, Smart Match, lesson timing, first-car checks, insurance prep, compliance alerts, message summaries, and AI package value. The more context you give it, the more it can route the question into the right LDA workflow.`,
     nextSteps: [
       "Ask one specific question at a time for a sharper answer.",
-      "Include the car type, warning light colour, lesson situation, and whether the vehicle is moving or parked.",
+      "Include the car type, location, budget, lesson situation, support need, or listing details when relevant.",
       "If the issue could affect braking, steering, tyres, smoke, overheating, or visibility, stop and treat it as safety-critical."
     ],
     mode: "demo",
     safetyCritical,
-    topics
+    topics,
+    links: [
+      { label: "SmartMatch", href: "/smart-match" },
+      { label: "First-car guidance", href: "/first-car-guidance" },
+      { label: "Insurance support", href: "/insurance-support" }
+    ]
   };
 }
 
@@ -526,7 +708,7 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
     setResponse(null);
 
     if (question.trim().length < 3) {
-      setError("Ask a vehicle, lesson, schedule, or Smart Match question first.");
+      setError("Ask an LDA AI question first.");
       return;
     }
 
@@ -642,7 +824,7 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
       </div>
 
       <p className="mt-3 text-sm font-semibold leading-6 text-zinc-300">
-        Ask by typing or microphone. LDA AI can help with vehicles, lesson plans, Smart Match, confidence, scheduling, safety, and instructor operations.
+        Ask by typing or microphone. LDA AI can branch across lessons, Smart Match, first cars, insurance, compliance, messages, scheduling, and safety.
       </p>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -717,9 +899,35 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
             />
           </label>
           <label className="grid gap-1 text-xs font-black uppercase text-zinc-500">
+            Budget / target
+            <input
+              value={profile.preferredBudget}
+              onChange={(event) => updateProfileField("preferredBudget", event.target.value)}
+              placeholder="e.g. £4,000 first car, low insurance"
+              className="rounded border border-zinc-700 bg-white px-3 py-2 text-sm font-black text-black placeholder:text-zinc-500"
+            />
+          </label>
+          <label className="grid gap-1 text-xs font-black uppercase text-zinc-500">
+            Support preference
+            <input
+              value={profile.preferredSupportNeed}
+              onChange={(event) => updateProfileField("preferredSupportNeed", event.target.value)}
+              placeholder="e.g. anxiety support, clear instructions"
+              className="rounded border border-zinc-700 bg-white px-3 py-2 text-sm font-black text-black placeholder:text-zinc-500"
+            />
+          </label>
+          <label className="grid gap-1 text-xs font-black uppercase text-zinc-500">
             Lesson window
             <select value={profile.preferredWindow} onChange={(event) => updateProfileField("preferredWindow", event.target.value as LessonWindow)} className="rounded border border-zinc-700 bg-white px-3 py-2 text-sm font-black text-black">
               {windowOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </label>
+          <label className="grid gap-1 text-xs font-black uppercase text-zinc-500 sm:col-span-2">
+            AI depth
+            <select value={profile.aiTier} onChange={(event) => updateProfileField("aiTier", event.target.value as AiTier)} className="rounded border border-zinc-700 bg-white px-3 py-2 text-sm font-black text-black">
+              {tierOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
@@ -763,14 +971,14 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
         <input
           value={situation}
           onChange={(event) => setSituation(event.target.value)}
-          placeholder="Situation, e.g. parked, lesson, test prep, warning light, traffic, EN5"
+          placeholder="Situation, e.g. EN5, first car listing, insurance, traffic, MOT, learner message"
           className="rounded border border-zinc-700 bg-white px-3 py-3 text-sm font-bold text-black placeholder:text-zinc-500"
         />
         <div className="relative">
           <textarea
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Ask about the vehicle, lesson plan, best lesson time, Smart Match, confidence, or instructor operations"
+            placeholder="Ask LDA AI about lessons, Smart Match, cars, insurance, messages, compliance, traffic, or safety"
             rows={variant === "floating" ? 4 : 5}
             className="w-full rounded border border-zinc-700 bg-white px-3 py-3 pr-14 text-sm font-bold text-black placeholder:text-zinc-500"
           />
@@ -810,6 +1018,12 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
             ))}
           </div>
           <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-6 text-zinc-800">{response.answer}</p>
+          {response.connectorNote ? (
+            <div className="mt-4 flex gap-2 rounded border border-amber-200 bg-amber-50 p-3 text-sm font-bold leading-6 text-amber-900">
+              <Bell size={17} className="mt-1 shrink-0" />
+              <span>{response.connectorNote}</span>
+            </div>
+          ) : null}
           {response.nextSteps.length ? (
             <div className="mt-4 rounded bg-zinc-100 p-4">
               <div className="flex items-center gap-2 text-sm font-black text-black">
@@ -825,11 +1039,20 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
               </ul>
             </div>
           ) : null}
+          {response.links?.length ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {response.links.map((link) => (
+                <Link key={link.href} href={link.href} className="rounded-full bg-black px-4 py-2 text-sm font-black text-white hover:bg-brand">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          ) : null}
         </article>
       ) : null}
 
       <p className="mt-3 text-xs font-semibold leading-5 text-zinc-500">
-        LDA AI is guidance only. If the car may be unsafe, stop safely and contact your instructor, garage, recovery provider, or emergency services.
+        LDA AI is guidance only. External car history, insurance, traffic, seller trust, and compliance checks need verified partner data before they can be treated as live results.
       </p>
     </section>
   );
@@ -853,7 +1076,7 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
           </span>
           <span className="min-w-0">
             <span className="block text-sm font-black">LDA Adaptive AI</span>
-            <span className="block truncate text-xs font-bold text-zinc-400">Voice, plans, Smart Match, safety</span>
+            <span className="block truncate text-xs font-bold text-zinc-400">Cars, lessons, insurance, safety</span>
           </span>
           <ChevronDown className="-rotate-90 text-zinc-400" size={18} />
         </button>
