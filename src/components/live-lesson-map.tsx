@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CarFront, Clock3, MapPin, Navigation, RadioTower, ShieldCheck } from "lucide-react";
 import { LDA_GOOGLE_MAP_STYLES } from "@/lib/google-map-style";
+import { getResponsiveWorldMinZoom, watchResponsiveWorldViewport } from "@/lib/google-map-viewport";
 
 type Point = {
   lat: number;
@@ -46,7 +47,6 @@ const instructorStart: Point = {
   lng: -0.1765,
   label: "Instructor - Finchley"
 };
-const MIN_WORLD_MAP_ZOOM = 2;
 const initialInstructorLocation = interpolate(instructorStart, learnerPickup, 0.18);
 
 function interpolate(start: Point, end: Point, progress: number): Point {
@@ -176,6 +176,7 @@ export function LiveLessonMap({ mode = "demo" }: { mode?: TrackingMode }) {
     }
 
     let cancelled = false;
+    let cleanupResponsiveViewport: (() => void) | null = null;
 
     loadGoogleMaps(googleMapsKey)
       .then(() => {
@@ -194,13 +195,14 @@ export function LiveLessonMap({ mode = "demo" }: { mode?: TrackingMode }) {
           disableDefaultUI: true,
           backgroundColor: "#eef2ef",
           mapTypeControl: false,
-          minZoom: MIN_WORLD_MAP_ZOOM,
+          minZoom: getResponsiveWorldMinZoom(mapRef.current),
           streetViewControl: false,
           styles: LDA_GOOGLE_MAP_STYLES,
           zoom: 13
         });
         mapInstance.current = map;
         map.fitBounds(bounds, 80);
+        cleanupResponsiveViewport = watchResponsiveWorldViewport(map, mapRef.current, maps);
 
         routeLine.current = new maps.Polyline({
           geodesic: true,
@@ -235,6 +237,7 @@ export function LiveLessonMap({ mode = "demo" }: { mode?: TrackingMode }) {
 
     return () => {
       cancelled = true;
+      cleanupResponsiveViewport?.();
     };
   }, [googleMapsKey, isLive]);
 
