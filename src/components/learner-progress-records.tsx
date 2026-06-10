@@ -1,4 +1,4 @@
-import { BookOpenCheck, CheckCircle2, ClipboardCheck, Video } from "lucide-react";
+import { BadgeCheck, BookOpenCheck, CheckCircle2, ClipboardCheck, ExternalLink, Video } from "lucide-react";
 
 export type LessonProgressRecord = {
   id: string;
@@ -27,12 +27,30 @@ export function LearnerProgressRecords({ records }: { records: LessonProgressRec
       {records.length ? (
         records.map((record) => (
           <article key={record.id} className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
+            {(record.completed_skills?.length ?? 0) >= 10 ? (
+              <div className="mb-4 rounded border border-emerald-200 bg-emerald-50 p-4 text-emerald-950">
+                <div className="flex items-start gap-3">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded bg-emerald-100 text-emerald-800">
+                    <BadgeCheck size={20} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-black uppercase">Instructor marked test-ready</div>
+                    <p className="mt-2 text-sm font-bold leading-6">
+                      Your instructor has signed off the full LDA progress checklist. Review your notes, then use the official GOV.UK route to book your practical test yourself.
+                    </p>
+                    <a href="https://www.gov.uk/book-driving-test" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-black text-emerald-900 hover:underline">
+                      Book your driving test on GOV.UK <ExternalLink size={15} />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ) : null}
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="text-sm font-black uppercase text-brand">{record.instructor_name}</div>
                 <h3 className="mt-1 text-2xl font-black">Lesson progress update</h3>
                 <p className="mt-1 text-sm font-bold text-zinc-500">
-                  {record.lesson_reference || "No lesson reference"} · {new Date(record.sent_at).toLocaleString("en-GB")}
+                  {record.lesson_reference || "No lesson reference"} Â· {new Date(record.sent_at).toLocaleString("en-GB")}
                 </p>
               </div>
               <div className="rounded bg-zinc-100 px-3 py-2 text-xs font-black uppercase text-zinc-600">View only</div>
