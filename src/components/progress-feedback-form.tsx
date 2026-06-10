@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { Mail, Plus, Save, Send, Trash2 } from "lucide-react";
+import { BadgeCheck, ExternalLink, Mail, Plus, Save, Send, Sparkles, Trash2 } from "lucide-react";
 
 const starterSkills = [
   "Cockpit drill and safety checks",
@@ -29,6 +29,8 @@ export function ProgressFeedbackForm({ instructorName }: { instructorName: strin
   const [message, setMessage] = useState("");
 
   const completedSkills = useMemo(() => skills.filter((skill) => skill.complete).map((skill) => skill.title), [skills]);
+  const checklistCompletion = skills.length ? Math.round((completedSkills.length / skills.length) * 100) : 0;
+  const isTestReadySignedOff = skills.length > 0 && skills.every((skill) => skill.complete);
 
   function addSkill() {
     const trimmed = newSkill.trim();
@@ -78,6 +80,8 @@ export function ProgressFeedbackForm({ instructorName }: { instructorName: strin
         instructorName,
         lessonReference,
         completedSkills,
+        totalChecklistSkills: skills.length,
+        testReadySignedOff: isTestReadySignedOff,
         instructorNotes,
         nextLessonFocus,
         recommendedVideos
@@ -125,7 +129,12 @@ export function ProgressFeedbackForm({ instructorName }: { instructorName: strin
       </div>
 
       <section className="mt-6 rounded bg-zinc-100 p-4">
-        <div className="text-sm font-black uppercase text-zinc-500">Checklist</div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="text-sm font-black uppercase text-zinc-500">Checklist</div>
+          <div className={`rounded-full px-3 py-1 text-xs font-black uppercase ${isTestReadySignedOff ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200" : "bg-white text-zinc-600 ring-1 ring-zinc-200"}`}>
+            {checklistCompletion}% signed off
+          </div>
+        </div>
         <div className="mt-3 grid gap-2">
           {skills.map((skill, index) => (
             <label key={`${skill.title}-${index}`} className="flex items-center gap-3 rounded bg-white p-3 text-sm font-bold">
@@ -150,6 +159,24 @@ export function ProgressFeedbackForm({ instructorName }: { instructorName: strin
           <button type="button" onClick={addSkill} className="lda-pill lda-pill-sm">
             <Plus size={16} /> Add
           </button>
+        </div>
+        <div className={`mt-4 rounded border p-4 ${isTestReadySignedOff ? "border-emerald-200 bg-emerald-50 text-emerald-950" : "border-zinc-200 bg-white text-zinc-700"}`}>
+          <div className="flex items-start gap-3">
+            <div className={`grid h-10 w-10 shrink-0 place-items-center rounded ${isTestReadySignedOff ? "bg-emerald-100 text-emerald-800" : "bg-red-50 text-brand"}`}>
+              {isTestReadySignedOff ? <BadgeCheck size={20} /> : <Sparkles size={20} />}
+            </div>
+            <div>
+              <div className="text-sm font-black uppercase">{isTestReadySignedOff ? "AI test-readiness trigger armed" : "AI readiness bridge"}</div>
+              <p className="mt-2 text-sm font-bold leading-6">
+                {isTestReadySignedOff
+                  ? "When you send this record, LDA will save the instructor-signed checklist, notify the learner that you feel they are test-ready, and give them the official GOV.UK booking link."
+                  : "Once every checklist item is ticked by the instructor, LDA can move the learner into a test-ready journey and send a privacy-safe next-step notification."}
+              </p>
+              <a href="https://www.gov.uk/book-driving-test" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-black text-brand hover:underline">
+                Official DVSA booking page <ExternalLink size={15} />
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
