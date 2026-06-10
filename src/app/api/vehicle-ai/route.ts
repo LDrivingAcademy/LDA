@@ -20,19 +20,6 @@ function isMeaningful(value?: string) {
   return typeof value === "string" && value.trim().length > 2;
 }
 
-function extractOutputText(payload: unknown) {
-  if (
-    payload &&
-    typeof payload === "object" &&
-    "output_text" in payload &&
-    typeof payload.output_text === "string"
-  ) {
-    return payload.output_text;
-  }
-
-  return "";
-}
-
 function unique(values: string[]) {
   return [...new Set(values)];
 }
@@ -164,57 +151,12 @@ export async function POST(request: Request) {
 
   const combinedQuestion = `${cleanInput.situation}\n${cleanInput.question}`;
   const safetyCritical = safetyPattern.test(combinedQuestion);
-  const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_VEHICLE_AI_MODEL || process.env.OPENAI_SUPPORT_MODEL || "gpt-5.2";
-  let answer = "";
-  let nextSteps: string[] = [];
-  let mode: "demo" | "live" = "demo";
-
-  if (apiKey) {
-    try {
-      const response = await fetch("https://api.openai.com/v1/responses", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model,
-          instructions:
-            "You are LDA Vehicle AI, a UK learner-driver and instructor vehicle coach. Be practical, calm, safety-aware, and concise. Cover manual, automatic, electric, and hybrid vehicles, dashboard warnings, show-me/tell-me checks, cockpit drill, tyres, brakes, fluids, visibility, MOT/tax/insurance awareness, and instructor vehicle compliance. Do not claim to diagnose faults with certainty. Do not replace a qualified mechanic, instructor, emergency service, DVSA, DVLA, insurer, or legal adviser. If there is any possible brake, steering, tyre, smoke, overheating, red warning light, crash, fluid leak, or unsafe-control issue, tell the user not to continue driving and to stop safely or seek professional help. Return a short answer followed by 3 practical next steps.",
-          input: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "input_text",
-                  text: `Role: ${cleanInput.role}\nVehicle type: ${cleanInput.vehicleType}\nSituation: ${cleanInput.situation}\nSafety critical detected: ${safetyCritical ? "yes" : "no"}\nQuestion: ${cleanInput.question}`
-                }
-              ]
-            }
-          ]
-        })
-      });
-
-      if (response.ok) {
-        answer = extractOutputText(await response.json());
-        mode = "live";
-      }
-    } catch {
-      answer = "";
-    }
-  }
-
-  if (!answer) {
-    const fallback = fallbackAnswer(cleanInput, safetyCritical);
-    answer = fallback.answer;
-    nextSteps = fallback.nextSteps;
-  }
+  const fallback = fallbackAnswer(cleanInput, safetyCritical);
 
   return jsonNoStore({
-    answer,
-    nextSteps,
-    mode,
+    answer: fallback.answer,
+    nextSteps: fallback.nextSteps,
+    mode: "demo",
     safetyCritical,
     topics: unique(classify(combinedQuestion))
   });
