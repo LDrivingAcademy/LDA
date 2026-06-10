@@ -35,6 +35,129 @@ const vehicleOptions: { label: string; value: VehicleType }[] = [
   { label: "Not sure", value: "unknown" }
 ];
 
+const safetyPattern =
+  /\b(brake|brakes|steering|tyre blowout|flat tyre|smoke|burning|overheat|overheating|engine light|warning light|red light|airbag|abs|crash|accident|fuel leak|oil leak|no control|unsafe|danger|dangerous)\b/i;
+const transmissionPattern = /\b(clutch|gear|gears|bite point|stall|stalling|hill start|automatic|manual|paddle|transmission|neutral|park|drive)\b/i;
+const checksPattern = /\b(show me|tell me|cockpit|mirrors|blind spot|oil|coolant|washer|lights|horn|demister|wipers|brake fluid|tyre pressure)\b/i;
+const evPattern = /\b(electric|ev|hybrid|battery|charging|regen|regenerative|range|charge)\b/i;
+const compliancePattern = /\b(mot|tax|insurance|service|servicing|adi|pdi|licence|license|expiry|compliance|maintenance|defect|record)\b/i;
+
+function classify(question: string) {
+  const topics = [];
+  if (safetyPattern.test(question)) topics.push("Safety");
+  if (transmissionPattern.test(question)) topics.push("Transmission");
+  if (checksPattern.test(question)) topics.push("Vehicle checks");
+  if (evPattern.test(question)) topics.push("EV or hybrid");
+  if (compliancePattern.test(question)) topics.push("Compliance");
+  return topics.length ? [...new Set(topics)] : ["Vehicle guidance"];
+}
+
+function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situation: string, question: string): VehicleAiResponse {
+  const combinedQuestion = `${situation} ${question}`;
+  const roleLabel = role === "instructor" ? "instructor" : role === "learner" ? "learner" : "driver";
+  const vehicleLabel = vehicleType === "unknown" ? "vehicle" : vehicleType;
+  const safetyCritical = safetyPattern.test(combinedQuestion);
+
+  if (safetyCritical) {
+    return {
+      answer:
+        "This sounds safety-related. Do not continue driving if the vehicle feels unsafe, has braking or steering issues, visible smoke, a serious warning light, a tyre problem, or a fluid leak. Stop somewhere safe if you are already moving, switch on hazard lights if needed, and contact your instructor, recovery provider, garage, or emergency services depending on the situation.",
+      nextSteps: [
+        "Treat red warning lights, brake faults, steering faults, smoke, overheating, and tyre failures as stop-driving issues.",
+        "Take a photo of the warning or defect only when parked safely.",
+        roleLabel === "instructor"
+          ? "Record the defect in your LDA vehicle compliance log before accepting more lessons."
+          : "Tell your instructor what happened before booking or continuing the next lesson."
+      ],
+      mode: "demo",
+      safetyCritical,
+      topics: classify(combinedQuestion)
+    };
+  }
+
+  if (transmissionPattern.test(combinedQuestion)) {
+    const manualAdvice =
+      "For a manual car, think in this order: clutch fully down, choose the right gear, find the bite point gently, add light gas, check mirrors and surroundings, then release smoothly. If you stall, secure the car, restart calmly, and reset the same sequence.";
+    const automaticAdvice =
+      "For an automatic, focus on smooth brake control, correct selector use, creep control, safe observation, and avoiding left-foot braking unless your instructor has specifically trained you that way.";
+
+    return {
+      answer:
+        vehicleType === "automatic" || vehicleType === "electric" || vehicleType === "hybrid"
+          ? automaticAdvice
+          : `${manualAdvice} If you are in an automatic or EV, the key habit changes from clutch control to brake, selector, speed, and observation control.`,
+      nextSteps: [
+        "Ask your instructor to isolate the skill for five minutes before using it in traffic.",
+        "Practise the same routine out loud until the order feels automatic.",
+        "If the car jumps, stalls repeatedly, or makes unusual noises, pause and ask for an instructor check."
+      ],
+      mode: "demo",
+      safetyCritical,
+      topics: classify(combinedQuestion)
+    };
+  }
+
+  if (checksPattern.test(combinedQuestion)) {
+    return {
+      answer:
+        "For UK learner driving, vehicle confidence comes from repeatable checks: seating and belt, mirrors, blind spots, lights, tyres, fluids, demisters, wipers, horn, and warning lights. For show-me/tell-me style questions, learn what the control does, when to use it, and how to check it without taking attention away from the road.",
+      nextSteps: [
+        "Use the cockpit drill before every lesson: doors, seat, belt, mirrors, controls.",
+        "Ask your instructor to link each check to a real driving situation, not just a memorised answer.",
+        "Keep a short list of controls you still hesitate on and review it before your next booking."
+      ],
+      mode: "demo",
+      safetyCritical,
+      topics: classify(combinedQuestion)
+    };
+  }
+
+  if (evPattern.test(combinedQuestion)) {
+    return {
+      answer:
+        "For EVs and hybrids, the big learning differences are smoother acceleration, regenerative braking, range planning, charging awareness, and understanding that the car may move or respond very quietly. Treat the silence as a reason to be more observant around pedestrians, cyclists, and car parks.",
+      nextSteps: [
+        "Ask how regenerative braking changes the feel of slowing down.",
+        "Check the vehicle range and charging plan before longer lessons.",
+        "Practise low-speed control in a quiet area because EV torque can feel immediate."
+      ],
+      mode: "demo",
+      safetyCritical,
+      topics: classify(combinedQuestion)
+    };
+  }
+
+  if (compliancePattern.test(combinedQuestion)) {
+    return {
+      answer:
+        roleLabel === "instructor"
+          ? "For instructor use, vehicle compliance should stay visible before lessons: MOT, tax, insurance, servicing, tyres, lights, registration status, defects, and expiry reminders. LDA should be your operating record so a lesson is never accepted with a compliance gap."
+          : "For learners, you do not need to manage the instructor vehicle compliance record, but you should feel confident the car is roadworthy. If you notice a defect, warning light, tyre issue, or anything unsafe, ask the instructor before driving.",
+      nextSteps: [
+        roleLabel === "instructor" ? "Update the vehicle compliance page after any service, MOT, insurance, or defect event." : "Raise any vehicle concern before the lesson starts.",
+        "Never ignore a warning light just because the lesson is already booked.",
+        "Keep photos or documents only where LDA asks for them and avoid sharing unnecessary personal data."
+      ],
+      mode: "demo",
+      safetyCritical,
+      topics: classify(combinedQuestion)
+    };
+  }
+
+  return {
+    answer:
+      `For a ${roleLabel} using a ${vehicleLabel}, the safest way to learn a vehicle topic is to split it into three parts: what the control or system does, when it matters during a lesson, and what action to take if something feels wrong. I can help with manual or automatic control, EV and hybrid driving, warning lights, cockpit checks, show-me/tell-me questions, tyres, brakes, fluids, MOT, tax, insurance, and instructor compliance records.`,
+    nextSteps: [
+      "Ask one specific question at a time for a sharper answer.",
+      "Include the car type, warning light colour, lesson situation, and whether the vehicle is moving or parked.",
+      "If the issue could affect braking, steering, tyres, smoke, overheating, or visibility, stop and treat it as safety-critical."
+    ],
+    mode: "demo",
+    safetyCritical,
+    topics: classify(combinedQuestion)
+  };
+}
+
 export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floating" | "inline" }) {
   const [isOpen, setIsOpen] = useState(variant === "inline");
   const [role, setRole] = useState<VehicleRole>("learner");
@@ -43,29 +166,18 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
   const [question, setQuestion] = useState("");
   const [response, setResponse] = useState<VehicleAiResponse | null>(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  async function submitQuestion(event: FormEvent<HTMLFormElement>) {
+  function submitQuestion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setLoading(true);
     setError("");
     setResponse(null);
 
-    const apiResponse = await fetch("/api/vehicle-ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role, vehicleType, situation, question })
-    });
-
-    const payload = await apiResponse.json();
-    setLoading(false);
-
-    if (!apiResponse.ok) {
-      setError(payload.error || "Vehicle AI could not respond. Please try again.");
+    if (question.trim().length < 3) {
+      setError("Ask a vehicle question first.");
       return;
     }
 
-    setResponse(payload);
+    setResponse(buildVehicleResponse(role, vehicleType, situation, question));
   }
 
   const panel = (
@@ -143,8 +255,8 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
           className="rounded border border-zinc-700 bg-white px-3 py-3 text-sm font-bold text-black placeholder:text-zinc-500"
         />
 
-        <button type="submit" disabled={loading} className="lda-pill lda-pill-sm justify-center disabled:cursor-wait disabled:opacity-70">
-          {loading ? "Thinking..." : "Ask Vehicle AI"} <Send size={16} />
+        <button type="submit" className="lda-pill lda-pill-sm justify-center">
+          Ask Vehicle AI <Send size={16} />
         </button>
       </form>
 
