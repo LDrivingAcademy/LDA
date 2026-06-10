@@ -130,19 +130,19 @@ export default function ContactPage() {
           <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-red-500/50 bg-red-500/10 px-4 py-2 text-sm font-black text-red-100">
-                <CarFront size={17} /> LDA Vehicle AI
+                <CarFront size={17} /> LDA Adaptive AI
               </div>
               <h2 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">
-                One place to ask about the vehicle.
+                One place to ask about the driving journey.
               </h2>
               <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-zinc-300">
-                Learners and instructors can ask about manual, automatic, electric, and hybrid vehicles, dashboard warnings, cockpit checks, show-me/tell-me questions, tyres, brakes, MOT, insurance, and safety-critical defects.
+                Learners and instructors can ask about vehicles, lesson plans, Smart Match, first cars, insurance preparation, message summaries, compliance, timing, support needs, and safety-critical defects.
               </p>
               <div className="mt-6 grid gap-3 text-sm font-bold text-zinc-300 sm:grid-cols-2">
-                <span className="rounded border border-zinc-800 bg-zinc-950 p-3">Transmission coaching</span>
-                <span className="rounded border border-zinc-800 bg-zinc-950 p-3">Warning-light triage</span>
-                <span className="rounded border border-zinc-800 bg-zinc-950 p-3">Lesson-ready checks</span>
-                <span className="rounded border border-zinc-800 bg-zinc-950 p-3">Instructor compliance support</span>
+                <span className="rounded border border-zinc-800 bg-zinc-950 p-3">Smart Match coaching</span>
+                <span className="rounded border border-zinc-800 bg-zinc-950 p-3">First-car and insurance prep</span>
+                <span className="rounded border border-zinc-800 bg-zinc-950 p-3">Traffic-aware lesson planning</span>
+                <span className="rounded border border-zinc-800 bg-zinc-950 p-3">Messages and compliance support</span>
               </div>
             </div>
             <VehicleAiAssistant variant="inline" />
