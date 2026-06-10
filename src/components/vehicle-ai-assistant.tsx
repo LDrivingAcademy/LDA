@@ -1,7 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { AlertTriangle, Bot, CarFront, ChevronDown, Minimize2, Send, Sparkles, Wrench } from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
+import { AlertTriangle, Bot, Brain, CarFront, ChevronDown, Minimize2, RotateCcw, Send, Sparkles, Wrench } from "lucide-react";
 
 type VehicleAiResponse = {
   answer: string;
@@ -13,6 +13,27 @@ type VehicleAiResponse = {
 
 type VehicleRole = "learner" | "instructor" | "visitor";
 type VehicleType = "manual" | "automatic" | "electric" | "hybrid" | "unknown";
+type ConfidenceLevel = "new" | "building" | "confident";
+
+type AdaptiveProfile = {
+  confidence: ConfidenceLevel;
+  preferredRole: VehicleRole;
+  preferredVehicle: VehicleType;
+  questionCount: number;
+  recurringTopics: Record<string, number>;
+  lastQuestions: string[];
+};
+
+const adaptiveProfileKey = "lda.vehicle-ai.profile.v1";
+
+const defaultAdaptiveProfile: AdaptiveProfile = {
+  confidence: "building",
+  preferredRole: "learner",
+  preferredVehicle: "manual",
+  questionCount: 0,
+  recurringTopics: {},
+  lastQuestions: []
+};
 
 const quickPrompts = [
   "What does this dashboard warning light mean?",
@@ -42,6 +63,37 @@ const checksPattern = /\b(show me|tell me|cockpit|mirrors|blind spot|oil|coolant
 const evPattern = /\b(electric|ev|hybrid|battery|charging|regen|regenerative|range|charge)\b/i;
 const compliancePattern = /\b(mot|tax|insurance|service|servicing|adi|pdi|licence|license|expiry|compliance|maintenance|defect|record)\b/i;
 
+function readAdaptiveProfile() {
+  if (typeof window === "undefined") {
+    return defaultAdaptiveProfile;
+  }
+
+  try {
+    const saved = window.localStorage.getItem(adaptiveProfileKey);
+    if (!saved) {
+      return defaultAdaptiveProfile;
+    }
+
+    const parsed = JSON.parse(saved) as Partial<AdaptiveProfile>;
+    return {
+      ...defaultAdaptiveProfile,
+      ...parsed,
+      recurringTopics: parsed.recurringTopics ?? {},
+      lastQuestions: parsed.lastQuestions ?? []
+    };
+  } catch {
+    return defaultAdaptiveProfile;
+  }
+}
+
+function saveAdaptiveProfile(profile: AdaptiveProfile) {
+  try {
+    window.localStorage.setItem(adaptiveProfileKey, JSON.stringify(profile));
+  } catch {
+    // If local storage is unavailable, the assistant still works without memory.
+  }
+}
+
 function classify(question: string) {
   const topics = [];
   if (safetyPattern.test(question)) topics.push("Safety");
@@ -52,16 +104,45 @@ function classify(question: string) {
   return topics.length ? [...new Set(topics)] : ["Vehicle guidance"];
 }
 
-function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situation: string, question: string): VehicleAiResponse {
+function confidenceCopy(confidence: ConfidenceLevel) {
+  if (confidence === "new") {
+    return "I’ll keep this step-by-step because your profile is set to new/confidence-building.";
+  }
+
+  if (confidence === "confident") {
+    return "I’ll keep this sharper and more operational because your profile is set to confident.";
+  }
+
+  return "I’ll keep this practical and coached because your profile is still building confidence.";
+}
+
+function strongestMemory(profile: AdaptiveProfile) {
+  const [topic] = Object.entries(profile.recurringTopics).sort((first, second) => second[1] - first[1])[0] ?? [];
+  return topic;
+}
+
+function adaptiveIntro(profile: AdaptiveProfile, topics: string[]) {
+  const strongestTopic = strongestMemory(profile);
+  const memoryLine = strongestTopic
+    ? `I can see you have asked most about ${strongestTopic.toLowerCase()}, so I’ll connect this answer back to that pattern.`
+    : "I’ll start building your vehicle profile from this question.";
+  const topicLine = topics.length ? `Current focus: ${topics.join(", ")}.` : "";
+
+  return `${confidenceCopy(profile.confidence)} ${memoryLine} ${topicLine}`.trim();
+}
+
+function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situation: string, question: string, profile: AdaptiveProfile): VehicleAiResponse {
   const combinedQuestion = `${situation} ${question}`;
   const roleLabel = role === "instructor" ? "instructor" : role === "learner" ? "learner" : "driver";
   const vehicleLabel = vehicleType === "unknown" ? "vehicle" : vehicleType;
   const safetyCritical = safetyPattern.test(combinedQuestion);
+  const topics = classify(combinedQuestion);
+  const intro = adaptiveIntro(profile, topics);
 
   if (safetyCritical) {
     return {
       answer:
-        "This sounds safety-related. Do not continue driving if the vehicle feels unsafe, has braking or steering issues, visible smoke, a serious warning light, a tyre problem, or a fluid leak. Stop somewhere safe if you are already moving, switch on hazard lights if needed, and contact your instructor, recovery provider, garage, or emergency services depending on the situation.",
+        `${intro}\n\nThis sounds safety-related. Do not continue driving if the vehicle feels unsafe, has braking or steering issues, visible smoke, a serious warning light, a tyre problem, or a fluid leak. Stop somewhere safe if you are already moving, switch on hazard lights if needed, and contact your instructor, recovery provider, garage, or emergency services depending on the situation.`,
       nextSteps: [
         "Treat red warning lights, brake faults, steering faults, smoke, overheating, and tyre failures as stop-driving issues.",
         "Take a photo of the warning or defect only when parked safely.",
@@ -71,7 +152,7 @@ function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situa
       ],
       mode: "demo",
       safetyCritical,
-      topics: classify(combinedQuestion)
+      topics
     };
   }
 
@@ -84,8 +165,8 @@ function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situa
     return {
       answer:
         vehicleType === "automatic" || vehicleType === "electric" || vehicleType === "hybrid"
-          ? automaticAdvice
-          : `${manualAdvice} If you are in an automatic or EV, the key habit changes from clutch control to brake, selector, speed, and observation control.`,
+          ? `${intro}\n\n${automaticAdvice}`
+          : `${intro}\n\n${manualAdvice} If you are in an automatic or EV, the key habit changes from clutch control to brake, selector, speed, and observation control.`,
       nextSteps: [
         "Ask your instructor to isolate the skill for five minutes before using it in traffic.",
         "Practise the same routine out loud until the order feels automatic.",
@@ -93,14 +174,14 @@ function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situa
       ],
       mode: "demo",
       safetyCritical,
-      topics: classify(combinedQuestion)
+      topics
     };
   }
 
   if (checksPattern.test(combinedQuestion)) {
     return {
       answer:
-        "For UK learner driving, vehicle confidence comes from repeatable checks: seating and belt, mirrors, blind spots, lights, tyres, fluids, demisters, wipers, horn, and warning lights. For show-me/tell-me style questions, learn what the control does, when to use it, and how to check it without taking attention away from the road.",
+        `${intro}\n\nFor UK learner driving, vehicle confidence comes from repeatable checks: seating and belt, mirrors, blind spots, lights, tyres, fluids, demisters, wipers, horn, and warning lights. For show-me/tell-me style questions, learn what the control does, when to use it, and how to check it without taking attention away from the road.`,
       nextSteps: [
         "Use the cockpit drill before every lesson: doors, seat, belt, mirrors, controls.",
         "Ask your instructor to link each check to a real driving situation, not just a memorised answer.",
@@ -108,14 +189,14 @@ function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situa
       ],
       mode: "demo",
       safetyCritical,
-      topics: classify(combinedQuestion)
+      topics
     };
   }
 
   if (evPattern.test(combinedQuestion)) {
     return {
       answer:
-        "For EVs and hybrids, the big learning differences are smoother acceleration, regenerative braking, range planning, charging awareness, and understanding that the car may move or respond very quietly. Treat the silence as a reason to be more observant around pedestrians, cyclists, and car parks.",
+        `${intro}\n\nFor EVs and hybrids, the big learning differences are smoother acceleration, regenerative braking, range planning, charging awareness, and understanding that the car may move or respond very quietly. Treat the silence as a reason to be more observant around pedestrians, cyclists, and car parks.`,
       nextSteps: [
         "Ask how regenerative braking changes the feel of slowing down.",
         "Check the vehicle range and charging plan before longer lessons.",
@@ -123,7 +204,7 @@ function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situa
       ],
       mode: "demo",
       safetyCritical,
-      topics: classify(combinedQuestion)
+      topics
     };
   }
 
@@ -131,8 +212,8 @@ function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situa
     return {
       answer:
         roleLabel === "instructor"
-          ? "For instructor use, vehicle compliance should stay visible before lessons: MOT, tax, insurance, servicing, tyres, lights, registration status, defects, and expiry reminders. LDA should be your operating record so a lesson is never accepted with a compliance gap."
-          : "For learners, you do not need to manage the instructor vehicle compliance record, but you should feel confident the car is roadworthy. If you notice a defect, warning light, tyre issue, or anything unsafe, ask the instructor before driving.",
+          ? `${intro}\n\nFor instructor use, vehicle compliance should stay visible before lessons: MOT, tax, insurance, servicing, tyres, lights, registration status, defects, and expiry reminders. LDA should be your operating record so a lesson is never accepted with a compliance gap.`
+          : `${intro}\n\nFor learners, you do not need to manage the instructor vehicle compliance record, but you should feel confident the car is roadworthy. If you notice a defect, warning light, tyre issue, or anything unsafe, ask the instructor before driving.`,
       nextSteps: [
         roleLabel === "instructor" ? "Update the vehicle compliance page after any service, MOT, insurance, or defect event." : "Raise any vehicle concern before the lesson starts.",
         "Never ignore a warning light just because the lesson is already booked.",
@@ -140,13 +221,13 @@ function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situa
       ],
       mode: "demo",
       safetyCritical,
-      topics: classify(combinedQuestion)
+      topics
     };
   }
 
   return {
     answer:
-      `For a ${roleLabel} using a ${vehicleLabel}, the safest way to learn a vehicle topic is to split it into three parts: what the control or system does, when it matters during a lesson, and what action to take if something feels wrong. I can help with manual or automatic control, EV and hybrid driving, warning lights, cockpit checks, show-me/tell-me questions, tyres, brakes, fluids, MOT, tax, insurance, and instructor compliance records.`,
+      `${intro}\n\nFor a ${roleLabel} using a ${vehicleLabel}, the safest way to learn a vehicle topic is to split it into three parts: what the control or system does, when it matters during a lesson, and what action to take if something feels wrong. I can help with manual or automatic control, EV and hybrid driving, warning lights, cockpit checks, show-me/tell-me questions, tyres, brakes, fluids, MOT, tax, insurance, and instructor compliance records.`,
     nextSteps: [
       "Ask one specific question at a time for a sharper answer.",
       "Include the car type, warning light colour, lesson situation, and whether the vehicle is moving or parked.",
@@ -154,7 +235,23 @@ function buildVehicleResponse(role: VehicleRole, vehicleType: VehicleType, situa
     ],
     mode: "demo",
     safetyCritical,
-    topics: classify(combinedQuestion)
+    topics
+  };
+}
+
+function updateAdaptiveProfile(profile: AdaptiveProfile, role: VehicleRole, vehicleType: VehicleType, question: string, topics: string[]) {
+  const recurringTopics = { ...profile.recurringTopics };
+  topics.forEach((topic) => {
+    recurringTopics[topic] = (recurringTopics[topic] ?? 0) + 1;
+  });
+
+  return {
+    ...profile,
+    preferredRole: role,
+    preferredVehicle: vehicleType,
+    questionCount: profile.questionCount + 1,
+    recurringTopics,
+    lastQuestions: [question.trim(), ...profile.lastQuestions].filter(Boolean).slice(0, 3)
   };
 }
 
@@ -166,6 +263,18 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
   const [question, setQuestion] = useState("");
   const [response, setResponse] = useState<VehicleAiResponse | null>(null);
   const [error, setError] = useState("");
+  const [profile, setProfile] = useState<AdaptiveProfile>(defaultAdaptiveProfile);
+
+  useEffect(() => {
+    const savedProfile = readAdaptiveProfile();
+    setProfile(savedProfile);
+    setRole(savedProfile.preferredRole);
+    setVehicleType(savedProfile.preferredVehicle);
+  }, []);
+
+  useEffect(() => {
+    saveAdaptiveProfile(profile);
+  }, [profile]);
 
   function submitQuestion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -177,7 +286,18 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
       return;
     }
 
-    setResponse(buildVehicleResponse(role, vehicleType, situation, question));
+    const nextResponse = buildVehicleResponse(role, vehicleType, situation, question, profile);
+    const nextProfile = updateAdaptiveProfile(profile, role, vehicleType, question, nextResponse.topics);
+    setResponse(nextResponse);
+    setProfile(nextProfile);
+  }
+
+  function resetAdaptiveProfile() {
+    setProfile(defaultAdaptiveProfile);
+    setRole(defaultAdaptiveProfile.preferredRole);
+    setVehicleType(defaultAdaptiveProfile.preferredVehicle);
+    setResponse(null);
+    setError("");
   }
 
   const panel = (
@@ -207,6 +327,37 @@ export function VehicleAiAssistant({ variant = "floating" }: { variant?: "floati
       <p className="mt-3 text-sm font-semibold leading-6 text-zinc-300">
         Vehicle guidance for learners and instructors: gears, clutch, dashboard warnings, EVs, checks, MOT, insurance, safety, and compliance.
       </p>
+
+      <div className="mt-4 rounded border border-zinc-800 bg-black p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-black uppercase text-red-200">
+              <Brain size={15} /> Adaptive profile
+            </div>
+            <p className="mt-2 text-xs font-semibold leading-5 text-zinc-400">
+              {profile.questionCount
+                ? `Learning from ${profile.questionCount} question${profile.questionCount === 1 ? "" : "s"}. Strongest focus: ${strongestMemory(profile) ?? "building profile"}.`
+                : "No memory yet. Ask a question and LDA will begin tailoring this assistant to you."}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={resetAdaptiveProfile}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded border border-zinc-800 text-zinc-400 hover:border-red-500 hover:text-white"
+            aria-label="Reset adaptive Vehicle AI profile"
+          >
+            <RotateCcw size={15} />
+          </button>
+        </div>
+        <label className="mt-3 grid gap-1 text-xs font-black uppercase text-zinc-500">
+          Confidence
+          <select value={profile.confidence} onChange={(event) => setProfile({ ...profile, confidence: event.target.value as ConfidenceLevel })} className="rounded border border-zinc-700 bg-white px-3 py-2 text-sm font-black text-black">
+            <option value="new">New / nervous</option>
+            <option value="building">Building confidence</option>
+            <option value="confident">Confident</option>
+          </select>
+        </label>
+      </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {quickPrompts.map((prompt) => (
