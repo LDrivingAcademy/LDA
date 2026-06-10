@@ -29,7 +29,6 @@ type TaxProfile = {
   taxCode: string;
   vatStatus: string;
   vatNumber: string;
-  accountingMethod: string;
 };
 
 const earningsRows = [
@@ -75,8 +74,7 @@ export function InstructorFinanceWorkspace() {
     nationalInsurance: "QQ 12 34 56 C",
     taxCode: "",
     vatStatus: "Not VAT registered",
-    vatNumber: "",
-    accountingMethod: "Cash basis"
+    vatNumber: ""
   });
   const [message, setMessage] = useState("");
 
@@ -220,13 +218,12 @@ export function InstructorFinanceWorkspace() {
                   <input value={taxProfile.vatNumber} onChange={(event) => setTaxProfile({ ...taxProfile, vatNumber: event.target.value })} placeholder="If VAT registered" className="rounded border border-zinc-300 px-3 py-3 font-bold" />
                 </label>
               </div>
-              <label className="grid gap-2 text-sm font-black">
+              <div className="grid gap-2 text-sm font-black">
                 Accounting method
-                <select value={taxProfile.accountingMethod} onChange={(event) => setTaxProfile({ ...taxProfile, accountingMethod: event.target.value })} className="rounded border border-zinc-300 px-3 py-3 font-bold">
-                  <option>Cash basis</option>
-                  <option>Traditional accounting</option>
-                </select>
-              </label>
+                <div className="rounded border border-zinc-200 bg-zinc-50 px-3 py-3 font-bold text-zinc-700">
+                  Traditional accounting
+                </div>
+              </div>
               <button type="submit" className="lda-pill lda-pill-sm mt-auto self-start">
                 Save tax profile
               </button>
