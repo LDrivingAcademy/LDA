@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -15,6 +15,7 @@ import {
   XCircle,
   UserRound
 } from "lucide-react";
+import { PlatformProtectionPanel } from "@/components/platform-protection-panel";
 
 type LessonStatus = "booked" | "pending" | "free" | "blocked" | "cancelled";
 
@@ -34,6 +35,8 @@ type InstructorCalendarWorkspaceProps = {
   instructorName: string;
   instructorEmail?: string | null;
 };
+
+const CALENDAR_STORAGE_KEY = "lda:instructor-calendar-slots:v1";
 
 const initialSlots: InstructorSlot[] = [
   {
@@ -170,10 +173,40 @@ function statusCounts(slots: InstructorSlot[]) {
   );
 }
 
+function isLessonStatus(value: unknown): value is LessonStatus {
+  return value === "booked" || value === "pending" || value === "free" || value === "blocked" || value === "cancelled";
+}
+
+function isInstructorSlot(value: unknown): value is InstructorSlot {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const slot = value as Partial<InstructorSlot>;
+  return (
+    typeof slot.id === "string" &&
+    typeof slot.date === "string" &&
+    typeof slot.start === "string" &&
+    typeof slot.end === "string" &&
+    isLessonStatus(slot.status)
+  );
+}
+
+function readStoredSlots() {
+  try {
+    const stored = window.localStorage.getItem(CALENDAR_STORAGE_KEY);
+    const parsed = stored ? JSON.parse(stored) : null;
+    return Array.isArray(parsed) && parsed.every(isInstructorSlot) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export function InstructorCalendarWorkspace({ instructorName, instructorEmail }: InstructorCalendarWorkspaceProps) {
   const [displayMonth, setDisplayMonth] = useState(() => new Date(2026, 5, 1));
   const [selectedDate, setSelectedDate] = useState("2026-06-08");
   const [slots, setSlots] = useState<InstructorSlot[]>(initialSlots);
+  const [hasLoadedStoredSlots, setHasLoadedStoredSlots] = useState(false);
   const [removeMode, setRemoveMode] = useState(false);
   const monthCells = useMemo(() => getMonthCells(displayMonth), [displayMonth]);
   const visibleMonthPrefix = `${displayMonth.getFullYear()}-${String(displayMonth.getMonth() + 1).padStart(2, "0")}`;
@@ -187,6 +220,22 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
       const [endHour, endMinute] = slot.end.split(":").map(Number);
       return hours + (endHour * 60 + endMinute - startHour * 60 - startMinute) / 60;
     }, 0);
+
+  useEffect(() => {
+    const storedSlots = readStoredSlots();
+    if (storedSlots) {
+      setSlots(storedSlots);
+    }
+    setHasLoadedStoredSlots(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedStoredSlots) {
+      return;
+    }
+
+    window.localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(slots));
+  }, [hasLoadedStoredSlots, slots]);
 
   function updateInstructorAvailability(slotId: string, status: "free" | "blocked") {
     setSlots((current) => current.map((slot) => {
@@ -410,6 +459,7 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
               <p>Unavailable keeps personal time, school runs, breaks, and admin time out of learner search.</p>
             </div>
           </section>
+          <PlatformProtectionPanel audience="instructor" compact />
         </aside>
       </section>
     </main>
