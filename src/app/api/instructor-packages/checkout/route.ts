@@ -1,10 +1,11 @@
-import { isRateLimited, jsonNoStore, rateLimitResponse } from "@/lib/security";
+import { getAppOrigin, isRateLimited, jsonNoStore, rateLimitResponse, readJsonBody } from "@/lib/security";
 import {
   getInstructorPackage,
   getInstructorPackagePriceEnv,
   type BillingInterval,
   type InstructorPackageId,
 } from "@/lib/instructor-packages";
+import { getStripePriceId, getStripeSecretKey } from "@/lib/stripe-env";
 
 type InstructorPackageCheckoutRequest = {
   packageId?: InstructorPackageId;
@@ -18,67 +19,41 @@ type StripeCheckoutResponse = {
   };
 };
 
-function normaliseAppUrl(request: Request) {
-  const configuredUrl = process.env.APP_WEBSITE_URL?.trim();
-  const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
-  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
-  const candidates = [
-    configuredUrl,
-    configuredUrl && !configuredUrl.startsWith("http") ? `https://${configuredUrl}` : undefined,
-    forwardedHost ? `${forwardedProto}://${forwardedHost}` : undefined,
-    "https://ldrivingacademy.co.uk",
-  ];
-
-  for (const candidate of candidates) {
-    if (!candidate) continue;
-
-    try {
-      return new URL(candidate).origin;
-    } catch {
-      // Keep trying the remaining fallbacks.
-    }
-  }
-
-  return "https://ldrivingacademy.co.uk";
-}
-
 export async function POST(request: Request) {
   if (isRateLimited(request, "instructor-package-checkout", 12)) {
     return rateLimitResponse();
   }
 
-  let payload: InstructorPackageCheckoutRequest = {};
-
-  try {
-    payload = (await request.json()) as InstructorPackageCheckoutRequest;
-  } catch {
+  const payload = await readJsonBody<InstructorPackageCheckoutRequest>(request);
+  if (!payload) {
     return jsonNoStore({ error: "Invalid checkout request." }, { status: 400 });
   }
 
   const packageId = payload.packageId ?? "instructor-plus";
-  const billingInterval = payload.billingInterval ?? "monthly";
+  const billingInterval = payload.billingInterval === "yearly" ? "yearly" : "monthly";
   const instructorPackage = getInstructorPackage(packageId);
 
   if (!instructorPackage) {
     return jsonNoStore({ error: "Instructor package not found." }, { status: 404 });
   }
 
-  const appUrl = normaliseAppUrl(request);
+  const appUrl = getAppOrigin(request);
 
   if (instructorPackage.id === "instructor") {
     return jsonNoStore({ checkoutUrl: `${appUrl}/instructor-dashboard?plan=instructor` });
   }
 
-  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  const stripeSecret = getStripeSecretKey();
   const priceEnvName = getInstructorPackagePriceEnv(instructorPackage.id, billingInterval);
-  const priceId = priceEnvName ? process.env[priceEnvName] : undefined;
+  const stripePrice = getStripePriceId(priceEnvName);
 
-  if (!stripeSecretKey || !priceId) {
+  if (!stripeSecret.value || !stripePrice?.value) {
+    console.error(
+      `Instructor package checkout missing ${!stripeSecret.value ? stripeSecret.envName : stripePrice?.envName ?? "Stripe Price ID"} in ${stripeSecret.modeLabel} Stripe mode.`,
+    );
     return jsonNoStore(
       {
-        error: priceEnvName
-          ? `Add ${priceEnvName} and STRIPE_SECRET_KEY in Vercel to enable this instructor subscription.`
-          : "Instructor package checkout is not configured yet.",
+        error: "Instructor package checkout is being connected. Please try again shortly or contact LDA support.",
       },
       { status: 500 },
     );
@@ -89,7 +64,7 @@ export async function POST(request: Request) {
     success_url: `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=success&billing=${billingInterval}`,
     cancel_url: `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=cancelled&billing=${billingInterval}`,
     "line_items[0][quantity]": "1",
-    "line_items[0][price]": priceId,
+    "line_items[0][price]": stripePrice.value,
     "metadata[lda_instructor_package_id]": instructorPackage.id,
     "metadata[lda_billing_interval]": billingInterval,
     "subscription_data[metadata][lda_instructor_package_id]": instructorPackage.id,
@@ -101,7 +76,7 @@ export async function POST(request: Request) {
     const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${stripeSecretKey}`,
+        Authorization: `Bearer ${stripeSecret.value}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body,
