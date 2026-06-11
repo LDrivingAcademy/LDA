@@ -1,55 +1,29 @@
-export type StripeRuntimeMode = "legacy" | "test" | "live";
+import {
+  getModeSpecificEnvCandidates,
+  getRuntimeEnvMode,
+  getRuntimeEnvModeLabel,
+  getRuntimeEnvValue,
+  type RuntimeEnvMode,
+  type RuntimeEnvValue
+} from "@/lib/runtime-env";
 
-const modeAliases: Record<string, StripeRuntimeMode> = {
-  live: "live",
-  prod: "live",
-  production: "live",
-  test: "test",
-  sandbox: "test",
-  testing: "test"
-};
-
-export type StripeEnvValue = {
-  envName: string;
-  mode: StripeRuntimeMode;
-  modeLabel: string;
-  value?: string;
-};
+export type StripeRuntimeMode = RuntimeEnvMode;
+export type StripeEnvValue = RuntimeEnvValue;
 
 export function getStripeRuntimeMode(): StripeRuntimeMode {
-  const rawMode = String(process.env.STRIPE_MODE ?? process.env.STRIPE_ENVIRONMENT ?? process.env.STRIPE_ENV ?? "")
-    .trim()
-    .toLowerCase();
-
-  return modeAliases[rawMode] ?? "legacy";
+  return getRuntimeEnvMode();
 }
 
 export function getStripeModeLabel(mode = getStripeRuntimeMode()) {
-  if (mode === "test") return "test/sandbox";
-  if (mode === "live") return "live";
-  return "legacy";
+  return getRuntimeEnvModeLabel(mode);
 }
 
 export function getModeSpecificStripeEnvName(baseEnvName: string, mode = getStripeRuntimeMode()) {
-  if (mode === "legacy") {
-    return baseEnvName;
-  }
-
-  const suffix = baseEnvName.replace(/^STRIPE_/, "");
-  return mode === "test" ? `STRIPE_TEST_${suffix}` : `STRIPE_LIVE_${suffix}`;
+  return getModeSpecificEnvCandidates(baseEnvName, mode)[0] ?? baseEnvName;
 }
 
 export function getStripeEnvValue(baseEnvName: string): StripeEnvValue {
-  const mode = getStripeRuntimeMode();
-  const envName = getModeSpecificStripeEnvName(baseEnvName, mode);
-  const value = process.env[envName]?.trim();
-
-  return {
-    envName,
-    mode,
-    modeLabel: getStripeModeLabel(mode),
-    value: value || undefined
-  };
+  return getRuntimeEnvValue(baseEnvName, { mode: getStripeRuntimeMode() });
 }
 
 export function getStripeSecretKey() {
