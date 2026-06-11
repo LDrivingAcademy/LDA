@@ -2,12 +2,16 @@ import {
   isRateLimited,
   jsonNoStore,
   rateLimitResponse,
+  getAppOrigin,
+  readJsonBody,
   safeAmountPence,
   safeCurrency,
   safeEmail,
+  safeStripeConnectedAccountId,
   safeText
 } from "@/lib/security";
 import { applyStripeCheckoutPaymentMethods } from "@/lib/stripe-checkout";
+import { getStripeEnvValue, getStripeSecretKey } from "@/lib/stripe-env";
 
 type CheckoutRequest = {
   bookingId?: string;
@@ -26,40 +30,19 @@ function normalisePaymentPreference(value?: string) {
     .replaceAll(" ", "_");
 }
 
-function normaliseAppUrl(request: Request) {
-  const configuredUrl = process.env.APP_WEBSITE_URL?.trim();
-  const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
-  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
-  const candidates = [
-    configuredUrl,
-    configuredUrl && !configuredUrl.startsWith("http") ? `https://${configuredUrl}` : undefined,
-    forwardedHost ? `${forwardedProto}://${forwardedHost}` : undefined,
-    "https://ldrivingacademy.co.uk"
-  ];
-
-  for (const candidate of candidates) {
-    if (!candidate) continue;
-
-    try {
-      const url = new URL(candidate);
-      return url.origin;
-    } catch {
-      // Try the next candidate. A malformed APP_WEBSITE_URL should not block checkout.
-    }
-  }
-
-  return "https://ldrivingacademy.co.uk";
-}
-
 export async function POST(request: Request) {
   if (isRateLimited(request, "booking-checkout", 20)) {
     return rateLimitResponse();
   }
 
-  const body = (await request.json()) as CheckoutRequest;
-  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-  const appUrl = normaliseAppUrl(request);
-  const currency = safeCurrency(process.env.STRIPE_DEFAULT_CURRENCY, "gbp");
+  const body = await readJsonBody<CheckoutRequest>(request);
+  if (!body) {
+    return jsonNoStore({ error: "Invalid checkout request." }, { status: 400 });
+  }
+
+  const stripeSecret = getStripeSecretKey();
+  const appUrl = getAppOrigin(request);
+  const currency = safeCurrency(getStripeEnvValue("STRIPE_DEFAULT_CURRENCY").value, "gbp");
   const amountPence = safeAmountPence(body.amountPence, 4200, 1000, 30000);
   const instructorName = safeText(body.instructorName, "your driving instructor", 80);
   const bookingId = safeText(body.bookingId, "demo-booking", 80);
@@ -68,10 +51,10 @@ export async function POST(request: Request) {
   const commissionPercent = Math.min(Math.max(Number(process.env.LDA_PLATFORM_COMMISSION_PERCENT ?? 10), 0), 30);
   const applicationFeeAmount = Math.round(amountPence * (commissionPercent / 100));
 
-  if (!stripeSecretKey) {
+  if (!stripeSecret.value) {
     return jsonNoStore({
       mode: "demo",
-      message: "Stripe is not configured yet. Add STRIPE_SECRET_KEY to create live Checkout sessions.",
+      message: `Stripe is not configured yet. Add ${stripeSecret.envName} to create ${stripeSecret.modeLabel} Checkout sessions.`,
       checkoutUrl: `${appUrl}/learner-dashboard?demoCheckout=1&booking=${encodeURIComponent(bookingId)}`
     });
   }
@@ -99,15 +82,16 @@ export async function POST(request: Request) {
 
   applyStripeCheckoutPaymentMethods(params);
 
-  if (body.stripeConnectedAccountId) {
-    params.set("payment_intent_data[transfer_data][destination]", body.stripeConnectedAccountId);
+  const connectedAccountId = safeStripeConnectedAccountId(body.stripeConnectedAccountId);
+  if (connectedAccountId) {
+    params.set("payment_intent_data[transfer_data][destination]", connectedAccountId);
     params.set("payment_intent_data[application_fee_amount]", String(applicationFeeAmount));
   }
 
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${stripeSecretKey}`,
+      Authorization: `Bearer ${stripeSecret.value}`,
       "Content-Type": "application/x-www-form-urlencoded"
     },
     body: params
