@@ -2,12 +2,15 @@ import {
   isRateLimited,
   jsonNoStore,
   rateLimitResponse,
+  getAppOrigin,
+  readJsonBody,
   safeAmountPence,
   safeCurrency,
   safeEmail,
   safeText
 } from "@/lib/security";
 import { applyStripeCheckoutPaymentMethods } from "@/lib/stripe-checkout";
+import { getStripeEnvValue, getStripeSecretKey } from "@/lib/stripe-env";
 
 type InstantCheckoutRequest = {
   fullName?: string;
@@ -38,37 +41,16 @@ function normalisePaymentPreference(value?: string) {
     .replaceAll(" ", "_");
 }
 
-function normaliseAppUrl(request: Request) {
-  const configuredUrl = process.env.APP_WEBSITE_URL?.trim();
-  const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
-  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
-  const candidates = [
-    configuredUrl,
-    configuredUrl && !configuredUrl.startsWith("http") ? `https://${configuredUrl}` : undefined,
-    forwardedHost ? `${forwardedProto}://${forwardedHost}` : undefined,
-    "https://ldrivingacademy.co.uk"
-  ];
-
-  for (const candidate of candidates) {
-    if (!candidate) continue;
-
-    try {
-      const url = new URL(candidate);
-      return url.origin;
-    } catch {
-      // Try the next candidate. A malformed APP_WEBSITE_URL should not block checkout.
-    }
-  }
-
-  return "https://ldrivingacademy.co.uk";
-}
-
 export async function POST(request: Request) {
   if (isRateLimited(request, "instant-checkout", 15)) {
     return rateLimitResponse();
   }
 
-  const body = (await request.json()) as InstantCheckoutRequest;
+  const body = await readJsonBody<InstantCheckoutRequest>(request);
+  if (!body) {
+    return jsonNoStore({ error: "Invalid checkout request." }, { status: 400 });
+  }
+
   const learnerEmail = safeEmail(body.learnerEmail);
   const provisionalLicenceNumber = safeText(body.provisionalLicenceNumber, "", 32).replace(/\s/g, "");
 
@@ -76,9 +58,9 @@ export async function POST(request: Request) {
     return jsonNoStore({ error: "Name, valid email, and provisional licence number are required." }, { status: 400 });
   }
 
-  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-  const appUrl = normaliseAppUrl(request);
-  const currency = safeCurrency(process.env.STRIPE_DEFAULT_CURRENCY, "gbp");
+  const stripeSecret = getStripeSecretKey();
+  const appUrl = getAppOrigin(request);
+  const currency = safeCurrency(getStripeEnvValue("STRIPE_DEFAULT_CURRENCY").value, "gbp");
   const amountPence = safeAmountPence(body.amountPence, 6500, 2500, 50000);
   const instructorName = safeText(body.instructorName, "your LDA instructor", 80);
   const lessonSummary = safeText(body.lessonSummary, `Instant LDA lesson with ${instructorName}`, 180);
@@ -95,11 +77,11 @@ export async function POST(request: Request) {
   const successUrl = `${appUrl}/lesson-now/confirmed?${successParams.toString()}`;
   const cancelUrl = `${appUrl}/lesson-now?payment=cancelled`;
 
-  if (!stripeSecretKey) {
+  if (!stripeSecret.value) {
     return jsonNoStore({
       mode: "demo",
       reference,
-      message: "Stripe is not configured yet. Add STRIPE_SECRET_KEY for live payment collection.",
+      message: `Stripe is not configured yet. Add ${stripeSecret.envName} for ${stripeSecret.modeLabel} payment collection.`,
       checkoutUrl: successUrl
     });
   }
@@ -126,7 +108,7 @@ export async function POST(request: Request) {
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${stripeSecretKey}`,
+      Authorization: `Bearer ${stripeSecret.value}`,
       "Content-Type": "application/x-www-form-urlencoded"
     },
     body: params
