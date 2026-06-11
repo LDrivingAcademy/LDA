@@ -1,5 +1,7 @@
+import { getStripeEnvValue } from "@/lib/stripe-env";
+
 export function applyStripeCheckoutPaymentMethods(params: URLSearchParams) {
-  const configuredTypes = (process.env.STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES || "")
+  const configuredTypes = (getStripeEnvValue("STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES").value || "")
     .split(",")
     .map((type) => type.trim().toLowerCase())
     .filter(Boolean);
