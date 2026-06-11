@@ -2,6 +2,7 @@ import { type EmailOtpType, createClient as createSupabaseClient } from "@supaba
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest } from "next/server";
 import { HANDOFF_COOKIE_NAME, hashHandoffSecret, parseHandoffCookie } from "@/lib/auth-handoff";
+import { getRuntimeEnvValue } from "@/lib/runtime-env";
 import { isRateLimited, jsonNoStore, rateLimitResponse } from "@/lib/security";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
@@ -90,7 +91,13 @@ export async function GET(request: NextRequest) {
   redirectTo.searchParams.set("role", role);
   redirectTo.searchParams.set("next", nextPath);
 
-  const privilegedAuth = createSupabaseClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  const serviceRoleKey = getRuntimeEnvValue("SUPABASE_SERVICE_ROLE_KEY").value;
+
+  if (!serviceRoleKey) {
+    return jsonResponse({ status: "not_configured" }, 500);
+  }
+
+  const privilegedAuth = createSupabaseClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
