@@ -18,12 +18,12 @@ const modeAliases: Record<string, RuntimeEnvMode> = {
 
 export function getRuntimeEnvMode(): RuntimeEnvMode {
   const rawMode = String(
-    process.env.NEXT_PUBLIC_LDA_ENV_MODE ??
-      process.env.LDA_ENV_MODE ??
-      process.env.APP_RUNTIME_MODE ??
-      process.env.STRIPE_MODE ??
+    process.env.STRIPE_MODE ??
       process.env.STRIPE_ENVIRONMENT ??
       process.env.STRIPE_ENV ??
+      process.env.LDA_ENV_MODE ??
+      process.env.APP_RUNTIME_MODE ??
+      process.env.NEXT_PUBLIC_LDA_ENV_MODE ??
       ""
   )
     .trim()
