@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
+const MAX_RATE_LIMIT_BUCKETS = 10_000;
 const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+const productionOrigins = new Set([
+  "https://ldrivingacademy.co.uk",
+  "https://www.ldrivingacademy.co.uk"
+]);
 
 const securityHeaders = {
   "Content-Security-Policy": [
@@ -61,6 +66,14 @@ export function isRateLimited(request: Request, key: string, limit: number) {
   const now = Date.now();
   const existing = rateLimitBuckets.get(bucketKey);
 
+  if (rateLimitBuckets.size > MAX_RATE_LIMIT_BUCKETS) {
+    for (const [currentKey, bucket] of rateLimitBuckets) {
+      if (bucket.resetAt <= now) {
+        rateLimitBuckets.delete(currentKey);
+      }
+    }
+  }
+
   if (!existing || existing.resetAt <= now) {
     rateLimitBuckets.set(bucketKey, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
     return false;
@@ -99,4 +112,65 @@ export function safeAmountPence(value: unknown, fallback: number, min: number, m
 export function safeCurrency(value: unknown, fallback = "gbp") {
   const currency = safeText(value, fallback, 3).toLowerCase();
   return /^[a-z]{3}$/.test(currency) ? currency : fallback;
+}
+
+export function safeStripeConnectedAccountId(value: unknown) {
+  const accountId = safeText(value, "", 64);
+  return /^acct_[A-Za-z0-9]{12,}$/.test(accountId) ? accountId : "";
+}
+
+export async function readJsonBody<T>(request: Request): Promise<T | null> {
+  try {
+    return (await request.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+function isLocalOrigin(origin: string) {
+  try {
+    const { hostname, protocol } = new URL(origin);
+    return (
+      (protocol === "http:" || protocol === "https:") &&
+      (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]")
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function getAppOrigin(request?: Request) {
+  const configuredUrl = process.env.APP_WEBSITE_URL?.trim();
+
+  if (configuredUrl) {
+    try {
+      const configuredOrigin = new URL(
+        configuredUrl.startsWith("http") ? configuredUrl : `https://${configuredUrl}`
+      ).origin;
+
+      if (productionOrigins.has(configuredOrigin) || isLocalOrigin(configuredOrigin)) {
+        return configuredOrigin;
+      }
+    } catch {
+      // Fall through to safe request/local fallbacks.
+    }
+  }
+
+  if (request) {
+    const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
+    const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+
+    if (forwardedHost) {
+      try {
+        const requestOrigin = new URL(`${forwardedProto}://${forwardedHost}`).origin;
+        if (productionOrigins.has(requestOrigin) || isLocalOrigin(requestOrigin)) {
+          return requestOrigin;
+        }
+      } catch {
+        // Use the canonical production fallback below.
+      }
+    }
+  }
+
+  return "https://ldrivingacademy.co.uk";
 }
