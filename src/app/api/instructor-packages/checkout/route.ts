@@ -59,6 +59,18 @@ export async function POST(request: Request) {
     );
   }
 
+  if (stripePrice.value.startsWith("prod_")) {
+    console.error(
+      `Instructor package checkout has a Stripe Product ID in ${stripePrice.envName}. Add the matching price_ ID instead.`,
+    );
+    return jsonNoStore(
+      {
+        error: "This package is linked to a Stripe Product ID. Add the matching Stripe Price ID in Vercel, then redeploy.",
+      },
+      { status: 400 },
+    );
+  }
+
   const body = new URLSearchParams({
     mode: "subscription",
     success_url: `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=success&billing=${billingInterval}`,
@@ -75,7 +87,7 @@ export async function POST(request: Request) {
   try {
     const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
-      headers: {
+    headers: {
         Authorization: `Bearer ${stripeSecret.value}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
