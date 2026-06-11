@@ -57,6 +57,14 @@ export async function POST(request: Request) {
     );
   }
 
+  if (stripePrice.value.startsWith("prod_")) {
+    console.error(`Learner package checkout has a Stripe Product ID in ${stripePrice.envName}. Add the matching price_ ID instead.`);
+    return jsonNoStore(
+      { error: "This learner package is linked to a Stripe Product ID. Add the matching Stripe Price ID in Vercel, then redeploy." },
+      { status: 400 }
+    );
+  }
+
   const successUrl = `${appUrl}/learner-plus/${learnerPackage.slug}?checkout=success&billing=${billingInterval}`;
   const cancelUrl = `${appUrl}/learner-plus/${learnerPackage.slug}?checkout=cancelled&billing=${billingInterval}`;
   const params = new URLSearchParams({
