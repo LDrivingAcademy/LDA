@@ -4,17 +4,18 @@ import { CheckCircle2, Sparkles } from "lucide-react";
 
 import { InstructorPackageCheckoutButton } from "@/components/instructor-package-checkout-button";
 import { PageTopBar } from "@/components/page-top-bar";
+import { getSignedInInstructorPackageId } from "@/lib/account-package-state";
 import {
-  currentInstructorPackageId,
   getInstructorPackage,
   getInstructorPackageActionLabel,
   instructorPackages,
   type BillingInterval,
 } from "@/lib/instructor-packages";
+import { getPageBackLink } from "@/lib/page-back-link";
 
 type InstructorPackageDetailPageProps = {
   params: Promise<{ packageId: string }>;
-  searchParams: Promise<{ checkout?: string; billing?: BillingInterval }>;
+  searchParams: Promise<{ checkout?: string; billing?: BillingInterval; from?: string }>;
 };
 
 export function generateStaticParams() {
@@ -43,19 +44,21 @@ export default async function InstructorPackageDetailPage({
     notFound();
   }
 
-  const isCurrent = instructorPackage.id === currentInstructorPackageId;
+  const currentPackageId = await getSignedInInstructorPackageId();
+  const isCurrent = instructorPackage.id === currentPackageId;
   const selectedBilling = resolvedSearchParams.billing === "yearly" ? "yearly" : "monthly";
   const checkoutState = resolvedSearchParams.checkout;
+  const { backHref, backLabel } = await getPageBackLink(Promise.resolve(resolvedSearchParams));
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <PageTopBar backHref="/instructor-plus" backLabel="Back to packages" />
+      <PageTopBar backHref={backHref} backLabel={backLabel} />
       <section className="mx-auto max-w-6xl px-5 py-14">
         <div className="rounded-md border border-neutral-200 bg-white p-6 shadow-sm sm:p-10">
           {checkoutState === "success" ? (
             <div className="mb-8 rounded-md border border-green-200 bg-green-50 p-5 text-base font-bold text-green-800">
-              Subscription checkout completed. LDA can now update this instructor account once
-              Stripe webhooks are connected.
+              Subscription checkout completed. LDA will update this instructor account
+              automatically once Stripe confirms the subscription.
             </div>
           ) : null}
           {checkoutState === "cancelled" ? (
@@ -101,7 +104,7 @@ export default async function InstructorPackageDetailPage({
                     <InstructorPackageCheckoutButton
                       packageId={instructorPackage.id}
                       billingInterval="monthly"
-                      label={getInstructorPackageActionLabel(instructorPackage.id)}
+                      label={getInstructorPackageActionLabel(instructorPackage.id, currentPackageId)}
                       disabled={isCurrent}
                       compact
                     />
@@ -118,7 +121,7 @@ export default async function InstructorPackageDetailPage({
                     <InstructorPackageCheckoutButton
                       packageId={instructorPackage.id}
                       billingInterval="yearly"
-                      label={getInstructorPackageActionLabel(instructorPackage.id)}
+                      label={getInstructorPackageActionLabel(instructorPackage.id, currentPackageId)}
                       disabled={isCurrent}
                       compact
                     />
