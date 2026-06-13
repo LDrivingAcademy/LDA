@@ -10,11 +10,13 @@ import { cancelStripeSubscription, updateStripeSubscriptionPrice } from "@/lib/s
 import {
   createSubscriptionSessionToken,
   getSubscriptionSessionMaxAge,
+  readSubscriptionSessionToken,
   subscriptionSessionCookieName
 } from "@/lib/subscription-session-cookie";
 import { syncInstructorPackage } from "@/lib/subscription-profile-sync";
 import { syncInstructorPackageWithUserClient } from "@/lib/subscription-profile-user-sync";
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 
 type InstructorPackageCheckoutRequest = {
   packageId?: InstructorPackageId;
@@ -64,7 +66,7 @@ function instructorRedirectResponse({
     response.cookies.set(subscriptionSessionCookieName, token, {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: checkoutUrl.startsWith("https://"),
       maxAge,
       path: "/"
     });
@@ -112,12 +114,22 @@ export async function POST(request: Request) {
     supabase.from("instructor_profiles").select("stripe_customer_id,stripe_subscription_id").eq("user_id", user.id).maybeSingle()
   ]);
   const isInstructor = roles?.some((role) => role.role === "instructor") ?? false;
+  const subscriptionSession = readSubscriptionSessionToken(
+    (await cookies()).get(subscriptionSessionCookieName)?.value,
+    user.id,
+    "instructor"
+  );
+  const sessionPaidPackage =
+    subscriptionSession?.packageId === "instructor-plus" || subscriptionSession?.packageId === "instructor-pro";
+  const savedStripeCustomerId = instructorProfile?.stripe_customer_id ?? subscriptionSession?.customerId ?? null;
+  const savedStripeSubscriptionId =
+    instructorProfile?.stripe_subscription_id ?? (sessionPaidPackage ? subscriptionSession?.subscriptionId : null) ?? null;
 
   if (!isInstructor) {
     return jsonNoStore({ error: "Use an instructor account before changing instructor packages." }, { status: 403 });
   }
 
-  if (instructorPackage.id === "instructor" && !instructorProfile?.stripe_subscription_id) {
+  if (instructorPackage.id === "instructor" && !savedStripeSubscriptionId) {
     return jsonNoStore({ checkoutUrl: `${appUrl}/instructor-dashboard?subscription=updated&plan=instructor` });
   }
 
@@ -125,18 +137,18 @@ export async function POST(request: Request) {
   const priceEnvName = getInstructorPackagePriceEnv(instructorPackage.id, billingInterval);
   const stripePrice = getStripePriceId(priceEnvName);
 
-  if (instructorPackage.id === "instructor" && instructorProfile?.stripe_subscription_id) {
+  if (instructorPackage.id === "instructor" && savedStripeSubscriptionId) {
     if (!stripeSecret.value) {
       return jsonNoStore({ error: "Instructor package cancellation is being connected. Please contact LDA support." }, { status: 500 });
     }
 
     try {
-      const subscription = await cancelStripeSubscription(stripeSecret.value, instructorProfile.stripe_subscription_id);
+      const subscription = await cancelStripeSubscription(stripeSecret.value, savedStripeSubscriptionId);
       try {
         try {
           await syncInstructorPackage({
             userId: user.id,
-            customerId: instructorProfile.stripe_customer_id,
+            customerId: savedStripeCustomerId,
             subscriptionId: subscription.id,
             packageId: "instructor",
             status: subscription.status,
@@ -147,7 +159,7 @@ export async function POST(request: Request) {
           await syncInstructorPackageWithUserClient({
             supabase,
             userId: user.id,
-            customerId: instructorProfile.stripe_customer_id,
+            customerId: savedStripeCustomerId,
             subscriptionId: subscription.id,
             packageId: "instructor",
             status: subscription.status,
@@ -161,7 +173,7 @@ export async function POST(request: Request) {
       return instructorRedirectResponse({
         checkoutUrl: `${appUrl}/instructor-dashboard?subscription=updated&plan=instructor`,
         userId: user.id,
-        customerId: instructorProfile.stripe_customer_id,
+        customerId: savedStripeCustomerId,
         subscriptionId: subscription.id,
         packageId: "instructor",
         status: subscription.status,
@@ -204,11 +216,11 @@ export async function POST(request: Request) {
   const successUrl = `${appUrl}/api/subscriptions/complete?session_id={CHECKOUT_SESSION_ID}&role=instructor`;
   const cancelUrl = `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=cancelled&billing=${billingInterval}`;
 
-  if (instructorProfile?.stripe_subscription_id) {
+  if (savedStripeSubscriptionId) {
     try {
       const subscription = await updateStripeSubscriptionPrice({
         secretKey: stripeSecret.value,
-        subscriptionId: instructorProfile.stripe_subscription_id,
+        subscriptionId: savedStripeSubscriptionId,
         priceId: stripePrice.value,
         metadata: {
           lda_user_id: user.id,
@@ -221,7 +233,7 @@ export async function POST(request: Request) {
         try {
           await syncInstructorPackage({
             userId: user.id,
-            customerId: instructorProfile.stripe_customer_id,
+            customerId: savedStripeCustomerId,
             subscriptionId: subscription.id,
             packageId: instructorPackage.id,
             status: subscription.status,
@@ -232,7 +244,7 @@ export async function POST(request: Request) {
           await syncInstructorPackageWithUserClient({
             supabase,
             userId: user.id,
-            customerId: instructorProfile.stripe_customer_id,
+            customerId: savedStripeCustomerId,
             subscriptionId: subscription.id,
             packageId: instructorPackage.id,
             status: subscription.status,
@@ -246,7 +258,7 @@ export async function POST(request: Request) {
       return instructorRedirectResponse({
         checkoutUrl: dashboardUrl,
         userId: user.id,
-        customerId: instructorProfile.stripe_customer_id,
+        customerId: savedStripeCustomerId,
         subscriptionId: subscription.id,
         packageId: instructorPackage.id,
         status: subscription.status,
@@ -268,8 +280,8 @@ export async function POST(request: Request) {
     "line_items[0][quantity]": "1",
     "line_items[0][price]": stripePrice.value,
     client_reference_id: user.id,
-    ...(instructorProfile?.stripe_customer_id ? { customer: instructorProfile.stripe_customer_id } : {}),
-    ...(!instructorProfile?.stripe_customer_id && (profile?.email || user.email) ? { customer_email: profile?.email ?? user.email ?? "" } : {}),
+    ...(savedStripeCustomerId ? { customer: savedStripeCustomerId } : {}),
+    ...(!savedStripeCustomerId && (profile?.email || user.email) ? { customer_email: profile?.email ?? user.email ?? "" } : {}),
     "metadata[lda_user_id]": user.id,
     "metadata[lda_account_role]": "instructor",
     "metadata[lda_instructor_package_id]": instructorPackage.id,
