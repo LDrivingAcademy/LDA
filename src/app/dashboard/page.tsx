@@ -13,9 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 import { type InstructorPackageId } from "@/lib/instructor-packages";
 import { type LearnerPackageId } from "@/lib/learner-packages";
-import { getStripeSecretKey } from "@/lib/stripe-env";
 import { readSubscriptionSessionToken, subscriptionSessionCookieName } from "@/lib/subscription-session-cookie";
-import { recoverLatestStripeSubscriptionForSignedInAccount } from "@/lib/subscription-return-recovery";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -124,24 +122,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   );
 
   if (pendingSubscriptionReturn) {
-    try {
-      const stripeSecret = getStripeSecretKey();
-      const recoveredTarget = await recoverLatestStripeSubscriptionForSignedInAccount({
-        supabase,
-        userId: user.id,
-        email: profile?.email ?? user.email,
-        role: isInstructor ? "instructor" : "learner",
-        secretKey: stripeSecret.value
-      });
-
-      if (recoveredTarget) {
-        redirect(
-          `/${recoveredTarget.role === "instructor" ? "instructor-dashboard" : "learner-dashboard"}?subscription=updated&plan=${recoveredTarget.packageId}`
-        );
-      }
-    } catch (error) {
-      console.error("Stripe dashboard subscription recovery failed", error);
-    }
+    redirect(`/api/subscriptions/recover?role=${isInstructor ? "instructor" : "learner"}`);
   }
 
   const hasLearnerPlus =
