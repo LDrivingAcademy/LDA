@@ -10,12 +10,13 @@ import { LearnerDashboardMenu } from "@/components/learner-dashboard-menu";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
-import { currentInstructorPackageId } from "@/lib/instructor-packages";
+import { type InstructorPackageId } from "@/lib/instructor-packages";
+import { type LearnerPackageId } from "@/lib/learner-packages";
 
 const instructorDashboardSections = [
   {
     title: "Lessons/Diary",
-    bio: "See the lessons that need attention today, from confirmed bookings to pickup details and lesson status.",
+    bio: "See lessons, pickup details, booking status, reminders, learner enquiries, and important platform notifications.",
     href: "/instructor-calendar?from=dashboard"
   },
   {
@@ -37,11 +38,6 @@ const instructorDashboardSections = [
     title: "Performance Metrics",
     bio: "Monitor the signals that shape your LDA profile: pass rate, lessons delivered, retention, reviews, and cancellations.",
     href: "/instructor-performance?from=dashboard"
-  },
-  {
-    title: "Messages & Notifications",
-    bio: "Keep learner enquiries, reminders, test prompts, and platform announcements easy to find.",
-    href: "/support/instructor/dashboard"
   },
   {
     title: "Vehicle & Compliance",
@@ -80,10 +76,10 @@ export default async function DashboardPage() {
   const [{ data: profile }, { data: roles }, { data: instructorProfile }, { data: learnerProfile }] = await Promise.all([
     supabase.from("profiles").select("full_name,email,phone").eq("id", user.id).maybeSingle(),
     supabase.from("account_roles").select("role").eq("user_id", user.id),
-    supabase.from("instructor_profiles").select("verification_status,hourly_rate_pence,areas_covered").eq("user_id", user.id).maybeSingle(),
+    supabase.from("instructor_profiles").select("verification_status,hourly_rate_pence,areas_covered,instructor_package").eq("user_id", user.id).maybeSingle(),
     supabase
       .from("learner_profiles")
-      .select("date_of_birth,provisional_licence_confirmed_at,terms_accepted_at,learner_plus_active,learner_plus_started_at,learner_plus_expires_at")
+      .select("date_of_birth,provisional_licence_confirmed_at,terms_accepted_at,learner_package,learner_plus_active,learner_plus_started_at,learner_plus_expires_at")
       .eq("user_id", user.id)
       .maybeSingle()
   ]);
@@ -96,16 +92,30 @@ export default async function DashboardPage() {
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
   const displayName = profile?.full_name || user.email || "Learner";
   const verificationStatus = instructorProfile?.verification_status ?? "not started";
+  const learnerPackageId = (learnerProfile?.learner_package || (hasLearnerPlus ? "learner-plus" : "learner")) as LearnerPackageId;
+  const learnerPackageLabel =
+    learnerPackageId === "learner-pro"
+      ? "Learner Pro"
+      : learnerPackageId === "learner-plus" || hasLearnerPlus
+        ? "Learner Plus"
+        : "Learner";
+  const learnerUpgrade =
+    learnerPackageId === "learner"
+      ? { label: "Upgrade to Plus", href: "/learner-plus?from=dashboard" }
+      : learnerPackageId === "learner-plus"
+        ? { label: "Upgrade to Pro", href: "/learner-plus?from=dashboard" }
+        : null;
+  const instructorPackageId = (instructorProfile?.instructor_package || "instructor") as InstructorPackageId;
   const instructorPackageLabel =
-    currentInstructorPackageId === "instructor-plus"
+    instructorPackageId === "instructor-plus"
       ? "Instructor Plus"
-      : currentInstructorPackageId === "instructor-pro"
+      : instructorPackageId === "instructor-pro"
         ? "Instructor Pro"
         : "Instructor";
   const instructorUpgrade =
-    currentInstructorPackageId === "instructor"
+    instructorPackageId === "instructor"
       ? { label: "Upgrade to Plus", href: "/instructor-plus?from=dashboard" }
-      : currentInstructorPackageId === "instructor-plus"
+      : instructorPackageId === "instructor-plus"
         ? { label: "Upgrade to Pro", href: "/instructor-plus?from=dashboard" }
         : null;
   const statusRequestHref = `mailto:info@ldrivingacademy.co.uk?subject=${encodeURIComponent(
@@ -142,11 +152,11 @@ export default async function DashboardPage() {
                 ) : (
                   <>
                     <Link href="/learner-plus?from=dashboard" className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
-                      {hasLearnerPlus ? "Learner Plus" : "Learner"}
+                      {learnerPackageLabel}
                     </Link>
-                    {!hasLearnerPlus ? (
-                      <Link href="/learner-plus?from=dashboard" className="rounded-full border border-red-500/40 bg-transparent px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
-                        Upgrade to Plus
+                    {learnerUpgrade ? (
+                      <Link href={learnerUpgrade.href} className="rounded-full border border-red-500/40 bg-transparent px-3 py-1 text-xs font-black uppercase text-red-100 hover:ring-2 hover:ring-brand">
+                        {learnerUpgrade.label}
                       </Link>
                     ) : null}
                   </>
