@@ -8,6 +8,7 @@ import {
 import { getStripePriceId, getStripeSecretKey } from "@/lib/stripe-env";
 import { cancelStripeSubscription, updateStripeSubscriptionPrice } from "@/lib/stripe-subscription-updates";
 import { syncLearnerPackage } from "@/lib/subscription-profile-sync";
+import { syncLearnerPackageWithUserClient } from "@/lib/subscription-profile-user-sync";
 import { createClient } from "@/lib/supabase/server";
 
 type LearnerPackageCheckoutRequest = {
@@ -76,14 +77,27 @@ export async function POST(request: Request) {
 
     try {
       const subscription = await cancelStripeSubscription(stripeSecret.value, learnerProfile.stripe_subscription_id);
-      await syncLearnerPackage({
-        userId: user.id,
-        customerId: learnerProfile.stripe_customer_id,
-        subscriptionId: subscription.id,
-        packageId: "learner",
-        status: subscription.status,
-        periodEnd: subscription.currentPeriodEnd
-      });
+      try {
+        await syncLearnerPackage({
+          userId: user.id,
+          customerId: learnerProfile.stripe_customer_id,
+          subscriptionId: subscription.id,
+          packageId: "learner",
+          status: subscription.status,
+          periodEnd: subscription.currentPeriodEnd
+        });
+      } catch (adminSyncError) {
+        console.error("Learner cancellation admin sync failed; trying signed-in profile sync", adminSyncError);
+        await syncLearnerPackageWithUserClient({
+          supabase,
+          userId: user.id,
+          customerId: learnerProfile.stripe_customer_id,
+          subscriptionId: subscription.id,
+          packageId: "learner",
+          status: subscription.status,
+          periodEnd: subscription.currentPeriodEnd
+        });
+      }
 
       return jsonNoStore({ checkoutUrl: `${appUrl}/learner-dashboard?plan=learner` });
     } catch (error) {
@@ -136,14 +150,27 @@ export async function POST(request: Request) {
           lda_billing_interval: billingInterval
         }
       });
-      await syncLearnerPackage({
-        userId: user.id,
-        customerId: learnerProfile.stripe_customer_id,
-        subscriptionId: subscription.id,
-        packageId: learnerPackage.id,
-        status: subscription.status,
-        periodEnd: subscription.currentPeriodEnd
-      });
+      try {
+        await syncLearnerPackage({
+          userId: user.id,
+          customerId: learnerProfile.stripe_customer_id,
+          subscriptionId: subscription.id,
+          packageId: learnerPackage.id,
+          status: subscription.status,
+          periodEnd: subscription.currentPeriodEnd
+        });
+      } catch (adminSyncError) {
+        console.error("Learner subscription package admin sync failed; trying signed-in profile sync", adminSyncError);
+        await syncLearnerPackageWithUserClient({
+          supabase,
+          userId: user.id,
+          customerId: learnerProfile.stripe_customer_id,
+          subscriptionId: subscription.id,
+          packageId: learnerPackage.id,
+          status: subscription.status,
+          periodEnd: subscription.currentPeriodEnd
+        });
+      }
 
       return jsonNoStore({ checkoutUrl: dashboardUrl });
     } catch (error) {
