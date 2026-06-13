@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import type { InstructorPackageId } from "@/lib/instructor-packages";
 import type { LearnerPackageId } from "@/lib/learner-packages";
 import { getStripeSecretKey } from "@/lib/stripe-env";
+import {
+  createSubscriptionSessionToken,
+  getSubscriptionSessionMaxAge,
+  subscriptionSessionCookieName
+} from "@/lib/subscription-session-cookie";
 import { syncSubscriptionTarget, type SubscriptionSyncTarget } from "@/lib/subscription-profile-sync";
 import { createClient } from "@/lib/supabase/server";
 
@@ -42,6 +47,51 @@ function getUpdatedDashboardUrl(request: Request, role: string, packageId: strin
   const url = getDashboardUrl(request, role);
   url.searchParams.set("plan", packageId);
   return url;
+}
+
+function redirectWithSubscriptionSession({
+  request,
+  target,
+  userId,
+  customerId,
+  subscriptionId,
+  status,
+  periodEnd
+}: {
+  request: Request;
+  target: SubscriptionSyncTarget;
+  userId: string;
+  customerId?: string | null;
+  subscriptionId?: string | null;
+  status?: string | null;
+  periodEnd?: string | null;
+}) {
+  const maxAge = getSubscriptionSessionMaxAge(periodEnd);
+  const response = NextResponse.redirect(getUpdatedDashboardUrl(request, target.role, target.packageId));
+  const token = createSubscriptionSessionToken(
+    {
+      userId,
+      role: target.role,
+      packageId: target.packageId,
+      customerId,
+      subscriptionId,
+      status,
+      periodEnd
+    },
+    maxAge
+  );
+
+  if (token) {
+    response.cookies.set(subscriptionSessionCookieName, token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
+      maxAge,
+      path: "/"
+    });
+  }
+
+  return response;
 }
 
 function toTimestamp(value?: number | null) {
@@ -248,8 +298,22 @@ export async function GET(request: Request) {
     const subscriptionStatus = getSubscriptionStatus(session.subscription);
     const periodEnd = getSubscriptionPeriodEnd(session.subscription);
 
-    await syncVerifiedSubscription({
-      supabase,
+    try {
+      await syncVerifiedSubscription({
+        supabase,
+        target,
+        userId: user.id,
+        customerId: session.customer,
+        subscriptionId,
+        status: subscriptionStatus,
+        periodEnd
+      });
+    } catch (syncError) {
+      console.error("Stripe checkout completion profile sync failed; using verified subscription session", syncError);
+    }
+
+    return redirectWithSubscriptionSession({
+      request,
       target,
       userId: user.id,
       customerId: session.customer,
@@ -257,8 +321,6 @@ export async function GET(request: Request) {
       status: subscriptionStatus,
       periodEnd
     });
-
-    return NextResponse.redirect(getUpdatedDashboardUrl(request, target.role, target.packageId));
   } catch (error) {
     console.error("Stripe checkout completion sync failed", error);
     return NextResponse.redirect(getPendingDashboardUrl(request, fallbackRole, "sync-failed"));
