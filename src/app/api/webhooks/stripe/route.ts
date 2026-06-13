@@ -1,9 +1,9 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { getStripeEnvValue, getStripePriceId } from "@/lib/stripe-env";
-import { createAdminClient } from "@/lib/supabase/admin";
 import type { InstructorPackageId } from "@/lib/instructor-packages";
 import type { LearnerPackageId } from "@/lib/learner-packages";
+import { syncSubscriptionTarget, type SubscriptionSyncTarget } from "@/lib/subscription-profile-sync";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -40,18 +40,6 @@ type StripeSubscription = {
     }>;
   };
 };
-
-type SubscriptionSyncTarget =
-  | {
-      role: "instructor";
-      packageId: InstructorPackageId;
-    }
-  | {
-      role: "learner";
-      packageId: LearnerPackageId;
-    };
-
-const activeSubscriptionStatuses = new Set(["active", "trialing", "past_due"]);
 
 function parseStripeSignature(header: string | null) {
   if (!header) {
@@ -157,117 +145,6 @@ function getSubscriptionTarget(subscription: StripeSubscription): SubscriptionSy
   return getPricePackage(subscription.items?.data?.[0]?.price?.id);
 }
 
-async function syncInstructorPackage({
-  userId,
-  customerId,
-  subscriptionId,
-  packageId,
-  status,
-  periodEnd
-}: {
-  userId?: string | null;
-  customerId?: string | null;
-  subscriptionId?: string | null;
-  packageId: InstructorPackageId;
-  status?: string | null;
-  periodEnd?: string | null;
-}) {
-  const supabase = createAdminClient();
-  const isActive = activeSubscriptionStatuses.has(status ?? "active");
-  const nextPackage = isActive ? packageId : "instructor";
-
-  if (!supabase) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured.");
-  }
-
-  const values = {
-    instructor_package: nextPackage,
-    instructor_subscription_status: status ?? "active",
-    instructor_package_started_at: isActive ? new Date().toISOString() : null,
-    instructor_package_expires_at: isActive ? periodEnd ?? null : null,
-    instructor_package_source: "stripe",
-    stripe_customer_id: customerId ?? null,
-    stripe_subscription_id: isActive ? subscriptionId ?? null : null,
-    updated_at: new Date().toISOString()
-  };
-
-  if (userId) {
-    const { error } = await supabase.from("instructor_profiles").upsert({ user_id: userId, ...values }, { onConflict: "user_id" });
-    if (error) throw error;
-    return;
-  }
-
-  let query = supabase.from("instructor_profiles").update(values);
-
-  if (subscriptionId) {
-    query = query.eq("stripe_subscription_id", subscriptionId);
-  } else if (customerId) {
-    query = query.eq("stripe_customer_id", customerId);
-  } else {
-    throw new Error("Stripe instructor subscription event had no LDA user, customer, or subscription id.");
-  }
-
-  const { error } = await query;
-  if (error) throw error;
-}
-
-async function syncLearnerPackage({
-  userId,
-  customerId,
-  subscriptionId,
-  packageId,
-  status,
-  periodEnd
-}: {
-  userId?: string | null;
-  customerId?: string | null;
-  subscriptionId?: string | null;
-  packageId: LearnerPackageId;
-  status?: string | null;
-  periodEnd?: string | null;
-}) {
-  const supabase = createAdminClient();
-  const isActive = activeSubscriptionStatuses.has(status ?? "active");
-  const nextPackage = isActive ? packageId : "learner";
-
-  if (!supabase) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured.");
-  }
-
-  const values = {
-    learner_package: nextPackage,
-    learner_subscription_status: status ?? "active",
-    learner_package_started_at: isActive ? new Date().toISOString() : null,
-    learner_package_expires_at: isActive ? periodEnd ?? null : null,
-    learner_plus_active: isActive && nextPackage !== "learner",
-    learner_plus_started_at: isActive && nextPackage !== "learner" ? new Date().toISOString() : null,
-    learner_plus_expires_at: isActive && nextPackage !== "learner" ? periodEnd ?? null : null,
-    learner_plus_source: "stripe",
-    stripe_customer_id: customerId ?? null,
-    stripe_subscription_id: isActive ? subscriptionId ?? null : null,
-    updated_at: new Date().toISOString()
-  };
-
-  if (userId) {
-    const { error } = await supabase.from("learner_profiles").upsert({ user_id: userId, ...values }, { onConflict: "user_id" });
-    if (error) throw error;
-    return;
-  }
-
-  let query = supabase.from("learner_profiles").update(values);
-
-  if (subscriptionId) {
-    query = query.eq("stripe_subscription_id", subscriptionId);
-  } else if (customerId) {
-    query = query.eq("stripe_customer_id", customerId);
-  } else {
-    throw new Error("Stripe learner subscription event had no LDA user, customer, or subscription id.");
-  }
-
-  const { error } = await query;
-  if (error) throw error;
-}
-
 async function syncTarget({
   target,
   userId,
@@ -283,12 +160,7 @@ async function syncTarget({
   status?: string | null;
   periodEnd?: string | null;
 }) {
-  if (target.role === "instructor") {
-    await syncInstructorPackage({ userId, customerId, subscriptionId, packageId: target.packageId, status, periodEnd });
-    return;
-  }
-
-  await syncLearnerPackage({ userId, customerId, subscriptionId, packageId: target.packageId, status, periodEnd });
+  await syncSubscriptionTarget({ target, userId, customerId, subscriptionId, status, periodEnd });
 }
 
 export async function POST(request: Request) {
