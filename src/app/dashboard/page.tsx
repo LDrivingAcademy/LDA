@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ArrowRight, CalendarCheck, FileCheck2, Sparkles } from "lucide-react";
 import { Brand } from "@/components/brand";
@@ -13,6 +14,7 @@ import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 import { type InstructorPackageId } from "@/lib/instructor-packages";
 import { type LearnerPackageId } from "@/lib/learner-packages";
 import { getStripeSecretKey } from "@/lib/stripe-env";
+import { readSubscriptionSessionToken, subscriptionSessionCookieName } from "@/lib/subscription-session-cookie";
 import { recoverLatestStripeSubscriptionForSignedInAccount } from "@/lib/subscription-return-recovery";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +62,18 @@ function getSearchParam(searchParams: Record<string, string | string[] | undefin
   return Array.isArray(value) ? value[0] : value;
 }
 
+function getSubscriptionReturnPlan(searchParams: Record<string, string | string[] | undefined> | undefined) {
+  return getSearchParam(searchParams, "subscription") === "updated" ? getSearchParam(searchParams, "plan") : null;
+}
+
+function getInstructorPlanOverride(plan?: string | null): InstructorPackageId | null {
+  return plan === "instructor" || plan === "instructor-plus" || plan === "instructor-pro" ? plan : null;
+}
+
+function getLearnerPlanOverride(plan?: string | null): LearnerPackageId | null {
+  return plan === "learner" || plan === "learner-plus" || plan === "learner-pro" ? plan : null;
+}
+
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
@@ -102,6 +116,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const roleLabels = roles?.map((role) => role.role).join(", ") || "learner";
   const isInstructor = roleLabels.includes("instructor");
   const pendingSubscriptionReturn = getSearchParam(resolvedSearchParams, "subscription") === "pending";
+  const subscriptionReturnPlan = getSubscriptionReturnPlan(resolvedSearchParams);
+  const subscriptionSession = readSubscriptionSessionToken(
+    (await cookies()).get(subscriptionSessionCookieName)?.value,
+    user.id,
+    isInstructor ? "instructor" : "learner"
+  );
 
   if (pendingSubscriptionReturn) {
     try {
@@ -130,7 +150,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
   const displayName = profile?.full_name || user.email || "Learner";
   const verificationStatus = instructorProfile?.verification_status ?? "not started";
-  const learnerPackageId = (learnerProfile?.learner_package || (hasLearnerPlus ? "learner-plus" : "learner")) as LearnerPackageId;
+  const learnerPackageId = (getLearnerPlanOverride(subscriptionReturnPlan) || (!isInstructor ? getLearnerPlanOverride(subscriptionSession?.packageId) : null) || learnerProfile?.learner_package || (hasLearnerPlus ? "learner-plus" : "learner")) as LearnerPackageId;
   const learnerPackageLabel =
     learnerPackageId === "learner-pro"
       ? "Learner Pro"
@@ -143,7 +163,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       : learnerPackageId === "learner-plus"
         ? { label: "Upgrade to Pro", href: "/learner-plus?from=dashboard" }
         : null;
-  const instructorPackageId = (instructorProfile?.instructor_package || "instructor") as InstructorPackageId;
+  const instructorPackageId = (getInstructorPlanOverride(subscriptionReturnPlan) || (isInstructor ? getInstructorPlanOverride(subscriptionSession?.packageId) : null) || instructorProfile?.instructor_package || "instructor") as InstructorPackageId;
   const instructorPackageLabel =
     instructorPackageId === "instructor-plus"
       ? "Instructor Plus"
