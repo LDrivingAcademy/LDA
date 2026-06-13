@@ -12,6 +12,11 @@ import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 import { type InstructorPackageId } from "@/lib/instructor-packages";
 import { type LearnerPackageId } from "@/lib/learner-packages";
+import { getStripeSecretKey } from "@/lib/stripe-env";
+import { recoverLatestStripeSubscriptionForSignedInAccount } from "@/lib/subscription-return-recovery";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const instructorDashboardSections = [
   {
@@ -46,7 +51,17 @@ const instructorDashboardSections = [
   }
 ];
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function getSearchParam(searchParams: Record<string, string | string[] | undefined> | undefined, key: string) {
+  const value = searchParams?.[key];
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
 
   if (!hasSupabaseConfig() || !supabase) {
@@ -86,6 +101,29 @@ export default async function DashboardPage() {
 
   const roleLabels = roles?.map((role) => role.role).join(", ") || "learner";
   const isInstructor = roleLabels.includes("instructor");
+  const pendingSubscriptionReturn = getSearchParam(resolvedSearchParams, "subscription") === "pending";
+
+  if (pendingSubscriptionReturn) {
+    try {
+      const stripeSecret = getStripeSecretKey();
+      const recoveredTarget = await recoverLatestStripeSubscriptionForSignedInAccount({
+        supabase,
+        userId: user.id,
+        email: profile?.email ?? user.email,
+        role: isInstructor ? "instructor" : "learner",
+        secretKey: stripeSecret.value
+      });
+
+      if (recoveredTarget) {
+        redirect(
+          `/${recoveredTarget.role === "instructor" ? "instructor-dashboard" : "learner-dashboard"}?subscription=updated&plan=${recoveredTarget.packageId}`
+        );
+      }
+    } catch (error) {
+      console.error("Stripe dashboard subscription recovery failed", error);
+    }
+  }
+
   const hasLearnerPlus =
     !isInstructor &&
     Boolean(learnerProfile?.learner_plus_active) &&
