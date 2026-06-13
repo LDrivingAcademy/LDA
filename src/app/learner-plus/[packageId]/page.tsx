@@ -2,12 +2,13 @@ import { notFound } from "next/navigation";
 import { CheckCircle2, Sparkles } from "lucide-react";
 import { LearnerPackageCheckoutButton } from "@/components/learner-package-checkout-button";
 import { PageTopBar } from "@/components/page-top-bar";
+import { getSignedInLearnerPackageId } from "@/lib/account-package-state";
 import {
-  currentLearnerPackageId,
   getLearnerPackage,
   getPackageActionLabel,
   learnerPackages
 } from "@/lib/learner-packages";
+import { getPageBackLink } from "@/lib/page-back-link";
 
 type LearnerPackageDetailPageProps = {
   params: Promise<{
@@ -16,6 +17,7 @@ type LearnerPackageDetailPageProps = {
   searchParams: Promise<{
     checkout?: string;
     billing?: string;
+    from?: string;
   }>;
 };
 
@@ -42,16 +44,18 @@ export default async function LearnerPackageDetailPage({ params, searchParams }:
     notFound();
   }
 
-  const isCurrentPlan = learnerPackage.id === currentLearnerPackageId;
-  const actionLabel = getPackageActionLabel(learnerPackage.id);
+  const currentPackageId = await getSignedInLearnerPackageId();
+  const isCurrentPlan = learnerPackage.id === currentPackageId;
+  const actionLabel = getPackageActionLabel(learnerPackage.id, currentPackageId);
+  const { backHref, backLabel } = await getPageBackLink(Promise.resolve(query));
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <PageTopBar backHref="/learner-plus" backLabel="Back to packages" />
+      <PageTopBar backHref={backHref} backLabel={backLabel} />
       <div className="mx-auto max-w-5xl px-4 py-8">
         {query.checkout === "success" ? (
           <div className="mb-5 rounded border border-red-500/30 bg-red-500/10 p-4 text-sm font-black text-brand">
-            Stripe checkout returned successfully for {learnerPackage.name} {query.billing ? `(${query.billing})` : ""}.
+            Stripe checkout returned successfully for {learnerPackage.name} {query.billing ? `(${query.billing})` : ""}. LDA will update this learner account automatically once Stripe confirms the subscription.
           </div>
         ) : null}
         {query.checkout === "cancelled" ? (
