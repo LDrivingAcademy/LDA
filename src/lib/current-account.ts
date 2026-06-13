@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { currentInstructorPackageId } from "@/lib/instructor-packages";
+import { type InstructorPackageId } from "@/lib/instructor-packages";
+import { type LearnerPackageId } from "@/lib/learner-packages";
 
 export type HeaderAccountSummary = {
   dashboardHref: string;
@@ -44,14 +45,20 @@ export async function getHeaderAccountSummary(): Promise<HeaderAccountSummary | 
   let profile = null;
   let roles = null;
   let learnerProfile = null;
+  let instructorProfile = null;
 
   try {
-    [{ data: profile }, { data: roles }, { data: learnerProfile }] = await Promise.all([
+    [{ data: profile }, { data: roles }, { data: learnerProfile }, { data: instructorProfile }] = await Promise.all([
       supabase.from("profiles").select("full_name,email").eq("id", user.id).maybeSingle(),
       supabase.from("account_roles").select("role").eq("user_id", user.id),
       supabase
         .from("learner_profiles")
-        .select("learner_plus_active,learner_plus_expires_at")
+        .select("learner_package,learner_plus_active,learner_plus_expires_at")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("instructor_profiles")
+        .select("instructor_package")
         .eq("user_id", user.id)
         .maybeSingle()
     ]);
@@ -65,16 +72,24 @@ export async function getHeaderAccountSummary(): Promise<HeaderAccountSummary | 
     !isInstructor &&
     Boolean(learnerProfile?.learner_plus_active) &&
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
+  const learnerPackageId = (learnerProfile?.learner_package || (hasLearnerPlus ? "learner-plus" : "learner")) as LearnerPackageId;
+  const learnerPackageLabel =
+    learnerPackageId === "learner-pro"
+      ? "Learner Pro"
+      : learnerPackageId === "learner-plus" || hasLearnerPlus
+        ? "Learner Plus"
+        : "Learner";
+  const instructorPackageId = (instructorProfile?.instructor_package || "instructor") as InstructorPackageId;
   const instructorPackageLabel =
-    currentInstructorPackageId === "instructor-plus"
+    instructorPackageId === "instructor-plus"
       ? "Instructor Plus"
-      : currentInstructorPackageId === "instructor-pro"
+      : instructorPackageId === "instructor-pro"
         ? "Instructor Pro"
         : "Instructor";
   const instructorUpgrade =
-    currentInstructorPackageId === "instructor"
+    instructorPackageId === "instructor"
       ? { upgradeLabel: "Upgrade to Plus", upgradeHref: "/instructor-plus" }
-      : currentInstructorPackageId === "instructor-plus"
+      : instructorPackageId === "instructor-plus"
         ? { upgradeLabel: "Upgrade to Pro", upgradeHref: "/instructor-plus" }
         : {};
 
@@ -83,7 +98,7 @@ export async function getHeaderAccountSummary(): Promise<HeaderAccountSummary | 
     name: getDisplayName(profile?.full_name, profile?.email ?? user.email),
     role: isInstructor ? "instructor" : "learner",
     subscriptionHref: isInstructor ? "/instructor-dashboard" : "/learner-plus",
-    subscriptionLabel: isInstructor ? instructorPackageLabel : hasLearnerPlus ? "Learner Plus" : "Learner",
-    ...(isInstructor ? instructorUpgrade : hasLearnerPlus ? {} : { upgradeLabel: "Upgrade to Plus", upgradeHref: "/learner-plus" })
+    subscriptionLabel: isInstructor ? instructorPackageLabel : learnerPackageLabel,
+    ...(isInstructor ? instructorUpgrade : learnerPackageId !== "learner" || hasLearnerPlus ? {} : { upgradeLabel: "Upgrade to Plus", upgradeHref: "/learner-plus" })
   };
 }
