@@ -2,18 +2,20 @@ import Link from "next/link";
 import { CheckCircle2, Sparkles } from "lucide-react";
 import { LearnerPackageCheckoutButton } from "@/components/learner-package-checkout-button";
 import {
-  currentLearnerPackageId,
   getPackageActionLabel,
-  type LearnerPackage
+  type LearnerPackage,
+  type LearnerPackageId
 } from "@/lib/learner-packages";
 
 type LearnerPackageCardProps = {
   learnerPackage: LearnerPackage;
+  currentPackageId?: LearnerPackageId;
+  fromDashboard?: boolean;
 };
 
-export function LearnerPackageCard({ learnerPackage }: LearnerPackageCardProps) {
-  const isCurrentPlan = learnerPackage.id === currentLearnerPackageId;
-  const actionLabel = getPackageActionLabel(learnerPackage.id);
+export function LearnerPackageCard({ learnerPackage, currentPackageId = "learner", fromDashboard = false }: LearnerPackageCardProps) {
+  const isCurrentPlan = learnerPackage.id === currentPackageId;
+  const actionLabel = getPackageActionLabel(learnerPackage.id, currentPackageId);
 
   return (
     <article
@@ -23,7 +25,7 @@ export function LearnerPackageCard({ learnerPackage }: LearnerPackageCardProps) 
     >
       <Link
         className="flex flex-1 flex-col focus:outline-none focus:ring-2 focus:ring-brand"
-        href={`/learner-plus/${learnerPackage.slug}`}
+        href={`/learner-plus/${learnerPackage.slug}${fromDashboard ? "?from=dashboard" : ""}`}
       >
         <h2 className="min-h-8 text-2xl font-black leading-8">{learnerPackage.name}</h2>
         <div className="mt-3 flex min-h-8 items-start">
