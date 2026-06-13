@@ -6,6 +6,9 @@ import {
   type InstructorPackageId,
 } from "@/lib/instructor-packages";
 import { getStripePriceId, getStripeSecretKey } from "@/lib/stripe-env";
+import { cancelStripeSubscription, updateStripeSubscriptionPrice } from "@/lib/stripe-subscription-updates";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 type InstructorPackageCheckoutRequest = {
   packageId?: InstructorPackageId;
@@ -38,14 +41,75 @@ export async function POST(request: Request) {
   }
 
   const appUrl = getAppOrigin(request);
+  const supabase = await createClient();
 
-  if (instructorPackage.id === "instructor") {
+  if (!supabase) {
+    return jsonNoStore({ error: "Sign in before changing your instructor package." }, { status: 401 });
+  }
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return jsonNoStore({ error: "Sign in before changing your instructor package." }, { status: 401 });
+  }
+
+  const [{ data: roles }, { data: profile }, { data: instructorProfile }] = await Promise.all([
+    supabase.from("account_roles").select("role").eq("user_id", user.id),
+    supabase.from("profiles").select("email").eq("id", user.id).maybeSingle(),
+    supabase.from("instructor_profiles").select("stripe_customer_id,stripe_subscription_id").eq("user_id", user.id).maybeSingle()
+  ]);
+  const isInstructor = roles?.some((role) => role.role === "instructor") ?? false;
+
+  if (!isInstructor) {
+    return jsonNoStore({ error: "Use an instructor account before changing instructor packages." }, { status: 403 });
+  }
+
+  if (instructorPackage.id === "instructor" && !instructorProfile?.stripe_subscription_id) {
     return jsonNoStore({ checkoutUrl: `${appUrl}/instructor-dashboard?plan=instructor` });
   }
 
   const stripeSecret = getStripeSecretKey();
   const priceEnvName = getInstructorPackagePriceEnv(instructorPackage.id, billingInterval);
   const stripePrice = getStripePriceId(priceEnvName);
+
+  if (instructorPackage.id === "instructor" && instructorProfile?.stripe_subscription_id) {
+    if (!stripeSecret.value) {
+      return jsonNoStore({ error: "Instructor package cancellation is being connected. Please contact LDA support." }, { status: 500 });
+    }
+
+    try {
+      const subscription = await cancelStripeSubscription(stripeSecret.value, instructorProfile.stripe_subscription_id);
+      const admin = createAdminClient();
+
+      if (admin) {
+        const { error } = await admin
+          .from("instructor_profiles")
+          .update({
+            instructor_package: "instructor",
+            instructor_subscription_status: subscription.status,
+            instructor_package_source: "stripe",
+            instructor_package_expires_at: subscription.currentPeriodEnd,
+            stripe_subscription_id: null,
+            updated_at: new Date().toISOString()
+          })
+          .eq("user_id", user.id);
+
+        if (error) {
+          throw error;
+        }
+      }
+
+      return jsonNoStore({ checkoutUrl: `${appUrl}/instructor-dashboard?plan=instructor` });
+    } catch (error) {
+      console.error("Instructor subscription cancellation failed", error);
+      return jsonNoStore(
+        { error: error instanceof Error ? error.message : "Instructor subscription could not be cancelled." },
+        { status: 500 }
+      );
+    }
+  }
 
   if (!stripeSecret.value || !stripePrice?.value) {
     console.error(
@@ -71,14 +135,67 @@ export async function POST(request: Request) {
     );
   }
 
+  const successUrl = `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=success&billing=${billingInterval}`;
+  const cancelUrl = `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=cancelled&billing=${billingInterval}`;
+
+  if (instructorProfile?.stripe_subscription_id) {
+    try {
+      const subscription = await updateStripeSubscriptionPrice({
+        secretKey: stripeSecret.value,
+        subscriptionId: instructorProfile.stripe_subscription_id,
+        priceId: stripePrice.value,
+        metadata: {
+          lda_user_id: user.id,
+          lda_account_role: "instructor",
+          lda_instructor_package_id: instructorPackage.id,
+          lda_billing_interval: billingInterval
+        }
+      });
+      const admin = createAdminClient();
+
+      if (admin) {
+        const { error } = await admin
+          .from("instructor_profiles")
+          .update({
+            instructor_package: instructorPackage.id,
+            instructor_subscription_status: subscription.status,
+            instructor_package_source: "stripe",
+            instructor_package_expires_at: subscription.currentPeriodEnd,
+            stripe_subscription_id: subscription.id,
+            updated_at: new Date().toISOString()
+          })
+          .eq("user_id", user.id);
+
+        if (error) {
+          throw error;
+        }
+      }
+
+      return jsonNoStore({ checkoutUrl: successUrl });
+    } catch (error) {
+      console.error("Instructor subscription package change failed", error);
+      return jsonNoStore(
+        { error: error instanceof Error ? error.message : "Instructor subscription could not be updated." },
+        { status: 500 }
+      );
+    }
+  }
+
   const body = new URLSearchParams({
     mode: "subscription",
-    success_url: `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=success&billing=${billingInterval}`,
-    cancel_url: `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=cancelled&billing=${billingInterval}`,
+    success_url: successUrl,
+    cancel_url: cancelUrl,
     "line_items[0][quantity]": "1",
     "line_items[0][price]": stripePrice.value,
+    client_reference_id: user.id,
+    ...(instructorProfile?.stripe_customer_id ? { customer: instructorProfile.stripe_customer_id } : {}),
+    ...(!instructorProfile?.stripe_customer_id && (profile?.email || user.email) ? { customer_email: profile?.email ?? user.email ?? "" } : {}),
+    "metadata[lda_user_id]": user.id,
+    "metadata[lda_account_role]": "instructor",
     "metadata[lda_instructor_package_id]": instructorPackage.id,
     "metadata[lda_billing_interval]": billingInterval,
+    "subscription_data[metadata][lda_user_id]": user.id,
+    "subscription_data[metadata][lda_account_role]": "instructor",
     "subscription_data[metadata][lda_instructor_package_id]": instructorPackage.id,
     "subscription_data[metadata][lda_billing_interval]": billingInterval,
     allow_promotion_codes: "true",
@@ -87,7 +204,7 @@ export async function POST(request: Request) {
   try {
     const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
-    headers: {
+      headers: {
         Authorization: `Bearer ${stripeSecret.value}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
