@@ -32,6 +32,12 @@ function getDashboardUrl(request: Request, role: string, state = "updated") {
   return url;
 }
 
+function getPendingDashboardUrl(request: Request, role: string, reason: string) {
+  const url = getDashboardUrl(request, role, "pending");
+  url.searchParams.set("reason", reason);
+  return url;
+}
+
 function getUpdatedDashboardUrl(request: Request, role: string, packageId: string) {
   const url = getDashboardUrl(request, role);
   url.searchParams.set("plan", packageId);
@@ -54,10 +60,14 @@ function getSubscriptionPeriodEnd(subscription?: string | StripeSubscription | n
   return typeof subscription === "string" ? null : toTimestamp(subscription?.current_period_end);
 }
 
-function getTarget(session: StripeCheckoutSession): SubscriptionSyncTarget | null {
-  const role = session.metadata?.lda_account_role;
-  const instructorPackageId = session.metadata?.lda_instructor_package_id;
-  const learnerPackageId = session.metadata?.lda_package_id;
+function isActiveSubscription(status?: string | null) {
+  return new Set(["active", "trialing", "past_due"]).has(status ?? "active");
+}
+
+function getMetadataTarget(metadata?: Record<string, string | undefined> | null): SubscriptionSyncTarget | null {
+  const role = metadata?.lda_account_role;
+  const instructorPackageId = metadata?.lda_instructor_package_id;
+  const learnerPackageId = metadata?.lda_package_id;
 
   if (role === "instructor" && (instructorPackageId === "instructor-plus" || instructorPackageId === "instructor-pro")) {
     return { role: "instructor", packageId: instructorPackageId as InstructorPackageId };
@@ -68,6 +78,16 @@ function getTarget(session: StripeCheckoutSession): SubscriptionSyncTarget | nul
   }
 
   return null;
+}
+
+function getTarget(session: StripeCheckoutSession): SubscriptionSyncTarget | null {
+  const subscription = typeof session.subscription === "string" ? null : session.subscription;
+  return getMetadataTarget(session.metadata) ?? getMetadataTarget(subscription?.metadata);
+}
+
+function getSessionUserId(session: StripeCheckoutSession) {
+  const subscription = typeof session.subscription === "string" ? null : session.subscription;
+  return session.metadata?.lda_user_id ?? subscription?.metadata?.lda_user_id ?? session.client_reference_id ?? null;
 }
 
 async function getStripeCheckoutSession(sessionId: string, secretKey: string) {
@@ -85,6 +105,111 @@ async function getStripeCheckoutSession(sessionId: string, secretKey: string) {
   return session;
 }
 
+type SupabaseServerClient = NonNullable<Awaited<ReturnType<typeof createClient>>>;
+
+async function syncSubscriptionWithUserClient({
+  supabase,
+  target,
+  userId,
+  customerId,
+  subscriptionId,
+  status,
+  periodEnd
+}: {
+  supabase: SupabaseServerClient;
+  target: SubscriptionSyncTarget;
+  userId: string;
+  customerId?: string | null;
+  subscriptionId?: string | null;
+  status?: string | null;
+  periodEnd?: string | null;
+}) {
+  const now = new Date().toISOString();
+  const isActive = isActiveSubscription(status);
+
+  if (target.role === "instructor") {
+    const values = {
+      instructor_package: isActive ? target.packageId : "instructor",
+      instructor_subscription_status: status ?? "active",
+      instructor_package_started_at: isActive ? now : null,
+      instructor_package_expires_at: isActive ? periodEnd ?? null : null,
+      instructor_package_source: "stripe",
+      stripe_customer_id: customerId ?? null,
+      stripe_subscription_id: isActive ? subscriptionId ?? null : null,
+      updated_at: now
+    };
+    const { data, error } = await supabase.from("instructor_profiles").update(values).eq("user_id", userId).select("user_id").maybeSingle();
+
+    if (error) throw error;
+    if (data) return;
+
+    const { error: insertError } = await supabase.from("instructor_profiles").insert({ user_id: userId, verification_status: "draft", ...values });
+    if (insertError) throw insertError;
+    return;
+  }
+
+  const values = {
+    learner_package: isActive ? target.packageId : "learner",
+    learner_subscription_status: status ?? "active",
+    learner_package_started_at: isActive ? now : null,
+    learner_package_expires_at: isActive ? periodEnd ?? null : null,
+    learner_plus_active: isActive && target.packageId !== "learner",
+    learner_plus_started_at: isActive && target.packageId !== "learner" ? now : null,
+    learner_plus_expires_at: isActive && target.packageId !== "learner" ? periodEnd ?? null : null,
+    learner_plus_source: "stripe",
+    stripe_customer_id: customerId ?? null,
+    stripe_subscription_id: isActive ? subscriptionId ?? null : null,
+    updated_at: now
+  };
+  const { data, error } = await supabase.from("learner_profiles").update(values).eq("user_id", userId).select("user_id").maybeSingle();
+
+  if (error) throw error;
+  if (data) return;
+
+  const { error: insertError } = await supabase.from("learner_profiles").insert({ user_id: userId, ...values });
+  if (insertError) throw insertError;
+}
+
+async function syncVerifiedSubscription({
+  supabase,
+  target,
+  userId,
+  customerId,
+  subscriptionId,
+  status,
+  periodEnd
+}: {
+  supabase: SupabaseServerClient;
+  target: SubscriptionSyncTarget;
+  userId: string;
+  customerId?: string | null;
+  subscriptionId?: string | null;
+  status?: string | null;
+  periodEnd?: string | null;
+}) {
+  try {
+    await syncSubscriptionTarget({
+      target,
+      userId,
+      customerId,
+      subscriptionId,
+      status,
+      periodEnd
+    });
+  } catch (adminSyncError) {
+    console.error("Stripe checkout admin profile sync failed; trying signed-in profile sync", adminSyncError);
+    await syncSubscriptionWithUserClient({
+      supabase,
+      target,
+      userId,
+      customerId,
+      subscriptionId,
+      status,
+      periodEnd
+    });
+  }
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const sessionId = url.searchParams.get("session_id") ?? "";
@@ -93,7 +218,7 @@ export async function GET(request: Request) {
   const supabase = await createClient();
 
   if (!sessionId || !stripeSecret.value || !supabase) {
-    return NextResponse.redirect(getDashboardUrl(request, fallbackRole, "pending"));
+    return NextResponse.redirect(getPendingDashboardUrl(request, fallbackRole, !sessionId ? "missing-session" : !stripeSecret.value ? "missing-stripe-secret" : "missing-supabase"));
   }
 
   const {
@@ -109,17 +234,22 @@ export async function GET(request: Request) {
   try {
     const session = await getStripeCheckoutSession(sessionId, stripeSecret.value);
     const target = getTarget(session);
-    const sessionUserId = session.metadata?.lda_user_id ?? session.client_reference_id;
+    const sessionUserId = getSessionUserId(session);
 
-    if (!target || sessionUserId !== user.id) {
-      return NextResponse.redirect(getDashboardUrl(request, fallbackRole, "pending"));
+    if (!target) {
+      return NextResponse.redirect(getPendingDashboardUrl(request, fallbackRole, "missing-package-metadata"));
+    }
+
+    if (!sessionUserId || sessionUserId !== user.id) {
+      return NextResponse.redirect(getPendingDashboardUrl(request, fallbackRole, "account-mismatch"));
     }
 
     const subscriptionId = getSubscriptionId(session.subscription);
     const subscriptionStatus = getSubscriptionStatus(session.subscription);
     const periodEnd = getSubscriptionPeriodEnd(session.subscription);
 
-    await syncSubscriptionTarget({
+    await syncVerifiedSubscription({
+      supabase,
       target,
       userId: user.id,
       customerId: session.customer,
@@ -131,6 +261,6 @@ export async function GET(request: Request) {
     return NextResponse.redirect(getUpdatedDashboardUrl(request, target.role, target.packageId));
   } catch (error) {
     console.error("Stripe checkout completion sync failed", error);
-    return NextResponse.redirect(getDashboardUrl(request, fallbackRole, "pending"));
+    return NextResponse.redirect(getPendingDashboardUrl(request, fallbackRole, "sync-failed"));
   }
 }
