@@ -7,7 +7,7 @@ import {
 } from "@/lib/learner-packages";
 import { getStripePriceId, getStripeSecretKey } from "@/lib/stripe-env";
 import { cancelStripeSubscription, updateStripeSubscriptionPrice } from "@/lib/stripe-subscription-updates";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { syncLearnerPackage } from "@/lib/subscription-profile-sync";
 import { createClient } from "@/lib/supabase/server";
 
 type LearnerPackageCheckoutRequest = {
@@ -76,28 +76,14 @@ export async function POST(request: Request) {
 
     try {
       const subscription = await cancelStripeSubscription(stripeSecret.value, learnerProfile.stripe_subscription_id);
-      const admin = createAdminClient();
-
-      if (admin) {
-        const now = new Date().toISOString();
-        const { error } = await admin
-          .from("learner_profiles")
-          .update({
-            learner_package: "learner",
-            learner_subscription_status: subscription.status,
-            learner_package_expires_at: subscription.currentPeriodEnd,
-            learner_plus_active: false,
-            learner_plus_expires_at: subscription.currentPeriodEnd,
-            learner_plus_source: "stripe",
-            stripe_subscription_id: null,
-            updated_at: now
-          })
-          .eq("user_id", user.id);
-
-        if (error) {
-          throw error;
-        }
-      }
+      await syncLearnerPackage({
+        userId: user.id,
+        customerId: learnerProfile.stripe_customer_id,
+        subscriptionId: subscription.id,
+        packageId: "learner",
+        status: subscription.status,
+        periodEnd: subscription.currentPeriodEnd
+      });
 
       return jsonNoStore({ checkoutUrl: `${appUrl}/learner-dashboard?plan=learner` });
     } catch (error) {
@@ -150,30 +136,14 @@ export async function POST(request: Request) {
           lda_billing_interval: billingInterval
         }
       });
-      const admin = createAdminClient();
-
-      if (admin) {
-        const now = new Date().toISOString();
-        const { error } = await admin
-          .from("learner_profiles")
-          .update({
-            learner_package: learnerPackage.id,
-            learner_subscription_status: subscription.status,
-            learner_package_started_at: now,
-            learner_package_expires_at: subscription.currentPeriodEnd,
-            learner_plus_active: learnerPackage.id !== "learner",
-            learner_plus_started_at: now,
-            learner_plus_expires_at: subscription.currentPeriodEnd,
-            learner_plus_source: "stripe",
-            stripe_subscription_id: subscription.id,
-            updated_at: now
-          })
-          .eq("user_id", user.id);
-
-        if (error) {
-          throw error;
-        }
-      }
+      await syncLearnerPackage({
+        userId: user.id,
+        customerId: learnerProfile.stripe_customer_id,
+        subscriptionId: subscription.id,
+        packageId: learnerPackage.id,
+        status: subscription.status,
+        periodEnd: subscription.currentPeriodEnd
+      });
 
       return jsonNoStore({ checkoutUrl: dashboardUrl });
     } catch (error) {
