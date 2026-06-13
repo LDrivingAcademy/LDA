@@ -133,7 +133,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const successUrl = `${appUrl}/learner-plus/${learnerPackage.slug}?checkout=success&billing=${billingInterval}`;
+  const dashboardUrl = `${appUrl}/learner-dashboard?subscription=updated`;
+  const successUrl = `${appUrl}/api/subscriptions/complete?session_id={CHECKOUT_SESSION_ID}&role=learner`;
   const cancelUrl = `${appUrl}/learner-plus/${learnerPackage.slug}?checkout=cancelled&billing=${billingInterval}`;
 
   if (learnerProfile?.stripe_subscription_id) {
@@ -174,7 +175,7 @@ export async function POST(request: Request) {
         }
       }
 
-      return jsonNoStore({ checkoutUrl: successUrl });
+      return jsonNoStore({ checkoutUrl: dashboardUrl });
     } catch (error) {
       console.error("Learner subscription package change failed", error);
       return jsonNoStore(
