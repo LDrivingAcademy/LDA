@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { type InstructorPackageId } from "@/lib/instructor-packages";
 import { type LearnerPackageId } from "@/lib/learner-packages";
+import { cookies } from "next/headers";
+import { readSubscriptionSessionToken, subscriptionSessionCookieName } from "@/lib/subscription-session-cookie";
 
 export type HeaderAccountSummary = {
   dashboardHref: string;
@@ -68,18 +70,31 @@ export async function getHeaderAccountSummary(): Promise<HeaderAccountSummary | 
 
   const roleNames = roles?.map((role) => String(role.role)) ?? [];
   const isInstructor = roleNames.includes("instructor");
+  const subscriptionSession = readSubscriptionSessionToken(
+    (await cookies()).get(subscriptionSessionCookieName)?.value,
+    user.id,
+    isInstructor ? "instructor" : "learner"
+  );
   const hasLearnerPlus =
     !isInstructor &&
     Boolean(learnerProfile?.learner_plus_active) &&
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
-  const learnerPackageId = (learnerProfile?.learner_package || (hasLearnerPlus ? "learner-plus" : "learner")) as LearnerPackageId;
+  const learnerSessionPackage =
+    subscriptionSession?.packageId === "learner-plus" || subscriptionSession?.packageId === "learner-pro"
+      ? subscriptionSession.packageId
+      : null;
+  const instructorSessionPackage =
+    subscriptionSession?.packageId === "instructor-plus" || subscriptionSession?.packageId === "instructor-pro"
+      ? subscriptionSession.packageId
+      : null;
+  const learnerPackageId = (learnerSessionPackage || learnerProfile?.learner_package || (hasLearnerPlus ? "learner-plus" : "learner")) as LearnerPackageId;
   const learnerPackageLabel =
     learnerPackageId === "learner-pro"
       ? "Learner Pro"
       : learnerPackageId === "learner-plus" || hasLearnerPlus
         ? "Learner Plus"
         : "Learner";
-  const instructorPackageId = (instructorProfile?.instructor_package || "instructor") as InstructorPackageId;
+  const instructorPackageId = (instructorSessionPackage || instructorProfile?.instructor_package || "instructor") as InstructorPackageId;
   const instructorPackageLabel =
     instructorPackageId === "instructor-plus"
       ? "Instructor Plus"
