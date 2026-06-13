@@ -7,7 +7,7 @@ import {
 } from "@/lib/instructor-packages";
 import { getStripePriceId, getStripeSecretKey } from "@/lib/stripe-env";
 import { cancelStripeSubscription, updateStripeSubscriptionPrice } from "@/lib/stripe-subscription-updates";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { syncInstructorPackage } from "@/lib/subscription-profile-sync";
 import { createClient } from "@/lib/supabase/server";
 
 type InstructorPackageCheckoutRequest = {
@@ -81,25 +81,14 @@ export async function POST(request: Request) {
 
     try {
       const subscription = await cancelStripeSubscription(stripeSecret.value, instructorProfile.stripe_subscription_id);
-      const admin = createAdminClient();
-
-      if (admin) {
-        const { error } = await admin
-          .from("instructor_profiles")
-          .update({
-            instructor_package: "instructor",
-            instructor_subscription_status: subscription.status,
-            instructor_package_source: "stripe",
-            instructor_package_expires_at: subscription.currentPeriodEnd,
-            stripe_subscription_id: null,
-            updated_at: new Date().toISOString()
-          })
-          .eq("user_id", user.id);
-
-        if (error) {
-          throw error;
-        }
-      }
+      await syncInstructorPackage({
+        userId: user.id,
+        customerId: instructorProfile.stripe_customer_id,
+        subscriptionId: subscription.id,
+        packageId: "instructor",
+        status: subscription.status,
+        periodEnd: subscription.currentPeriodEnd
+      });
 
       return jsonNoStore({ checkoutUrl: `${appUrl}/instructor-dashboard?plan=instructor` });
     } catch (error) {
@@ -152,25 +141,14 @@ export async function POST(request: Request) {
           lda_billing_interval: billingInterval
         }
       });
-      const admin = createAdminClient();
-
-      if (admin) {
-        const { error } = await admin
-          .from("instructor_profiles")
-          .update({
-            instructor_package: instructorPackage.id,
-            instructor_subscription_status: subscription.status,
-            instructor_package_source: "stripe",
-            instructor_package_expires_at: subscription.currentPeriodEnd,
-            stripe_subscription_id: subscription.id,
-            updated_at: new Date().toISOString()
-          })
-          .eq("user_id", user.id);
-
-        if (error) {
-          throw error;
-        }
-      }
+      await syncInstructorPackage({
+        userId: user.id,
+        customerId: instructorProfile.stripe_customer_id,
+        subscriptionId: subscription.id,
+        packageId: instructorPackage.id,
+        status: subscription.status,
+        periodEnd: subscription.currentPeriodEnd
+      });
 
       return jsonNoStore({ checkoutUrl: dashboardUrl });
     } catch (error) {
