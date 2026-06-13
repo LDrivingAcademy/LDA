@@ -82,10 +82,11 @@ function redirectWithSubscriptionSession({
   );
 
   if (token) {
+    const isSecureRequest = new URL(request.url).protocol === "https:";
     response.cookies.set(subscriptionSessionCookieName, token, {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: isSecureRequest,
       maxAge,
       path: "/"
     });
@@ -297,6 +298,10 @@ export async function GET(request: Request) {
     const subscriptionId = getSubscriptionId(session.subscription);
     const subscriptionStatus = getSubscriptionStatus(session.subscription);
     const periodEnd = getSubscriptionPeriodEnd(session.subscription);
+
+    if (!isActiveSubscription(subscriptionStatus)) {
+      return NextResponse.redirect(getPendingDashboardUrl(request, fallbackRole, "subscription-not-active"));
+    }
 
     try {
       await syncVerifiedSubscription({
