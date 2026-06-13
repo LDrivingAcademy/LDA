@@ -9,6 +9,9 @@ type LearnerPlusPageProps = {
   searchParams?: PageSourceSearchParams;
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function LearnerPlusPage({ searchParams }: LearnerPlusPageProps) {
   const { backHref, backLabel, fromDashboard } = await getPageBackLink(searchParams);
   const currentPackageId = await getSignedInLearnerPackageId();
