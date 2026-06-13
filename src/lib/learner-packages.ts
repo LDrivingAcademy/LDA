@@ -20,7 +20,7 @@ export type LearnerPackage = {
   }[];
 };
 
-export const currentLearnerPackageId: LearnerPackageId = "learner-plus";
+export const currentLearnerPackageId: LearnerPackageId = "learner";
 
 export const learnerPackages: LearnerPackage[] = [
   {
@@ -60,10 +60,10 @@ export const learnerPackages: LearnerPackage[] = [
     slug: "learner-plus",
     rank: 2,
     name: "Learner Plus",
-    price: "From Â£7.99/month",
-    monthlyPrice: "Â£7.99 per month",
-    yearlyPrice: "Â£79 per year",
-    label: "Current plan",
+    price: "From £7.99/month",
+    monthlyPrice: "£7.99 per month",
+    yearlyPrice: "£79 per year",
+    label: "Guided support",
     highlighted: true,
     summary: "More guidance, stronger SmartMatch weighting, and priority learner support.",
     stripePriceEnv: {
@@ -101,9 +101,9 @@ export const learnerPackages: LearnerPackage[] = [
     slug: "learner-pro",
     rank: 3,
     name: "Learner Pro",
-    price: "From Â£14.99/month",
-    monthlyPrice: "Â£14.99 per month",
-    yearlyPrice: "Â£149 per year",
+    price: "From £14.99/month",
+    monthlyPrice: "£14.99 per month",
+    yearlyPrice: "£149 per year",
     label: "Full support",
     stripePriceEnv: {
       monthly: "STRIPE_LEARNER_PRO_MONTHLY_PRICE_ID",
@@ -142,12 +142,12 @@ export function getLearnerPackage(packageId: string) {
   return learnerPackages.find((learnerPackage) => learnerPackage.id === packageId || learnerPackage.slug === packageId);
 }
 
-export function getCurrentLearnerPackage() {
-  return getLearnerPackage(currentLearnerPackageId) ?? learnerPackages[1];
+export function getCurrentLearnerPackage(packageId: LearnerPackageId = currentLearnerPackageId) {
+  return getLearnerPackage(packageId) ?? learnerPackages[0];
 }
 
-export function getPackageActionLabel(packageId: LearnerPackageId) {
-  const currentPackage = getCurrentLearnerPackage();
+export function getPackageActionLabel(packageId: LearnerPackageId, currentPackageId: LearnerPackageId = currentLearnerPackageId) {
+  const currentPackage = getCurrentLearnerPackage(currentPackageId);
   const targetPackage = getLearnerPackage(packageId);
 
   if (!targetPackage || targetPackage.id === currentPackage.id) {
