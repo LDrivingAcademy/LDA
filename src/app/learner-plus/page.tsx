@@ -1,7 +1,8 @@
 import { PlusCircle } from "lucide-react";
 import { LearnerPackageCard } from "@/components/learner-package-card";
 import { PageTopBar } from "@/components/page-top-bar";
-import { learnerPackages } from "@/lib/learner-packages";
+import { getSignedInLearnerPackageId } from "@/lib/account-package-state";
+import { getCurrentLearnerPackage, learnerPackages } from "@/lib/learner-packages";
 import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 
 type LearnerPlusPageProps = {
@@ -9,7 +10,9 @@ type LearnerPlusPageProps = {
 };
 
 export default async function LearnerPlusPage({ searchParams }: LearnerPlusPageProps) {
-  const { backHref, backLabel } = await getPageBackLink(searchParams);
+  const { backHref, backLabel, fromDashboard } = await getPageBackLink(searchParams);
+  const currentPackageId = await getSignedInLearnerPackageId();
+  const currentPackage = getCurrentLearnerPackage(currentPackageId);
 
   return (
     <main className="min-h-screen bg-white text-black">
@@ -21,11 +24,16 @@ export default async function LearnerPlusPage({ searchParams }: LearnerPlusPageP
           </div>
           <h1 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">Choose your LDA learner package.</h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-zinc-700">
-            Your current package is Learner Plus. Each tile opens a full breakdown, and paid packages can be selected with monthly or yearly billing through secure Stripe Checkout.
+            Your current package is {currentPackage.name}. Each tile opens a full breakdown, and paid package changes are applied automatically once Stripe confirms the subscription.
           </p>
           <div className="mt-7 grid items-stretch gap-4 lg:grid-cols-3">
             {learnerPackages.map((learnerPackage) => (
-              <LearnerPackageCard key={learnerPackage.id} learnerPackage={learnerPackage} />
+              <LearnerPackageCard
+                key={learnerPackage.id}
+                learnerPackage={learnerPackage}
+                currentPackageId={currentPackageId}
+                fromDashboard={fromDashboard}
+              />
             ))}
           </div>
         </section>
