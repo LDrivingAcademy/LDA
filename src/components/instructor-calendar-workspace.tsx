@@ -12,7 +12,6 @@ import {
   MapPin,
   PauseCircle,
   PlusCircle,
-  ShieldCheck,
   Trash2,
   XCircle,
   UserRound
@@ -337,8 +336,8 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
-        <div className="grid gap-5">
-          <div className="grid gap-3 md:grid-cols-4">
+        <div className="grid content-start gap-5">
+          <div className="grid items-start gap-3 sm:grid-cols-2 md:grid-cols-4">
             <Metric icon={CheckCircle2} label="Booked" value={String(monthCounts.booked)} tone="emerald" />
             <Metric icon={Clock3} label="Being booked" value={String(monthCounts.pending)} tone="amber" />
             <Metric icon={PlusCircle} label="Free slots" value={String(monthCounts.free)} tone="sky" />
@@ -504,15 +503,6 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
             </div>
           </section>
 
-          <section className="rounded border border-zinc-200 bg-zinc-950 p-5 text-white shadow-sm">
-            <ShieldCheck className="text-brand" />
-            <h2 className="mt-3 text-2xl font-black">Flexible working controls</h2>
-            <div className="mt-4 grid gap-3 text-sm font-bold leading-6 text-zinc-300">
-              <p>Free slots can be made visible to learners.</p>
-              <p>Being booked means a learner has started checkout and the slot should not be double-booked.</p>
-              <p>Unavailable keeps personal time, school runs, breaks, and admin time out of learner search.</p>
-            </div>
-          </section>
         </aside>
       </section>
     </main>
@@ -528,12 +518,14 @@ function Metric({ icon: Icon, label, value, tone }: { icon: typeof CalendarDays;
   }[tone];
 
   return (
-    <article className="rounded border border-zinc-200 bg-white p-3 shadow-sm">
+    <article className="flex aspect-square min-h-[112px] flex-col justify-between rounded border border-zinc-200 bg-white p-3 shadow-sm">
       <div className={`grid h-8 w-8 place-items-center rounded ${toneClass}`}>
         <Icon size={17} />
       </div>
-      <div className="mt-2 text-2xl font-black">{value}</div>
-      <div className="mt-1 text-xs font-black uppercase text-zinc-500">{label}</div>
+      <div>
+        <div className="text-2xl font-black">{value}</div>
+        <div className="mt-1 text-xs font-black uppercase text-zinc-500">{label}</div>
+      </div>
     </article>
   );
 }
