@@ -162,12 +162,12 @@ export function getInstructorPackage(packageId: string) {
   );
 }
 
-export function getCurrentInstructorPackage() {
-  return getInstructorPackage(currentInstructorPackageId) ?? instructorPackages[0];
+export function getCurrentInstructorPackage(packageId: InstructorPackageId = currentInstructorPackageId) {
+  return getInstructorPackage(packageId) ?? instructorPackages[0];
 }
 
-export function getInstructorPackageActionLabel(packageId: InstructorPackageId) {
-  const currentPackage = getCurrentInstructorPackage();
+export function getInstructorPackageActionLabel(packageId: InstructorPackageId, currentPackageId: InstructorPackageId = currentInstructorPackageId) {
+  const currentPackage = getCurrentInstructorPackage(currentPackageId);
   const targetPackage = getInstructorPackage(packageId);
 
   if (!targetPackage || targetPackage.id === currentPackage.id) {
