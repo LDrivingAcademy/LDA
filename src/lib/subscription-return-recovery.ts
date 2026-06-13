@@ -33,6 +33,14 @@ type StripeSubscription = {
   };
 };
 
+export type SubscriptionRecoveryResult = {
+  target: SubscriptionSyncTarget;
+  customerId?: string | null;
+  subscriptionId?: string | null;
+  status?: string | null;
+  periodEnd?: string | null;
+};
+
 const activeSubscriptionStatuses = new Set(["active", "trialing", "past_due"]);
 
 function toTimestamp(value?: number | null) {
@@ -222,28 +230,38 @@ export async function recoverLatestStripeSubscriptionForSignedInAccount({
     const periodEnd = toTimestamp(subscription.current_period_end);
 
     try {
-      await syncSubscriptionTarget({
-        target,
-        userId,
-        customerId,
-        subscriptionId: subscription.id,
-        status: subscription.status,
-        periodEnd
-      });
-    } catch (adminSyncError) {
-      console.error("Stripe dashboard recovery admin sync failed; trying signed-in profile sync", adminSyncError);
-      await syncSubscriptionWithUserClient({
-        supabase,
-        target,
-        userId,
-        customerId,
-        subscriptionId: subscription.id,
-        status: subscription.status,
-        periodEnd
-      });
+      try {
+        await syncSubscriptionTarget({
+          target,
+          userId,
+          customerId,
+          subscriptionId: subscription.id,
+          status: subscription.status,
+          periodEnd
+        });
+      } catch (adminSyncError) {
+        console.error("Stripe dashboard recovery admin sync failed; trying signed-in profile sync", adminSyncError);
+        await syncSubscriptionWithUserClient({
+          supabase,
+          target,
+          userId,
+          customerId,
+          subscriptionId: subscription.id,
+          status: subscription.status,
+          periodEnd
+        });
+      }
+    } catch (syncError) {
+      console.error("Stripe dashboard recovery profile sync failed; using verified subscription session", syncError);
     }
 
-    return target;
+    return {
+      target,
+      customerId,
+      subscriptionId: subscription.id,
+      status: subscription.status,
+      periodEnd
+    };
   }
 
   return null;
