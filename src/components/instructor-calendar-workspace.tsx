@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  Bell,
   CalendarDays,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock3,
+  MessageSquareText,
   MapPin,
   PauseCircle,
   PlusCircle,
@@ -15,7 +17,6 @@ import {
   XCircle,
   UserRound
 } from "lucide-react";
-import { PlatformProtectionPanel } from "@/components/platform-protection-panel";
 
 type LessonStatus = "booked" | "pending" | "free" | "blocked" | "cancelled";
 
@@ -127,6 +128,29 @@ const statusStyles: Record<LessonStatus, { label: string; className: string }> =
   blocked: { label: "Unavailable", className: "border-zinc-200 bg-zinc-100 text-zinc-700" },
   cancelled: { label: "Cancelled", className: "border-red-200 bg-red-50 text-red-800" }
 };
+
+const instructorNotifications = [
+  {
+    title: "Learner enquiry",
+    detail: "New learner request waiting for lesson-time confirmation.",
+    meta: "Action needed today"
+  },
+  {
+    title: "Lesson reminder",
+    detail: "Confirmed pickup details should be checked before the next booked slot.",
+    meta: "Booking workflow"
+  },
+  {
+    title: "Test reminder",
+    detail: "Review test-ready pupils before approving additional mock-test slots.",
+    meta: "Readiness check"
+  },
+  {
+    title: "LDA announcement",
+    detail: "Keep availability current so SmartMatch does not offer stale lesson times.",
+    meta: "Platform update"
+  }
+];
 
 function isoDate(year: number, monthIndex: number, day: number) {
   return `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -312,7 +336,7 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_380px] lg:px-8">
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
         <div className="grid gap-5">
           <div className="grid gap-3 md:grid-cols-4">
             <Metric icon={CheckCircle2} label="Booked" value={String(monthCounts.booked)} tone="emerald" />
@@ -324,14 +348,14 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
           <section className="rounded border border-zinc-200 bg-white shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 p-4">
               <div>
-                <h2 className="text-2xl font-black">{monthLabel(displayMonth)}</h2>
+                <h2 className="text-xl font-black">{monthLabel(displayMonth)}</h2>
                 <p className="mt-1 text-sm font-bold text-zinc-500">Tap a day to inspect bookings and edit availability.</p>
               </div>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => setDisplayMonth((current) => addMonths(current, -1))} className="grid h-10 w-10 place-items-center rounded border border-zinc-300 hover:ring-2 hover:ring-brand" aria-label="Previous month">
+                <button type="button" onClick={() => setDisplayMonth((current) => addMonths(current, -1))} className="grid h-9 w-9 place-items-center rounded border border-zinc-300 hover:ring-2 hover:ring-brand" aria-label="Previous month">
                   <ChevronLeft size={18} />
                 </button>
-                <button type="button" onClick={() => setDisplayMonth((current) => addMonths(current, 1))} className="grid h-10 w-10 place-items-center rounded border border-zinc-300 hover:ring-2 hover:ring-brand" aria-label="Next month">
+                <button type="button" onClick={() => setDisplayMonth((current) => addMonths(current, 1))} className="grid h-9 w-9 place-items-center rounded border border-zinc-300 hover:ring-2 hover:ring-brand" aria-label="Next month">
                   <ChevronRight size={18} />
                 </button>
               </div>
@@ -340,7 +364,7 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
               <div>
                 <div className="grid grid-cols-7 border-b border-zinc-200 bg-zinc-50 text-center text-xs font-black uppercase text-zinc-500">
                   {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                    <div key={day} className="px-2 py-3">{day}</div>
+                    <div key={day} className="px-2 py-2">{day}</div>
                   ))}
                 </div>
                 <div className="grid grid-cols-7">
@@ -355,12 +379,12 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
                         type="button"
                         disabled={!cell.day}
                         onClick={() => cell.day && setSelectedDate(cell.iso)}
-                        className={`min-h-28 border-b border-r border-zinc-200 p-2 text-left transition ${isSelected ? "bg-red-50 ring-2 ring-inset ring-brand" : cell.day ? "bg-white hover:bg-zinc-50" : "bg-zinc-50"}`}
+                        className={`min-h-20 border-b border-r border-zinc-200 p-2 text-left transition sm:min-h-24 ${isSelected ? "bg-red-50 ring-2 ring-inset ring-brand" : cell.day ? "bg-white hover:bg-zinc-50" : "bg-zinc-50"}`}
                       >
                         {cell.day ? (
                           <>
                             <div className="text-sm font-black">{cell.day}</div>
-                            <div className="mt-3 grid gap-1">
+                            <div className="mt-2 grid gap-0.5">
                               {counts.booked ? <StatusDot label={`${counts.booked} booked`} className="bg-emerald-500" /> : null}
                               {counts.pending ? <StatusDot label={`${counts.pending} holding`} className="bg-amber-500" /> : null}
                               {counts.free ? <StatusDot label={`${counts.free} free`} className="bg-sky-500" /> : null}
@@ -379,6 +403,36 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
         </div>
 
         <aside className="grid content-start gap-5">
+          <section className="rounded border border-zinc-200 bg-white p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 text-xs font-black uppercase text-brand">
+                  <Bell size={16} /> Messages & notifications
+                </div>
+                <h2 className="mt-2 text-xl font-black">Lesson-day alerts</h2>
+              </div>
+              <a href="/notification-hub?from=dashboard" className="rounded border border-zinc-300 px-3 py-2 text-xs font-black uppercase hover:ring-2 hover:ring-brand">
+                Hub
+              </a>
+            </div>
+            <div className="mt-4 grid gap-2">
+              {instructorNotifications.map((notification) => (
+                <article key={notification.title} className="rounded border border-zinc-200 bg-zinc-50 p-3">
+                  <div className="flex items-start gap-3">
+                    <div className="grid h-8 w-8 shrink-0 place-items-center rounded bg-red-50 text-brand">
+                      <MessageSquareText size={16} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black">{notification.title}</h3>
+                      <p className="mt-1 text-xs font-semibold leading-5 text-zinc-600">{notification.detail}</p>
+                      <div className="mt-1 text-[11px] font-black uppercase text-zinc-500">{notification.meta}</div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
           <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="text-sm font-black uppercase text-brand">Day planner</div>
             <h2 className="mt-2 text-2xl font-black">{new Intl.DateTimeFormat("en-GB", { dateStyle: "full" }).format(new Date(`${selectedDate}T12:00:00`))}</h2>
@@ -459,7 +513,6 @@ export function InstructorCalendarWorkspace({ instructorName, instructorEmail }:
               <p>Unavailable keeps personal time, school runs, breaks, and admin time out of learner search.</p>
             </div>
           </section>
-          <PlatformProtectionPanel audience="instructor" compact />
         </aside>
       </section>
     </main>
@@ -475,12 +528,12 @@ function Metric({ icon: Icon, label, value, tone }: { icon: typeof CalendarDays;
   }[tone];
 
   return (
-    <article className="rounded border border-zinc-200 bg-white p-4 shadow-sm">
-      <div className={`grid h-11 w-11 place-items-center rounded ${toneClass}`}>
-        <Icon size={22} />
+    <article className="rounded border border-zinc-200 bg-white p-3 shadow-sm">
+      <div className={`grid h-8 w-8 place-items-center rounded ${toneClass}`}>
+        <Icon size={17} />
       </div>
-      <div className="mt-4 text-3xl font-black">{value}</div>
-      <div className="mt-1 text-sm font-black uppercase text-zinc-500">{label}</div>
+      <div className="mt-2 text-2xl font-black">{value}</div>
+      <div className="mt-1 text-xs font-black uppercase text-zinc-500">{label}</div>
     </article>
   );
 }
