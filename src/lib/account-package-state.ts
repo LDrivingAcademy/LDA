@@ -1,6 +1,8 @@
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import type { InstructorPackageId } from "@/lib/instructor-packages";
 import type { LearnerPackageId } from "@/lib/learner-packages";
+import { readSubscriptionSessionToken, subscriptionSessionCookieName } from "@/lib/subscription-session-cookie";
 
 export async function getSignedInInstructorPackageId(): Promise<InstructorPackageId> {
   const supabase = await createClient();
@@ -15,6 +17,16 @@ export async function getSignedInInstructorPackageId(): Promise<InstructorPackag
 
   if (!user) {
     return "instructor";
+  }
+
+  const subscriptionSession = readSubscriptionSessionToken(
+    (await cookies()).get(subscriptionSessionCookieName)?.value,
+    user.id,
+    "instructor"
+  );
+
+  if (subscriptionSession?.packageId === "instructor-plus" || subscriptionSession?.packageId === "instructor-pro") {
+    return subscriptionSession.packageId;
   }
 
   const { data } = await supabase
@@ -41,6 +53,16 @@ export async function getSignedInLearnerPackageId(): Promise<LearnerPackageId> {
 
   if (!user) {
     return "learner";
+  }
+
+  const subscriptionSession = readSubscriptionSessionToken(
+    (await cookies()).get(subscriptionSessionCookieName)?.value,
+    user.id,
+    "learner"
+  );
+
+  if (subscriptionSession?.packageId === "learner-pro" || subscriptionSession?.packageId === "learner-plus") {
+    return subscriptionSession.packageId;
   }
 
   const { data } = await supabase
