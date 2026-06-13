@@ -10,11 +10,13 @@ import { cancelStripeSubscription, updateStripeSubscriptionPrice } from "@/lib/s
 import {
   createSubscriptionSessionToken,
   getSubscriptionSessionMaxAge,
+  readSubscriptionSessionToken,
   subscriptionSessionCookieName
 } from "@/lib/subscription-session-cookie";
 import { syncLearnerPackage } from "@/lib/subscription-profile-sync";
 import { syncLearnerPackageWithUserClient } from "@/lib/subscription-profile-user-sync";
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 
 type LearnerPackageCheckoutRequest = {
   packageId?: LearnerPackageId;
@@ -57,7 +59,7 @@ function learnerRedirectResponse({
     response.cookies.set(subscriptionSessionCookieName, token, {
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
+      secure: checkoutUrl.startsWith("https://"),
       maxAge,
       path: "/"
     });
@@ -101,6 +103,15 @@ export async function POST(request: Request) {
     supabase.from("learner_profiles").select("stripe_customer_id,stripe_subscription_id").eq("user_id", user.id).maybeSingle()
   ]);
   const isLearner = roles?.some((role) => role.role === "learner") ?? false;
+  const subscriptionSession = readSubscriptionSessionToken(
+    (await cookies()).get(subscriptionSessionCookieName)?.value,
+    user.id,
+    "learner"
+  );
+  const sessionPaidPackage = subscriptionSession?.packageId === "learner-plus" || subscriptionSession?.packageId === "learner-pro";
+  const savedStripeCustomerId = learnerProfile?.stripe_customer_id ?? subscriptionSession?.customerId ?? null;
+  const savedStripeSubscriptionId =
+    learnerProfile?.stripe_subscription_id ?? (sessionPaidPackage ? subscriptionSession?.subscriptionId : null) ?? null;
 
   if (!isLearner) {
     return jsonNoStore({ error: "Use a learner account before changing learner packages." }, { status: 403 });
@@ -110,7 +121,7 @@ export async function POST(request: Request) {
     return jsonNoStore({ error: "LDA learner package was not found." }, { status: 404 });
   }
 
-  if (learnerPackage.id === "learner" && !learnerProfile?.stripe_subscription_id) {
+  if (learnerPackage.id === "learner" && !savedStripeSubscriptionId) {
     return jsonNoStore({
       checkoutUrl: `${appUrl}/learner-dashboard?subscription=updated&plan=learner`
     });
@@ -120,18 +131,18 @@ export async function POST(request: Request) {
   const priceEnvName = getPackagePriceEnv(learnerPackage.id, billingInterval);
   const stripePrice = getStripePriceId(priceEnvName);
 
-  if (learnerPackage.id === "learner" && learnerProfile?.stripe_subscription_id) {
+  if (learnerPackage.id === "learner" && savedStripeSubscriptionId) {
     if (!stripeSecret.value) {
       return jsonNoStore({ error: "Learner package cancellation is being connected. Please contact LDA support." }, { status: 500 });
     }
 
     try {
-      const subscription = await cancelStripeSubscription(stripeSecret.value, learnerProfile.stripe_subscription_id);
+      const subscription = await cancelStripeSubscription(stripeSecret.value, savedStripeSubscriptionId);
       try {
         try {
           await syncLearnerPackage({
             userId: user.id,
-            customerId: learnerProfile.stripe_customer_id,
+            customerId: savedStripeCustomerId,
             subscriptionId: subscription.id,
             packageId: "learner",
             status: subscription.status,
@@ -142,7 +153,7 @@ export async function POST(request: Request) {
           await syncLearnerPackageWithUserClient({
             supabase,
             userId: user.id,
-            customerId: learnerProfile.stripe_customer_id,
+            customerId: savedStripeCustomerId,
             subscriptionId: subscription.id,
             packageId: "learner",
             status: subscription.status,
@@ -156,7 +167,7 @@ export async function POST(request: Request) {
       return learnerRedirectResponse({
         checkoutUrl: `${appUrl}/learner-dashboard?subscription=updated&plan=learner`,
         userId: user.id,
-        customerId: learnerProfile.stripe_customer_id,
+        customerId: savedStripeCustomerId,
         subscriptionId: subscription.id,
         packageId: "learner",
         status: subscription.status,
@@ -199,11 +210,11 @@ export async function POST(request: Request) {
   const successUrl = `${appUrl}/api/subscriptions/complete?session_id={CHECKOUT_SESSION_ID}&role=learner`;
   const cancelUrl = `${appUrl}/learner-plus/${learnerPackage.slug}?checkout=cancelled&billing=${billingInterval}`;
 
-  if (learnerProfile?.stripe_subscription_id) {
+  if (savedStripeSubscriptionId) {
     try {
       const subscription = await updateStripeSubscriptionPrice({
         secretKey: stripeSecret.value,
-        subscriptionId: learnerProfile.stripe_subscription_id,
+        subscriptionId: savedStripeSubscriptionId,
         priceId: stripePrice.value,
         metadata: {
           lda_user_id: user.id,
@@ -216,7 +227,7 @@ export async function POST(request: Request) {
         try {
           await syncLearnerPackage({
             userId: user.id,
-            customerId: learnerProfile.stripe_customer_id,
+            customerId: savedStripeCustomerId,
             subscriptionId: subscription.id,
             packageId: learnerPackage.id,
             status: subscription.status,
@@ -227,7 +238,7 @@ export async function POST(request: Request) {
           await syncLearnerPackageWithUserClient({
             supabase,
             userId: user.id,
-            customerId: learnerProfile.stripe_customer_id,
+            customerId: savedStripeCustomerId,
             subscriptionId: subscription.id,
             packageId: learnerPackage.id,
             status: subscription.status,
@@ -241,7 +252,7 @@ export async function POST(request: Request) {
       return learnerRedirectResponse({
         checkoutUrl: dashboardUrl,
         userId: user.id,
-        customerId: learnerProfile.stripe_customer_id,
+        customerId: savedStripeCustomerId,
         subscriptionId: subscription.id,
         packageId: learnerPackage.id,
         status: subscription.status,
@@ -263,8 +274,8 @@ export async function POST(request: Request) {
     "line_items[0][quantity]": "1",
     "line_items[0][price]": stripePrice.value,
     client_reference_id: user.id,
-    ...(learnerProfile?.stripe_customer_id ? { customer: learnerProfile.stripe_customer_id } : {}),
-    ...(!learnerProfile?.stripe_customer_id && (profile?.email || user.email) ? { customer_email: profile?.email ?? user.email ?? "" } : {}),
+    ...(savedStripeCustomerId ? { customer: savedStripeCustomerId } : {}),
+    ...(!savedStripeCustomerId && (profile?.email || user.email) ? { customer_email: profile?.email ?? user.email ?? "" } : {}),
     "metadata[lda_user_id]": user.id,
     "metadata[lda_account_role]": "learner",
     "metadata[lda_package_id]": learnerPackage.id,
