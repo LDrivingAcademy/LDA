@@ -2,7 +2,7 @@ import type { InstructorPackageId } from "@/lib/instructor-packages";
 import type { LearnerPackageId } from "@/lib/learner-packages";
 import { getStripePriceId } from "@/lib/stripe-env";
 import { createClient } from "@/lib/supabase/server";
-import type { SubscriptionSyncTarget } from "@/lib/subscription-profile-sync";
+import { syncSubscriptionTarget, type SubscriptionSyncTarget } from "@/lib/subscription-profile-sync";
 
 type SupabaseServerClient = NonNullable<Awaited<ReturnType<typeof createClient>>>;
 
@@ -218,15 +218,30 @@ export async function recoverLatestStripeSubscriptionForSignedInAccount({
     if (!target || target.role !== role || !isActiveSubscription(subscription.status)) continue;
     if (metadataUserId && metadataUserId !== userId) continue;
 
-    await syncSubscriptionWithUserClient({
-      supabase,
-      target,
-      userId,
-      customerId: getCustomerId(subscription.customer),
-      subscriptionId: subscription.id,
-      status: subscription.status,
-      periodEnd: toTimestamp(subscription.current_period_end)
-    });
+    const customerId = getCustomerId(subscription.customer);
+    const periodEnd = toTimestamp(subscription.current_period_end);
+
+    try {
+      await syncSubscriptionTarget({
+        target,
+        userId,
+        customerId,
+        subscriptionId: subscription.id,
+        status: subscription.status,
+        periodEnd
+      });
+    } catch (adminSyncError) {
+      console.error("Stripe dashboard recovery admin sync failed; trying signed-in profile sync", adminSyncError);
+      await syncSubscriptionWithUserClient({
+        supabase,
+        target,
+        userId,
+        customerId,
+        subscriptionId: subscription.id,
+        status: subscription.status,
+        periodEnd
+      });
+    }
 
     return target;
   }
