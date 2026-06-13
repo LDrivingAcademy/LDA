@@ -8,6 +8,7 @@ import {
 import { getStripePriceId, getStripeSecretKey } from "@/lib/stripe-env";
 import { cancelStripeSubscription, updateStripeSubscriptionPrice } from "@/lib/stripe-subscription-updates";
 import { syncInstructorPackage } from "@/lib/subscription-profile-sync";
+import { syncInstructorPackageWithUserClient } from "@/lib/subscription-profile-user-sync";
 import { createClient } from "@/lib/supabase/server";
 
 type InstructorPackageCheckoutRequest = {
@@ -81,14 +82,27 @@ export async function POST(request: Request) {
 
     try {
       const subscription = await cancelStripeSubscription(stripeSecret.value, instructorProfile.stripe_subscription_id);
-      await syncInstructorPackage({
-        userId: user.id,
-        customerId: instructorProfile.stripe_customer_id,
-        subscriptionId: subscription.id,
-        packageId: "instructor",
-        status: subscription.status,
-        periodEnd: subscription.currentPeriodEnd
-      });
+      try {
+        await syncInstructorPackage({
+          userId: user.id,
+          customerId: instructorProfile.stripe_customer_id,
+          subscriptionId: subscription.id,
+          packageId: "instructor",
+          status: subscription.status,
+          periodEnd: subscription.currentPeriodEnd
+        });
+      } catch (adminSyncError) {
+        console.error("Instructor cancellation admin sync failed; trying signed-in profile sync", adminSyncError);
+        await syncInstructorPackageWithUserClient({
+          supabase,
+          userId: user.id,
+          customerId: instructorProfile.stripe_customer_id,
+          subscriptionId: subscription.id,
+          packageId: "instructor",
+          status: subscription.status,
+          periodEnd: subscription.currentPeriodEnd
+        });
+      }
 
       return jsonNoStore({ checkoutUrl: `${appUrl}/instructor-dashboard?plan=instructor` });
     } catch (error) {
@@ -141,14 +155,27 @@ export async function POST(request: Request) {
           lda_billing_interval: billingInterval
         }
       });
-      await syncInstructorPackage({
-        userId: user.id,
-        customerId: instructorProfile.stripe_customer_id,
-        subscriptionId: subscription.id,
-        packageId: instructorPackage.id,
-        status: subscription.status,
-        periodEnd: subscription.currentPeriodEnd
-      });
+      try {
+        await syncInstructorPackage({
+          userId: user.id,
+          customerId: instructorProfile.stripe_customer_id,
+          subscriptionId: subscription.id,
+          packageId: instructorPackage.id,
+          status: subscription.status,
+          periodEnd: subscription.currentPeriodEnd
+        });
+      } catch (adminSyncError) {
+        console.error("Instructor subscription package admin sync failed; trying signed-in profile sync", adminSyncError);
+        await syncInstructorPackageWithUserClient({
+          supabase,
+          userId: user.id,
+          customerId: instructorProfile.stripe_customer_id,
+          subscriptionId: subscription.id,
+          packageId: instructorPackage.id,
+          status: subscription.status,
+          periodEnd: subscription.currentPeriodEnd
+        });
+      }
 
       return jsonNoStore({ checkoutUrl: dashboardUrl });
     } catch (error) {
