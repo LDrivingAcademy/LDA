@@ -2,6 +2,8 @@ import { BadgeCheck } from "lucide-react";
 
 import { InstructorPackageCard } from "@/components/instructor-package-card";
 import { PageTopBar } from "@/components/page-top-bar";
+import { getSignedInInstructorPackageId } from "@/lib/account-package-state";
+import { getCurrentInstructorPackage } from "@/lib/instructor-packages";
 import { instructorPackages } from "@/lib/instructor-packages";
 import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 
@@ -10,7 +12,9 @@ type InstructorPlusPageProps = {
 };
 
 export default async function InstructorPlusPage({ searchParams }: InstructorPlusPageProps) {
-  const { backHref, backLabel } = await getPageBackLink(searchParams);
+  const { backHref, backLabel, fromDashboard } = await getPageBackLink(searchParams);
+  const currentPackageId = await getSignedInInstructorPackageId();
+  const currentPackage = getCurrentInstructorPackage(currentPackageId);
 
   return (
     <main className="min-h-screen bg-white text-black">
@@ -25,14 +29,18 @@ export default async function InstructorPlusPage({ searchParams }: InstructorPlu
             Choose your LDA instructor package.
           </h1>
           <p className="mt-6 max-w-4xl text-xl font-medium leading-9 text-neutral-600">
-            Your current package is Instructor. Each tile opens a full breakdown, and paid package
-            buttons are wired to Stripe subscription Checkout once the monthly and yearly Price IDs
-            are added in Vercel.
+            Your current package is {currentPackage.name}. Each tile opens a full breakdown, and
+            paid package changes are applied automatically once Stripe confirms the subscription.
           </p>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-3">
             {instructorPackages.map((instructorPackage) => (
-              <InstructorPackageCard key={instructorPackage.id} instructorPackage={instructorPackage} />
+              <InstructorPackageCard
+                key={instructorPackage.id}
+                instructorPackage={instructorPackage}
+                currentPackageId={currentPackageId}
+                fromDashboard={fromDashboard}
+              />
             ))}
           </div>
         </div>
