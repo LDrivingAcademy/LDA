@@ -135,7 +135,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const successUrl = `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=success&billing=${billingInterval}`;
+  const dashboardUrl = `${appUrl}/instructor-dashboard?subscription=updated`;
+  const successUrl = `${appUrl}/api/subscriptions/complete?session_id={CHECKOUT_SESSION_ID}&role=instructor`;
   const cancelUrl = `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=cancelled&billing=${billingInterval}`;
 
   if (instructorProfile?.stripe_subscription_id) {
@@ -171,7 +172,7 @@ export async function POST(request: Request) {
         }
       }
 
-      return jsonNoStore({ checkoutUrl: successUrl });
+      return jsonNoStore({ checkoutUrl: dashboardUrl });
     } catch (error) {
       console.error("Instructor subscription package change failed", error);
       return jsonNoStore(
@@ -204,7 +205,7 @@ export async function POST(request: Request) {
   try {
     const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
-      headers: {
+    headers: {
         Authorization: `Bearer ${stripeSecret.value}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
