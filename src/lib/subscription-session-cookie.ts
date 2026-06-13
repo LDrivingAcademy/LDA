@@ -7,6 +7,8 @@ export const subscriptionSessionCookieName = "lda_subscription_session";
 
 export type SubscriptionSessionRole = "instructor" | "learner";
 
+const activeSubscriptionStatuses = new Set(["active", "trialing", "past_due"]);
+
 export type SubscriptionSessionPayload =
   | {
       userId: string;
@@ -62,6 +64,15 @@ function isLearnerPackageId(value: unknown): value is LearnerPackageId {
   return value === "learner" || value === "learner-plus" || value === "learner-pro";
 }
 
+function isPaidPackage(payload: SubscriptionSessionPayload) {
+  return (
+    payload.packageId === "instructor-plus" ||
+    payload.packageId === "instructor-pro" ||
+    payload.packageId === "learner-plus" ||
+    payload.packageId === "learner-pro"
+  );
+}
+
 function isSubscriptionSessionPayload(value: unknown): value is SubscriptionSessionPayload {
   if (!value || typeof value !== "object") return false;
 
@@ -115,6 +126,7 @@ export function readSubscriptionSessionToken(token: string | undefined, userId: 
     const payload = JSON.parse(base64UrlDecode(encodedPayload)) as unknown;
     if (!isSubscriptionSessionPayload(payload)) return null;
     if (payload.userId !== userId || payload.role !== role || payload.expiresAt <= Math.floor(Date.now() / 1000)) return null;
+    if (isPaidPackage(payload) && payload.status && !activeSubscriptionStatuses.has(payload.status)) return null;
 
     return payload;
   } catch {
