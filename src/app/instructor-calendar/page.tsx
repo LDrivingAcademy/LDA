@@ -9,10 +9,10 @@ export default async function InstructorCalendarPage() {
 
   if (!hasSupabaseConfig() || !supabase) {
     return (
-      <>
+      <div className="lda-instructor-calendar-page">
         <PageTopBar backHref="/dashboard" backLabel="Back to dashboard" />
         <InstructorCalendarWorkspace instructorName="LDA instructor" />
-      </>
+      </div>
     );
   }
 
@@ -35,9 +35,9 @@ export default async function InstructorCalendarPage() {
   }
 
   return (
-    <>
+    <div className="lda-instructor-calendar-page">
       <PageTopBar backHref="/dashboard" backLabel="Back to dashboard" />
       <InstructorCalendarWorkspace instructorName={profile?.full_name || user.email || "LDA instructor"} instructorEmail={profile?.email ?? user.email} />
-    </>
+    </div>
   );
 }
