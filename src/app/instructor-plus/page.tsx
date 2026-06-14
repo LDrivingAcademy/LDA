@@ -33,7 +33,7 @@ export default async function InstructorPlusPage({ searchParams }: InstructorPlu
           </h1>
           <p className="mt-6 max-w-4xl text-xl font-medium leading-9 text-neutral-600">
             Your current package is {currentPackage.name}. Each tile opens a full breakdown, and
-            paid package changes are applied automatically once Stripe confirms the subscription.
+            existing paid package changes are confirmed before LDA updates your Stripe subscription.
           </p>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-3">
