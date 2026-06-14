@@ -177,8 +177,8 @@ export default async function PupilManagementPage() {
                   When the instructor signs off every progress checklist item, LDA can mark the learner as test-ready, save that evidence, notify the learner, and send them to the official GOV.UK booking route.
                 </p>
               </div>
-              <a href="https://www.gov.uk/book-driving-test" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-black hover:ring-2 hover:ring-brand">
-                GOV.UK driving test <ExternalLink size={16} />
+              <a href="https://www.gov.uk/book-driving-test" target="_blank" rel="noreferrer" className="lda-pill lda-pill-sm shrink-0 whitespace-nowrap">
+                Book test <ExternalLink size={16} />
               </a>
             </div>
             <div className="mt-5 grid gap-3 md:grid-cols-3">
