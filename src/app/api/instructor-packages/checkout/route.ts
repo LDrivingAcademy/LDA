@@ -21,6 +21,7 @@ import { cookies } from "next/headers";
 type InstructorPackageCheckoutRequest = {
   packageId?: InstructorPackageId;
   billingInterval?: BillingInterval;
+  confirmedPlanChange?: boolean;
 };
 
 type StripeCheckoutResponse = {
@@ -138,6 +139,10 @@ export async function POST(request: Request) {
   const stripePrice = getStripePriceId(priceEnvName);
 
   if (instructorPackage.id === "instructor" && savedStripeSubscriptionId) {
+    if (!payload.confirmedPlanChange) {
+      return jsonNoStore({ error: "Confirm this instructor package change before LDA updates your Stripe subscription." }, { status: 409 });
+    }
+
     if (!stripeSecret.value) {
       return jsonNoStore({ error: "Instructor package cancellation is being connected. Please contact LDA support." }, { status: 500 });
     }
@@ -217,6 +222,10 @@ export async function POST(request: Request) {
   const cancelUrl = `${appUrl}/instructor-plus/${instructorPackage.slug}?checkout=cancelled&billing=${billingInterval}`;
 
   if (savedStripeSubscriptionId) {
+    if (!payload.confirmedPlanChange) {
+      return jsonNoStore({ error: "Confirm this instructor package change before LDA updates your Stripe subscription." }, { status: 409 });
+    }
+
     try {
       const subscription = await updateStripeSubscriptionPrice({
         secretKey: stripeSecret.value,
