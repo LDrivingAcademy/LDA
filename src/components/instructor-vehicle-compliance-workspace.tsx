@@ -58,6 +58,11 @@ type VehicleComplianceProfile = {
   tyreCheck: string;
 };
 
+type ComplianceBlocker = {
+  label: string;
+  detail: string;
+};
+
 const initialItems: ComplianceItem[] = [
   {
     id: "adi",
@@ -139,6 +144,15 @@ const quickChecks = [
   { label: "ADI steps", href: "https://www.gov.uk/become-car-driving-instructor" }
 ];
 
+function isPastDate(value: string) {
+  if (!value) return true;
+  const date = new Date(`${value}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return true;
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  return date < today;
+}
+
 export function InstructorVehicleComplianceWorkspace({ instructorName }: { instructorName: string }) {
   const [vehicle, setVehicle] = useState<VehicleProfile>({
     registration: "AB12 LDA",
@@ -180,9 +194,62 @@ export function InstructorVehicleComplianceWorkspace({ instructorName }: { instr
     [items]
   );
 
+  const blockerReasons = useMemo<ComplianceBlocker[]>(() => {
+    const statusBlockers = items
+      .filter((item) => item.status === "missing" || item.status === "review")
+      .map((item) => ({
+        label: item.title,
+        detail: item.status === "missing" ? "Required evidence is missing." : "Evidence is under LDA review."
+      }));
+
+    const expiryBlockers = [
+      { label: "ADI/PDI badge", value: licence.badgeExpiry },
+      { label: "Driving licence", value: licence.drivingLicenceExpiry },
+      { label: "DBS renewal", value: licence.dbsRenewal },
+      { label: "Insurance", value: vehicleCompliance.insuranceExpiry },
+      { label: "MOT", value: vehicleCompliance.motExpiry },
+      { label: "Vehicle tax", value: vehicleCompliance.taxExpiry },
+      { label: "Service and safety check", value: vehicleCompliance.serviceDue },
+      { label: "Tyre and daily safety check", value: vehicleCompliance.tyreCheck }
+    ]
+      .filter((item) => isPastDate(item.value))
+      .map((item) => ({
+        label: item.label,
+        detail: "Expiry date is missing, invalid, or already passed."
+      }));
+
+    const tuitionCoverBlockers =
+      vehicleCompliance.tuitionCover === "Confirmed"
+        ? []
+        : [
+            {
+              label: "Paid tuition cover",
+              detail: "Paid driving tuition insurance must be confirmed before learner bookings reopen."
+            }
+          ];
+
+    return [...statusBlockers, ...expiryBlockers, ...tuitionCoverBlockers];
+  }, [
+    items,
+    licence.badgeExpiry,
+    licence.dbsRenewal,
+    licence.drivingLicenceExpiry,
+    vehicleCompliance.insuranceExpiry,
+    vehicleCompliance.motExpiry,
+    vehicleCompliance.serviceDue,
+    vehicleCompliance.taxExpiry,
+    vehicleCompliance.tuitionCover,
+    vehicleCompliance.tyreCheck
+  ]);
+  const learnerAvailabilityBlocked = blockerReasons.length > 0;
+
   function submitForReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMessage("Vehicle and instructor compliance details submitted for LDA review.");
+    setMessage(
+      learnerAvailabilityBlocked
+        ? "Compliance details submitted. Learner-facing availability stays paused until every blocker is cleared and approved."
+        : "Vehicle and instructor compliance details submitted for LDA review."
+    );
     setItems((current) => current.map((item) => item.status === "missing" ? { ...item, status: "review", note: "Evidence added and awaiting LDA review." } : item));
   }
 
@@ -216,6 +283,37 @@ export function InstructorVehicleComplianceWorkspace({ instructorName }: { instr
               {message}
             </div>
           ) : null}
+
+          <section className={`rounded border p-5 shadow-sm ${learnerAvailabilityBlocked ? "border-red-200 bg-red-50 text-red-900" : "border-emerald-200 bg-emerald-50 text-emerald-900"}`}>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="text-sm font-black uppercase">{learnerAvailabilityBlocked ? "Learner availability paused" : "Learner availability clear"}</div>
+                <h2 className="mt-2 text-2xl font-black">
+                  {learnerAvailabilityBlocked ? "This instructor must not appear for new learner bookings." : "Required compliance evidence is clear for learner-facing availability."}
+                </h2>
+                <p className="mt-2 text-sm font-bold leading-6">
+                  {learnerAvailabilityBlocked
+                    ? "LDA blocks learner-facing search, slot visibility, and new checkout until missing, expired, or under-review evidence is resolved."
+                    : "LDA can keep this instructor visible to learners while the evidence remains valid."}
+                </p>
+              </div>
+              <span className={`rounded-full px-4 py-2 text-xs font-black uppercase ${learnerAvailabilityBlocked ? "bg-red-900 text-white" : "bg-emerald-900 text-white"}`}>
+                {learnerAvailabilityBlocked ? "Blocked" : "Bookable"}
+              </span>
+            </div>
+            {learnerAvailabilityBlocked ? (
+              <div className="mt-4 grid gap-2">
+                {blockerReasons.slice(0, 4).map((blocker) => (
+                  <div key={`${blocker.label}-${blocker.detail}`} className="rounded border border-red-200 bg-white/70 p-3 text-sm font-bold">
+                    <span className="font-black">{blocker.label}:</span> {blocker.detail}
+                  </div>
+                ))}
+                {blockerReasons.length > 4 ? (
+                  <div className="text-sm font-black">+ {blockerReasons.length - 4} more blocker{blockerReasons.length - 4 === 1 ? "" : "s"} to clear.</div>
+                ) : null}
+              </div>
+            ) : null}
+          </section>
 
           <div className="grid gap-3 md:grid-cols-4">
             <Metric icon={CheckCircle2} label="Verified" value={String(counts.verified)} tone="green" />
@@ -402,8 +500,11 @@ export function InstructorVehicleComplianceWorkspace({ instructorName }: { instr
             <TriangleAlert />
             <h2 className="mt-3 text-2xl font-black">Blocker rules</h2>
             <p className="mt-3 text-sm font-bold leading-6">
-              LDA should be able to pause learner-facing availability when required evidence is missing, expired, or under review.
+              LDA automatically pauses learner-facing availability when required evidence is missing, expired, under review, or paid tuition cover is not confirmed.
             </p>
+            <div className="mt-4 rounded border border-red-200 bg-white p-3 text-sm font-black">
+              Current enforcement: {learnerAvailabilityBlocked ? "paused until blockers are cleared." : "clear for learner-facing availability."}
+            </div>
           </section>
         </aside>
       </section>
