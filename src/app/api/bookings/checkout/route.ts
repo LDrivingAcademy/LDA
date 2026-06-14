@@ -12,6 +12,7 @@ import {
 } from "@/lib/security";
 import { applyStripeCheckoutPaymentMethods } from "@/lib/stripe-checkout";
 import { getStripeEnvValue, getStripeSecretKey } from "@/lib/stripe-env";
+import { createClient } from "@/lib/supabase/server";
 
 type CheckoutRequest = {
   bookingId?: string;
@@ -31,6 +32,10 @@ function normalisePaymentPreference(value?: string) {
     .trim()
     .toLowerCase()
     .replaceAll(" ", "_");
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 export async function POST(request: Request) {
@@ -64,6 +69,33 @@ export async function POST(request: Request) {
       },
       { status: 409 }
     );
+  }
+
+  if (instructorId && isUuid(instructorId)) {
+    const supabase = await createClient();
+    if (supabase) {
+      const { data: instructorProfile } = await supabase
+        .from("instructor_profiles")
+        .select("verification_status,compliance_status,learner_availability_paused,learner_availability_pause_reason")
+        .eq("user_id", instructorId)
+        .maybeSingle();
+
+      if (
+        !instructorProfile ||
+        instructorProfile.verification_status !== "approved" ||
+        instructorProfile.compliance_status !== "clear" ||
+        instructorProfile.learner_availability_paused
+      ) {
+        return jsonNoStore(
+          {
+            error:
+              safeText(instructorProfile?.learner_availability_pause_reason, "", 180) ||
+              "This instructor is temporarily unavailable while LDA reviews compliance evidence."
+          },
+          { status: 409 }
+        );
+      }
+    }
   }
 
   if (!stripeSecret.value) {
