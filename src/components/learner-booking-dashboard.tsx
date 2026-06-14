@@ -24,6 +24,8 @@ type Instructor = (typeof demoInstructors)[number] & {
   id: string;
   distanceMiles: number;
   slots: Record<string, string[]>;
+  learnerAvailabilityPaused?: boolean;
+  learnerAvailabilityPauseReason?: string;
   stripeConnectedAccountId?: string;
 };
 
@@ -334,7 +336,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
     const maxDistance = distanceLimit(distance);
     const filtered = instructors.filter((instructor) => {
       const matchesTransmission = transmission === "any" || instructor.transmission === transmission;
-      return matchesTransmission && instructor.price <= maxPrice * 100 && instructor.distanceMiles <= maxDistance;
+      return !instructor.learnerAvailabilityPaused && matchesTransmission && instructor.price <= maxPrice * 100 && instructor.distanceMiles <= maxDistance;
     });
 
     return [...filtered].sort((a, b) => {
@@ -347,7 +349,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   const selectedInstructor = selectedInstructorId ? (filteredInstructors.find((instructor) => instructor.id === selectedInstructorId) ?? null) : null;
   const availableSlots = selectedInstructor?.slots[availabilityDate] ?? [];
   const lessonSummary = selectedInstructor ? `${availabilityDate} at ${selectedSlot || "selected time"} from ${postcode}. ${selectedInstructor.car}, ${selectedInstructor.transmission}.` : "";
-  const canPay = Boolean(selectedInstructor && selectedSlot && postcode);
+  const canPay = Boolean(selectedInstructor && !selectedInstructor.learnerAvailabilityPaused && selectedSlot && postcode);
   const trackingBooking =
     bookingRecords.find((record) => record.status === "upcoming" || record.status === "pending") ??
     bookingRecords[0] ??
@@ -458,15 +460,24 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
       return Promise.reject({ error: "Choose an instructor before checkout." });
     }
 
+    if (selectedInstructor.learnerAvailabilityPaused) {
+      return Promise.reject({
+        error: selectedInstructor.learnerAvailabilityPauseReason || "This instructor is temporarily unavailable while LDA reviews compliance evidence."
+      });
+    }
+
     return fetch("/api/bookings/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       keepalive: false,
       body: JSON.stringify({
         bookingId: reference,
+        instructorId: selectedInstructor.id,
         instructorName: selectedInstructor.name,
         lessonSummary,
         amountPence: selectedInstructor.price,
+        learnerAvailabilityPaused: Boolean(selectedInstructor.learnerAvailabilityPaused),
+        learnerAvailabilityPauseReason: selectedInstructor.learnerAvailabilityPauseReason,
         stripeConnectedAccountId: selectedInstructor.stripeConnectedAccountId,
         learnerEmail,
         paymentPreference: "checkout"
@@ -490,7 +501,15 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
   }
 
   async function startCheckout() {
-    if (!canPay || !selectedInstructor) return;
+    if (!selectedInstructor) return;
+
+    if (selectedInstructor.learnerAvailabilityPaused) {
+      setCheckoutError(selectedInstructor.learnerAvailabilityPauseReason || "This instructor is temporarily unavailable while LDA reviews compliance evidence.");
+      setCheckoutState("error");
+      return;
+    }
+
+    if (!canPay) return;
     setCheckoutState("loading");
     setCheckoutError("");
 
@@ -616,7 +635,7 @@ export function LearnerBookingDashboard({ learnerEmail, learnerPhone }: { learne
                   <div className="mt-4 grid min-h-[116px] grid-rows-4 gap-2 text-sm text-zinc-700">
                     <span className="inline-flex min-w-0 items-center gap-2"><Star size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.rating} rating</span></span>
                     <span className="inline-flex min-w-0 items-center gap-2"><MapPin size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.distanceMiles} miles away</span></span>
-                    <span className="inline-flex min-w-0 items-center gap-2"><CarFront size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.car} Â· {instructor.transmission}</span></span>
+                    <span className="inline-flex min-w-0 items-center gap-2"><CarFront size={16} className="shrink-0 text-brand" /> <span className="truncate">{instructor.car} · {instructor.transmission}</span></span>
                     <span className="inline-flex min-w-0 items-center gap-2"><Clock3 size={16} className="shrink-0 text-brand" /> <span className="truncate">Next: {instructor.next}</span></span>
                   </div>
                   <div className="mt-3 min-h-[84px] rounded border border-zinc-200 bg-zinc-50 p-3 text-xs font-bold leading-5 text-zinc-700">
