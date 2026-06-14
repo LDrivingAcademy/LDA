@@ -190,6 +190,9 @@ body {
 @media (min-width: 1024px) {
   .lda-instructor-calendar-page main > section:nth-of-type(2) > aside {
     align-self: stretch;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 100%;
   }
 
   .lda-instructor-calendar-page main > section:nth-of-type(2) > aside > section:first-child > div:nth-child(2) {
@@ -200,12 +203,15 @@ body {
 
   .lda-instructor-calendar-page main > section:nth-of-type(2) > aside > section:nth-child(2) {
     display: flex;
+    height: 100%;
     min-height: 0;
-    max-height: 390px;
+    max-height: none;
     flex-direction: column;
+    overflow: hidden;
   }
 
   .lda-instructor-calendar-page main > section:nth-of-type(2) > aside > section:nth-child(2) > div:last-child {
+    flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     padding-right: 0.25rem;
