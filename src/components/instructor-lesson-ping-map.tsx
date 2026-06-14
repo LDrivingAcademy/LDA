@@ -24,6 +24,7 @@ const learnerPickup: Point = {
   lng: -0.1995,
   label: "Learner pickup - EN5 5XY"
 };
+const learnerPickupAddress = "EN5 5XY, Barnet";
 const instructorBase: Point = {
   lat: 51.6152,
   lng: -0.1765,
@@ -92,6 +93,28 @@ function distanceMiles(a: Pick<Point, "lat" | "lng">, b: Pick<Point, "lat" | "ln
     Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
 
   return 2 * earthMiles * Math.asin(Math.sqrt(h));
+}
+
+function mapsHandoffUrls(destination: string) {
+  const encodedDestination = encodeURIComponent(destination);
+
+  return {
+    apple: `https://maps.apple.com/?daddr=${encodedDestination}&dirflg=d`,
+    google: `https://www.google.com/maps/dir/?api=1&destination=${encodedDestination}&travelmode=driving`,
+    android: `geo:0,0?q=${encodedDestination}`
+  };
+}
+
+function preferredMapsUrl(destination: string) {
+  const urls = mapsHandoffUrls(destination);
+  const userAgent = window.navigator.userAgent;
+  const isAndroid = /Android/i.test(userAgent);
+  const isAppleMobile = /iPhone|iPad|iPod/i.test(userAgent);
+  const isTouchMac = /Macintosh/i.test(userAgent) && window.navigator.maxTouchPoints > 1;
+
+  if (isAndroid) return urls.android;
+  if (isAppleMobile || isTouchMac) return urls.apple;
+  return urls.google;
 }
 
 function learnerPingIcon(isActive: boolean) {
@@ -277,6 +300,22 @@ export function InstructorLessonPingMap() {
     mapRef.current.fitBounds(bounds, 72);
   }
 
+  function startRouteToLearner() {
+    if (!isPingActive) return;
+
+    setIsEnRoute(true);
+
+    const urls = mapsHandoffUrls(learnerPickupAddress);
+    const url = preferredMapsUrl(learnerPickupAddress);
+    window.location.href = url;
+
+    window.setTimeout(() => {
+      if (document.visibilityState === "visible" && url !== urls.google) {
+        window.open(urls.google, "_blank", "noopener,noreferrer");
+      }
+    }, 900);
+  }
+
   return (
     <article className="rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -286,7 +325,7 @@ export function InstructorLessonPingMap() {
           </div>
           <h2 className="mt-4 text-2xl font-black">Next lesson location alert.</h2>
           <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-zinc-600">
-            The learner pickup ping unlocks {PING_WINDOW_MINUTES} minutes before the lesson. Start route tracking when you are heading out, and use the map control to re-centre the route if you move away from it.
+            The learner pickup ping unlocks {PING_WINDOW_MINUTES} minutes before the lesson. Start route tracking when you are heading out, and LDA will open your map app with the learner pickup ready for driving directions.
           </p>
         </div>
         <div className="rounded border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-black text-zinc-800">
@@ -314,20 +353,23 @@ export function InstructorLessonPingMap() {
           </div>
           <div className="rounded border border-zinc-200 bg-zinc-50 p-4">
             <div className="flex items-center gap-2 text-sm font-bold text-zinc-500"><MapPin size={16} /> Learner pickup</div>
-            <div className="mt-1 font-black">EN5 5XY, Barnet</div>
+            <div className="mt-1 font-black">{learnerPickupAddress}</div>
           </div>
           <div className="rounded border border-zinc-200 bg-zinc-50 p-4">
             <div className="flex items-center gap-2 text-sm font-bold text-zinc-500"><CarFront size={16} /> Route estimate</div>
-            <div className="mt-1 font-black">{milesAway.toFixed(1)} miles Â· {etaMinutes} min</div>
+            <div className="mt-1 font-black">{milesAway.toFixed(1)} miles · {etaMinutes} min</div>
           </div>
           <button
             type="button"
             disabled={!isPingActive}
-            onClick={() => setIsEnRoute(true)}
+            onClick={startRouteToLearner}
             className="lda-pill w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Navigation size={18} /> {isEnRoute ? "Tracking en route" : "Start heading to learner"}
+            <Navigation size={18} /> {isEnRoute ? "Open maps again" : "Start route to learner"}
           </button>
+          <p className="text-xs font-bold leading-5 text-zinc-500">
+            Opens Apple Maps, Google Maps, or your device map chooser when available. The pickup address is passed in automatically.
+          </p>
         </div>
       </div>
     </article>
