@@ -157,12 +157,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       : instructorPackageId === "instructor-plus"
         ? { label: "Upgrade to Pro", href: "/instructor-plus?from=dashboard" }
         : null;
-  const statusRequestHref = `mailto:info@ldrivingacademy.co.uk?subject=${encodeURIComponent(
-    "Instructor verification status request"
-  )}&body=${encodeURIComponent(
-    `Hello LDA,\n\nPlease can you send me a status update on my instructor verification process.\n\nAccount: ${profile?.email ?? user.email ?? "Unknown"}\nCurrent status: ${verificationStatus}\n\nThank you.`
-  )}`;
-
   if (!isInstructor && !hasCompletedLearnerEligibility(learnerProfile)) {
     redirect("/auth/verify?role=learner&message=Complete learner eligibility before booking. Your date of birth must show you are 17 or over, and you must accept the terms and provisional licence checks.");
   }
@@ -261,8 +255,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <p className="mt-2 text-zinc-600">
               Current status: <span className="font-black">{verificationStatus}</span>
             </p>
-            <Link href={statusRequestHref} className="lda-pill lda-pill-sm mt-auto self-start">
-              Request update <ArrowRight size={16} />
+            <Link href="/instructor-verification?from=dashboard" className="lda-pill lda-pill-sm mt-auto self-start">
+              View <ArrowRight size={16} />
             </Link>
           </article>
         ) : (
