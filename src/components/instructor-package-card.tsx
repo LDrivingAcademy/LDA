@@ -51,6 +51,7 @@ export function InstructorPackageCard({ instructorPackage, currentPackageId = "i
       <div className="mt-7">
         <InstructorPackageCheckoutButton
           packageId={instructorPackage.id}
+          currentPackageId={currentPackageId}
           billingInterval="monthly"
           label={actionLabel}
           disabled={isCurrent}
