@@ -21,6 +21,9 @@ type LearnerPackageDetailPageProps = {
   }>;
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export function generateStaticParams() {
   return learnerPackages.map((learnerPackage) => ({
     packageId: learnerPackage.slug
@@ -80,6 +83,7 @@ export default async function LearnerPackageDetailPage({ params, searchParams }:
               <div className="mt-5">
                 <LearnerPackageCheckoutButton
                   packageId={learnerPackage.id}
+                  currentPackageId={currentPackageId}
                   billingInterval="monthly"
                   label={isCurrentPlan ? "Current plan" : `${actionLabel} monthly`}
                   disabled={isCurrentPlan}
@@ -95,6 +99,7 @@ export default async function LearnerPackageDetailPage({ params, searchParams }:
               <div className="mt-5">
                 <LearnerPackageCheckoutButton
                   packageId={learnerPackage.id}
+                  currentPackageId={currentPackageId}
                   billingInterval="yearly"
                   label={isCurrentPlan ? "Current plan" : `${actionLabel} yearly`}
                   disabled={isCurrentPlan}
