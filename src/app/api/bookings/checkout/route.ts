@@ -15,9 +15,12 @@ import { getStripeEnvValue, getStripeSecretKey } from "@/lib/stripe-env";
 
 type CheckoutRequest = {
   bookingId?: string;
+  instructorId?: string;
   instructorName?: string;
   lessonSummary?: string;
   amountPence?: number;
+  learnerAvailabilityPaused?: boolean;
+  learnerAvailabilityPauseReason?: string;
   stripeConnectedAccountId?: string;
   paymentPreference?: string;
   learnerEmail?: string | null;
@@ -45,11 +48,23 @@ export async function POST(request: Request) {
   const currency = safeCurrency(getStripeEnvValue("STRIPE_DEFAULT_CURRENCY").value, "gbp");
   const amountPence = safeAmountPence(body.amountPence, 4200, 1000, 30000);
   const instructorName = safeText(body.instructorName, "your driving instructor", 80);
+  const instructorId = safeText(body.instructorId, "", 80);
   const bookingId = safeText(body.bookingId, "demo-booking", 80);
   const paymentPreference = normalisePaymentPreference(body.paymentPreference);
   const learnerEmail = safeEmail(body.learnerEmail);
   const commissionPercent = Math.min(Math.max(Number(process.env.LDA_PLATFORM_COMMISSION_PERCENT ?? 10), 0), 30);
   const applicationFeeAmount = Math.round(amountPence * (commissionPercent / 100));
+
+  if (body.learnerAvailabilityPaused) {
+    return jsonNoStore(
+      {
+        error:
+          safeText(body.learnerAvailabilityPauseReason, "", 180) ||
+          "This instructor is temporarily unavailable while LDA reviews compliance evidence."
+      },
+      { status: 409 }
+    );
+  }
 
   if (!stripeSecret.value) {
     return jsonNoStore({
@@ -64,10 +79,12 @@ export async function POST(request: Request) {
     success_url: `${appUrl}/learner-dashboard?payment=success&booking=${encodeURIComponent(bookingId)}`,
     cancel_url: `${appUrl}/learner-dashboard?payment=cancelled&booking=${encodeURIComponent(bookingId)}`,
     "metadata[booking_id]": bookingId,
+    "metadata[instructor_id]": instructorId,
     "metadata[lda_protected_booking]": "true",
     "metadata[platform_policy_version]": "anti_circumvention_launch",
     "metadata[payment_preference]": paymentPreference,
     "payment_intent_data[metadata][booking_id]": bookingId,
+    "payment_intent_data[metadata][instructor_id]": instructorId,
     "payment_intent_data[metadata][lda_protected_booking]": "true",
     "payment_intent_data[metadata][platform_policy_version]": "anti_circumvention_launch",
     "line_items[0][quantity]": "1",
