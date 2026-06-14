@@ -61,6 +61,7 @@ export function LearnerPackageCard({ learnerPackage, currentPackageId = "learner
         ) : (
           <LearnerPackageCheckoutButton
             packageId={learnerPackage.id}
+            currentPackageId={currentPackageId}
             billingInterval="monthly"
             label={actionLabel}
             compact
