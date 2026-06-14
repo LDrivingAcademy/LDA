@@ -18,6 +18,9 @@ type InstructorPackageDetailPageProps = {
   searchParams: Promise<{ checkout?: string; billing?: BillingInterval; from?: string }>;
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export function generateStaticParams() {
   return instructorPackages.map((instructorPackage) => ({ packageId: instructorPackage.slug }));
 }
@@ -103,6 +106,7 @@ export default async function InstructorPackageDetailPage({
                   <div className="mt-4">
                     <InstructorPackageCheckoutButton
                       packageId={instructorPackage.id}
+                      currentPackageId={currentPackageId}
                       billingInterval="monthly"
                       label={getInstructorPackageActionLabel(instructorPackage.id, currentPackageId)}
                       disabled={isCurrent}
@@ -120,6 +124,7 @@ export default async function InstructorPackageDetailPage({
                   <div className="mt-4">
                     <InstructorPackageCheckoutButton
                       packageId={instructorPackage.id}
+                      currentPackageId={currentPackageId}
                       billingInterval="yearly"
                       label={getInstructorPackageActionLabel(instructorPackage.id, currentPackageId)}
                       disabled={isCurrent}
