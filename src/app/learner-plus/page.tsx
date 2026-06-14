@@ -27,7 +27,7 @@ export default async function LearnerPlusPage({ searchParams }: LearnerPlusPageP
           </div>
           <h1 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">Choose your LDA learner package.</h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-zinc-700">
-            Your current package is {currentPackage.name}. Each tile opens a full breakdown, and paid package changes are applied automatically once Stripe confirms the subscription.
+            Your current package is {currentPackage.name}. Each tile opens a full breakdown, and existing paid package changes are confirmed before LDA updates your Stripe subscription.
           </p>
           <div className="mt-7 grid items-stretch gap-4 lg:grid-cols-3">
             {learnerPackages.map((learnerPackage) => (
