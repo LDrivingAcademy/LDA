@@ -266,7 +266,7 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
               <DetailRow label="Vehicle" value={[instructorProfile?.car_make, instructorProfile?.car_model].filter(Boolean).join(" ")} />
               <DetailRow
                 label="Hourly rate"
-                value={typeof instructorProfile?.hourly_rate_pence === "number" ? `\u00a3${(instructorProfile.hourly_rate_pence / 100).toFixed(2)}/hr` : null}
+                value={typeof instructorProfile?.hourly_rate_pence === "number" ? `${String.fromCharCode(163)}${(instructorProfile.hourly_rate_pence / 100).toFixed(2)}/hr` : null}
               />
             </div>
           </section>
