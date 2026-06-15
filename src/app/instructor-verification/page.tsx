@@ -4,7 +4,7 @@ import { ArrowRight, CheckCircle2, Clock3, FileCheck2, FileWarning, Mail, Shield
 
 import { PageTopBar } from "@/components/page-top-bar";
 import { uploadInstructorVerificationDocument } from "@/app/instructor-verification/actions";
-import { getInstructorVerificationDisplay } from "@/lib/instructor-verification-status";
+import { getInstructorVerificationDisplay, getInstructorVerificationDisplayFromEvidence } from "@/lib/instructor-verification-status";
 import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -152,8 +152,11 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
     redirect("/auth/login?role=instructor");
   }
 
-  const verificationDisplay = getInstructorVerificationDisplay(instructorProfile?.verification_status);
   const uploadedDocuments = (documents ?? []) as DocumentRow[];
+  const verificationDisplay = getInstructorVerificationDisplayFromEvidence(
+    instructorProfile?.verification_status,
+    uploadedDocuments.map((document) => document.status)
+  );
   const documentLinks = await getDocumentLinks(supabase, uploadedDocuments);
   const requiredUploadedCount = requiredDocuments.filter((document) => getLatestDocument(uploadedDocuments, document.type)).length;
   const accountEmail = profile?.email ?? user.email ?? "Unknown";
@@ -263,7 +266,7 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
               <DetailRow label="Vehicle" value={[instructorProfile?.car_make, instructorProfile?.car_model].filter(Boolean).join(" ")} />
               <DetailRow
                 label="Hourly rate"
-                value={typeof instructorProfile?.hourly_rate_pence === "number" ? `£${(instructorProfile.hourly_rate_pence / 100).toFixed(2)}/hr` : null}
+                value={typeof instructorProfile?.hourly_rate_pence === "number" ? `\u00a3${(instructorProfile.hourly_rate_pence / 100).toFixed(2)}/hr` : null}
               />
             </div>
           </section>
@@ -320,7 +323,7 @@ function DocumentStatusRow({
           <p className="mt-2 text-sm font-semibold leading-6 text-zinc-600">{detail}</p>
           {document ? (
             <p className="mt-2 text-sm font-bold leading-6 text-zinc-800">
-              {fileNameFromPath(document.storage_path)} · Uploaded {formatDate(document.created_at)}
+              {fileNameFromPath(document.storage_path)} &middot; Uploaded {formatDate(document.created_at)}
             </p>
           ) : null}
         </div>
