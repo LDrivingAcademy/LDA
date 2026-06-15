@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, CheckCircle2, Clock3, FileCheck2, FileWarning, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, FileCheck2, FileWarning, Mail, ShieldCheck, Upload } from "lucide-react";
 
 import { PageTopBar } from "@/components/page-top-bar";
+import { uploadInstructorVerificationDocument } from "@/app/instructor-verification/actions";
+import { getInstructorVerificationDisplay } from "@/lib/instructor-verification-status";
 import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -65,12 +67,6 @@ const supportingDocuments: Array<{ type: DocumentType; label: string; detail: st
   }
 ];
 
-function titleCaseStatus(status?: string | null) {
-  return String(status || "not started")
-    .replace(/[_-]+/g, " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
 function formatDate(value?: string | null) {
   if (!value) {
     return "Not reviewed yet";
@@ -91,22 +87,6 @@ function getLatestDocument(documents: DocumentRow[], type: DocumentType) {
   return documents.find((document) => document.document_type === type) ?? null;
 }
 
-function getStatusTone(status?: string | null) {
-  if (status === "approved") {
-    return "border-emerald-200 bg-emerald-50 text-emerald-800";
-  }
-
-  if (status === "rejected") {
-    return "border-red-200 bg-red-50 text-brand";
-  }
-
-  if (status === "pending") {
-    return "border-amber-200 bg-amber-50 text-amber-900";
-  }
-
-  return "border-zinc-200 bg-zinc-50 text-zinc-700";
-}
-
 async function getDocumentLinks(supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>, documents: DocumentRow[]) {
   const entries = await Promise.all(
     documents.map(async (document) => {
@@ -123,7 +103,9 @@ async function getDocumentLinks(supabase: NonNullable<Awaited<ReturnType<typeof 
 }
 
 export default async function InstructorVerificationPage({ searchParams }: InstructorVerificationPageProps) {
-  const { backHref, backLabel } = await getPageBackLink(searchParams);
+  const resolvedSearchParams = await searchParams;
+  const { backHref, backLabel } = await getPageBackLink(Promise.resolve(resolvedSearchParams));
+  const flashMessage = Array.isArray(resolvedSearchParams?.message) ? resolvedSearchParams.message[0] : resolvedSearchParams?.message;
   const supabase = await createClient();
 
   if (!hasSupabaseConfig() || !supabase) {
@@ -170,7 +152,7 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
     redirect("/auth/login?role=instructor");
   }
 
-  const verificationStatus = instructorProfile?.verification_status ?? "not started";
+  const verificationDisplay = getInstructorVerificationDisplay(instructorProfile?.verification_status);
   const uploadedDocuments = (documents ?? []) as DocumentRow[];
   const documentLinks = await getDocumentLinks(supabase, uploadedDocuments);
   const requiredUploadedCount = requiredDocuments.filter((document) => getLatestDocument(uploadedDocuments, document.type)).length;
@@ -178,7 +160,7 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
   const statusRequestHref = `mailto:info@ldrivingacademy.co.uk?subject=${encodeURIComponent(
     "Instructor verification status request"
   )}&body=${encodeURIComponent(
-    `Hello LDA,\n\nPlease can you send me a status update on my instructor verification process.\n\nAccount: ${accountEmail}\nCurrent status: ${verificationStatus}\n\nThank you.`
+    `Hello LDA,\n\nPlease can you send me a status update on my instructor verification process.\n\nAccount: ${accountEmail}\nCurrent status: ${verificationDisplay.label}\n\nThank you.`
   )}`;
 
   return (
@@ -198,6 +180,12 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
 
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
         <div className="grid gap-5">
+          {flashMessage ? (
+            <div className="rounded border border-emerald-200 bg-emerald-50 p-4 text-sm font-black text-emerald-800">
+              {flashMessage}
+            </div>
+          ) : null}
+
           <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -205,11 +193,11 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
                 <h2 className="mt-4 text-2xl font-black">Current status</h2>
                 <p className="mt-2 text-base font-semibold leading-7 text-zinc-600">
                   {profile?.full_name || "Instructor account"} is currently marked as{" "}
-                  <span className="font-black text-black">{titleCaseStatus(verificationStatus)}</span>.
+                  <span className="font-black text-black">{verificationDisplay.label}</span>.
                 </p>
               </div>
-              <span className={`rounded-full border px-4 py-2 text-xs font-black uppercase ${getStatusTone(verificationStatus)}`}>
-                {titleCaseStatus(verificationStatus)}
+              <span className={`rounded-full border px-4 py-2 text-xs font-black uppercase ${verificationDisplay.toneClass}`}>
+                {verificationDisplay.label}
               </span>
             </div>
             {instructorProfile?.rejection_reason ? (
@@ -231,6 +219,7 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
                 return (
                   <DocumentStatusRow
                     key={document.type}
+                    documentType={document.type}
                     label={document.label}
                     detail={document.detail}
                     document={uploaded}
@@ -250,6 +239,7 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
                 return (
                   <DocumentStatusRow
                     key={document.type}
+                    documentType={document.type}
                     label={document.label}
                     detail={document.detail}
                     document={uploaded}
@@ -265,6 +255,7 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
           <section className="rounded border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
             <h2 className="text-xl font-black">Profile details</h2>
             <div className="mt-4 grid gap-3 text-sm font-bold leading-6 text-zinc-700">
+              <DetailRow label="Verification status" value={verificationDisplay.label} />
               <DetailRow label="ADI/PDI status" value={instructorProfile?.adi_pdi_status} />
               <DetailRow label="Badge number" value={instructorProfile?.adi_pdi_number} />
               <DetailRow label="Base postcode" value={instructorProfile?.base_postcode} />
@@ -305,15 +296,18 @@ function DetailRow({ label, value }: { label: string; value?: string | number | 
 function DocumentStatusRow({
   label,
   detail,
+  documentType,
   document,
   signedUrl
 }: {
   label: string;
   detail: string;
+  documentType: DocumentType;
   document: DocumentRow | null;
   signedUrl?: string | null;
 }) {
   const isUploaded = Boolean(document);
+  const documentDisplay = getInstructorVerificationDisplay(document?.status);
 
   return (
     <article className="rounded border border-zinc-200 bg-white p-4">
@@ -330,8 +324,8 @@ function DocumentStatusRow({
             </p>
           ) : null}
         </div>
-        <span className={`rounded-full border px-3 py-1 text-xs font-black uppercase ${document ? getStatusTone(document.status) : "border-amber-200 bg-amber-50 text-amber-900"}`}>
-          {document ? titleCaseStatus(document.status) : "Missing"}
+        <span className={`rounded-full border px-3 py-1 text-xs font-black uppercase ${document ? documentDisplay.toneClass : "border-amber-200 bg-amber-50 text-amber-900"}`}>
+          {document ? documentDisplay.label : "Missing"}
         </span>
       </div>
       {document ? (
@@ -346,6 +340,28 @@ function DocumentStatusRow({
           ) : null}
         </div>
       ) : null}
+      <form action={uploadInstructorVerificationDocument} className="mt-4 rounded border border-zinc-200 bg-zinc-50 p-3">
+        <input type="hidden" name="documentType" value={documentType} />
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-zinc-300 bg-white px-3 py-1 text-xs font-black uppercase text-zinc-800 hover:ring-2 hover:ring-brand">
+            <Upload size={14} />
+            Choose photo or PDF
+            <input
+              name="documentFile"
+              type="file"
+              accept="application/pdf,image/jpeg,image/jpg,image/png,image/webp,image/heic,image/heif"
+              className="sr-only"
+              required
+            />
+          </label>
+          <button type="submit" className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-black uppercase text-brand hover:ring-2 hover:ring-brand">
+            {isUploaded ? "Upload replacement" : "Upload document"}
+          </button>
+        </div>
+        <p className="mt-2 text-xs font-bold leading-5 text-zinc-500">
+          Upload a photo or PDF under 8MB. On phones and tablets, the file picker can use the camera where the device supports it.
+        </p>
+      </form>
     </article>
   );
 }
