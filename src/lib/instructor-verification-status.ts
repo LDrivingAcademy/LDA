@@ -9,10 +9,14 @@ function titleCaseStatus(status: string) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-export function getInstructorVerificationDisplay(status?: string | null): InstructorVerificationDisplay {
-  const normalised = String(status || "not_started").trim().toLowerCase().replace(/\s+/g, "_");
+function normaliseVerificationStatus(status?: string | null) {
+  return String(status || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+}
 
-  if (normalised === "draft" || normalised === "not_started" || normalised === "not-started") {
+export function getInstructorVerificationDisplay(status?: string | null): InstructorVerificationDisplay {
+  const normalised = normaliseVerificationStatus(status) || "not_started";
+
+  if (normalised === "draft" || normalised === "not_started") {
     return {
       label: "Not started",
       toneClass: "border-zinc-200 bg-zinc-50 text-zinc-700"
@@ -26,7 +30,7 @@ export function getInstructorVerificationDisplay(status?: string | null): Instru
     };
   }
 
-  if (normalised === "in_progress" || normalised === "in-progress") {
+  if (normalised === "in_progress") {
     return {
       label: "In progress",
       toneClass: "border-sky-200 bg-sky-50 text-sky-800"
@@ -51,4 +55,18 @@ export function getInstructorVerificationDisplay(status?: string | null): Instru
     label: titleCaseStatus(normalised),
     toneClass: "border-zinc-200 bg-zinc-50 text-zinc-700"
   };
+}
+
+export function getInstructorVerificationDisplayFromEvidence(
+  profileStatus?: string | null,
+  documentStatuses: Array<string | null | undefined> = []
+): InstructorVerificationDisplay {
+  const normalisedProfile = normaliseVerificationStatus(profileStatus);
+  const hasUploadedDocuments = documentStatuses.some((status) => Boolean(normaliseVerificationStatus(status)));
+
+  if ((!normalisedProfile || normalisedProfile === "draft" || normalisedProfile === "not_started") && hasUploadedDocuments) {
+    return getInstructorVerificationDisplay("pending");
+  }
+
+  return getInstructorVerificationDisplay(profileStatus);
 }
