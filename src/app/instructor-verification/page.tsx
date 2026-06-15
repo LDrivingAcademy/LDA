@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, CheckCircle2, Clock3, FileCheck2, FileWarning, Mail, ShieldCheck, Upload } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3, FileCheck2, FileWarning, Mail, ShieldCheck } from "lucide-react";
 
 import { PageTopBar } from "@/components/page-top-bar";
-import { uploadInstructorVerificationDocument } from "@/app/instructor-verification/actions";
+import { InstructorVerificationUploadForm } from "@/components/instructor-verification-upload-form";
 import { getInstructorVerificationDisplay, getInstructorVerificationDisplayFromEvidence } from "@/lib/instructor-verification-status";
 import { getPageBackLink, type PageSourceSearchParams } from "@/lib/page-back-link";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
@@ -104,8 +104,10 @@ async function getDocumentLinks(supabase: NonNullable<Awaited<ReturnType<typeof 
 
 export default async function InstructorVerificationPage({ searchParams }: InstructorVerificationPageProps) {
   const resolvedSearchParams = await searchParams;
+  const pageSearchParams = resolvedSearchParams as Record<string, string | string[] | undefined> | undefined;
   const { backHref, backLabel } = await getPageBackLink(Promise.resolve(resolvedSearchParams));
-  const flashMessage = Array.isArray(resolvedSearchParams?.message) ? resolvedSearchParams.message[0] : resolvedSearchParams?.message;
+  const flashMessage = Array.isArray(pageSearchParams?.message) ? pageSearchParams.message[0] : pageSearchParams?.message;
+  const uploadedDocumentType = Array.isArray(pageSearchParams?.uploaded) ? pageSearchParams.uploaded[0] : pageSearchParams?.uploaded;
   const supabase = await createClient();
 
   if (!hasSupabaseConfig() || !supabase) {
@@ -227,6 +229,7 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
                     detail={document.detail}
                     document={uploaded}
                     signedUrl={uploaded ? documentLinks.get(uploaded.id) ?? null : null}
+                    uploadedRecently={uploadedDocumentType === document.type}
                   />
                 );
               })}
@@ -247,6 +250,7 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
                     detail={document.detail}
                     document={uploaded}
                     signedUrl={uploaded ? documentLinks.get(uploaded.id) ?? null : null}
+                    uploadedRecently={uploadedDocumentType === document.type}
                   />
                 );
               })}
@@ -301,13 +305,15 @@ function DocumentStatusRow({
   detail,
   documentType,
   document,
-  signedUrl
+  signedUrl,
+  uploadedRecently = false
 }: {
   label: string;
   detail: string;
   documentType: DocumentType;
   document: DocumentRow | null;
   signedUrl?: string | null;
+  uploadedRecently?: boolean;
 }) {
   const isUploaded = Boolean(document);
   const documentDisplay = getInstructorVerificationDisplay(document?.status);
@@ -343,28 +349,7 @@ function DocumentStatusRow({
           ) : null}
         </div>
       ) : null}
-      <form action={uploadInstructorVerificationDocument} className="mt-4 rounded border border-zinc-200 bg-zinc-50 p-3">
-        <input type="hidden" name="documentType" value={documentType} />
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-zinc-300 bg-white px-3 py-1 text-xs font-black uppercase text-zinc-800 hover:ring-2 hover:ring-brand">
-            <Upload size={14} />
-            Choose photo or PDF
-            <input
-              name="documentFile"
-              type="file"
-              accept="application/pdf,image/jpeg,image/jpg,image/png,image/webp,image/heic,image/heif"
-              className="sr-only"
-              required
-            />
-          </label>
-          <button type="submit" className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-black uppercase text-brand hover:ring-2 hover:ring-brand">
-            {isUploaded ? "Upload replacement" : "Upload document"}
-          </button>
-        </div>
-        <p className="mt-2 text-xs font-bold leading-5 text-zinc-500">
-          Upload a photo or PDF under 8MB. On phones and tablets, the file picker can use the camera where the device supports it.
-        </p>
-      </form>
+      <InstructorVerificationUploadForm documentType={documentType} isUploaded={isUploaded} uploadedRecently={uploadedRecently} />
     </article>
   );
 }
