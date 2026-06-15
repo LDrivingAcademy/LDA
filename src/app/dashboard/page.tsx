@@ -12,7 +12,7 @@ import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 import { type InstructorPackageId } from "@/lib/instructor-packages";
-import { getInstructorVerificationDisplay } from "@/lib/instructor-verification-status";
+import { getInstructorVerificationDisplayFromEvidence } from "@/lib/instructor-verification-status";
 import { type LearnerPackageId } from "@/lib/learner-packages";
 import { readSubscriptionSessionToken, subscriptionSessionCookieName } from "@/lib/subscription-session-cookie";
 
@@ -101,7 +101,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     redirect("/auth/login?role=learner");
   }
 
-  const [{ data: profile }, { data: roles }, { data: instructorProfile }, { data: learnerProfile }] = await Promise.all([
+  const [{ data: profile }, { data: roles }, { data: instructorProfile }, { data: learnerProfile }, { data: instructorDocuments }] = await Promise.all([
     supabase.from("profiles").select("full_name,email,phone").eq("id", user.id).maybeSingle(),
     supabase.from("account_roles").select("role").eq("user_id", user.id),
     supabase.from("instructor_profiles").select("verification_status,hourly_rate_pence,areas_covered,instructor_package").eq("user_id", user.id).maybeSingle(),
@@ -109,7 +109,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       .from("learner_profiles")
       .select("date_of_birth,provisional_licence_confirmed_at,terms_accepted_at,learner_package,learner_plus_active,learner_plus_started_at,learner_plus_expires_at")
       .eq("user_id", user.id)
-      .maybeSingle()
+      .maybeSingle(),
+    supabase
+      .from("instructor_documents")
+      .select("status,created_at")
+      .eq("instructor_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(10)
   ]);
 
   const roleLabels = roles?.map((role) => role.role).join(", ") || "learner";
@@ -131,7 +137,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     Boolean(learnerProfile?.learner_plus_active) &&
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
   const displayName = profile?.full_name || user.email || "Learner";
-  const verificationStatus = getInstructorVerificationDisplay(instructorProfile?.verification_status);
+  const verificationStatus = getInstructorVerificationDisplayFromEvidence(
+    instructorProfile?.verification_status,
+    (instructorDocuments ?? []).map((document) => document.status)
+  );
   const learnerPackageId = (getLearnerPlanOverride(subscriptionReturnPlan) || (!isInstructor ? getLearnerPlanOverride(subscriptionSession?.packageId) : null) || learnerProfile?.learner_package || (hasLearnerPlus ? "learner-plus" : "learner")) as LearnerPackageId;
   const learnerPackageLabel =
     learnerPackageId === "learner-pro"
