@@ -42,6 +42,10 @@ function uploadRedirect(message: string): never {
   redirect(`/instructor-verification?from=dashboard&message=${encodeURIComponent(message)}`);
 }
 
+function uploadSuccessRedirect(message: string, documentType: VerificationDocumentType): never {
+  redirect(`/instructor-verification?from=dashboard&uploaded=${encodeURIComponent(documentType)}&message=${encodeURIComponent(message)}`);
+}
+
 function getUploadedFile(formData: FormData): UploadedFileLike | null {
   const value = formData.get("documentFile");
 
@@ -137,5 +141,5 @@ export async function uploadInstructorVerificationDocument(formData: FormData) {
   revalidatePath("/dashboard");
   revalidatePath("/instructor-dashboard");
   revalidatePath("/instructor-verification");
-  uploadRedirect("Document uploaded. LDA can now review it.");
+  uploadSuccessRedirect("Document uploaded. LDA can now review it.", documentType);
 }
