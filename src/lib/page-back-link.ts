@@ -1,5 +1,6 @@
 type PageSourceParams = {
   from?: string | string[];
+  message?: string | string[];
 };
 
 export type PageSourceSearchParams = Promise<PageSourceParams | undefined> | undefined;
