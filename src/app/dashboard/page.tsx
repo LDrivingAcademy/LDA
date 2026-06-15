@@ -12,6 +12,7 @@ import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
 import { type InstructorPackageId } from "@/lib/instructor-packages";
+import { getInstructorVerificationDisplay } from "@/lib/instructor-verification-status";
 import { type LearnerPackageId } from "@/lib/learner-packages";
 import { readSubscriptionSessionToken, subscriptionSessionCookieName } from "@/lib/subscription-session-cookie";
 
@@ -130,7 +131,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     Boolean(learnerProfile?.learner_plus_active) &&
     (!learnerProfile?.learner_plus_expires_at || new Date(learnerProfile.learner_plus_expires_at).getTime() > Date.now());
   const displayName = profile?.full_name || user.email || "Learner";
-  const verificationStatus = instructorProfile?.verification_status ?? "not started";
+  const verificationStatus = getInstructorVerificationDisplay(instructorProfile?.verification_status);
   const learnerPackageId = (getLearnerPlanOverride(subscriptionReturnPlan) || (!isInstructor ? getLearnerPlanOverride(subscriptionSession?.packageId) : null) || learnerProfile?.learner_package || (hasLearnerPlus ? "learner-plus" : "learner")) as LearnerPackageId;
   const learnerPackageLabel =
     learnerPackageId === "learner-pro"
@@ -253,7 +254,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <FileCheck2 className="text-brand" />
             <h2 className="mt-4 text-xl font-black">Verification status</h2>
             <p className="mt-2 text-zinc-600">
-              Current status: <span className="font-black">{verificationStatus}</span>
+              Current status: <span className="font-black">{verificationStatus.label}</span>
             </p>
             <Link href="/instructor-verification?from=dashboard" className="lda-pill lda-pill-sm mt-auto self-start">
               View <ArrowRight size={16} />
