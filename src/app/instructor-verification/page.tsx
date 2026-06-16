@@ -18,6 +18,15 @@ type DocumentType =
   | "driving_licence"
   | "proof_of_id"
   | "insurance"
+  | "tuition_insurance"
+  | "mot_certificate"
+  | "vehicle_tax_status"
+  | "vehicle_registration"
+  | "vehicle_safety_declaration"
+  | "public_liability_insurance"
+  | "standards_check"
+  | "safeguarding_code"
+  | "right_to_work"
   | "dbs_check"
   | "vehicle_photo"
   | "other";
@@ -34,36 +43,76 @@ type DocumentRow = {
 const requiredDocuments: Array<{ type: DocumentType; label: string; detail: string }> = [
   {
     type: "adi_pdi_badge",
-    label: "ADI/PDI badge or certificate",
-    detail: "Confirms the instructor registration route attached to this LDA account."
+    label: "ADI/PDI badge, certificate, or trainee licence",
+    detail: "Confirms the DVSA registration route needed before an instructor can charge for lessons through LDA."
   },
   {
     type: "driving_licence",
-    label: "Driving licence",
-    detail: "Confirms entitlement evidence for instructor onboarding review."
+    label: "Full driving licence",
+    detail: "Confirms the instructor holds the driving entitlement attached to their teaching vehicle and transmission."
   },
   {
-    type: "insurance",
-    label: "Insurance certificate",
-    detail: "Confirms professional cover evidence before approval."
+    type: "dbs_check",
+    label: "Current DBS / ADI criminal record check evidence",
+    detail: "Supports DVSA fit-and-proper checks and the 4-year ADI renewal cycle before learner-facing availability is approved."
+  },
+  {
+    type: "tuition_insurance",
+    label: "Paid driving tuition motor insurance",
+    detail: "Must show the vehicle is insured for paid driving instruction or business tuition use, not ordinary private cover only."
+  },
+  {
+    type: "mot_certificate",
+    label: "Current MOT certificate or exemption evidence",
+    detail: "Required for vehicles over 3 years old and used to evidence roadworthiness before lessons are offered."
+  },
+  {
+    type: "vehicle_tax_status",
+    label: "Vehicle tax status confirmation",
+    detail: "Confirms the lesson vehicle is taxed before being used for learner lessons or test-day support."
+  },
+  {
+    type: "vehicle_registration",
+    label: "V5C, lease agreement, or keeper permission",
+    detail: "Confirms the vehicle identity, registration, and authority to use it for LDA learner bookings."
+  },
+  {
+    type: "vehicle_safety_declaration",
+    label: "Lesson vehicle safety declaration",
+    detail: "Confirms L-plates, mirrors, tyres, lights, brakes, roadworthiness, and any dual-control or test-suitability checks."
   }
 ];
 
 const supportingDocuments: Array<{ type: DocumentType; label: string; detail: string }> = [
   {
     type: "proof_of_id",
-    label: "Proof of ID",
-    detail: "Useful if LDA support asks for identity evidence during review."
+    label: "Proof of ID and address",
+    detail: "Supports identity checks where the driving licence or DBS evidence is not enough on its own."
   },
   {
-    type: "dbs_check",
-    label: "DBS check",
-    detail: "Useful supporting evidence for safeguarding and trust checks."
+    type: "right_to_work",
+    label: "Right to work or UK contractor eligibility evidence",
+    detail: "Useful where LDA needs extra onboarding assurance before contracting with the instructor."
+  },
+  {
+    type: "public_liability_insurance",
+    label: "Public liability or professional indemnity cover",
+    detail: "Not a DVSA badge requirement, but useful platform protection evidence for claims, disputes, and professional services."
+  },
+  {
+    type: "standards_check",
+    label: "Latest ADI standards check or training progress",
+    detail: "Supports quality assurance, teaching standards, and review of ADI/PDI status over time."
   },
   {
     type: "vehicle_photo",
-    label: "Vehicle photo",
-    detail: "Useful once the public instructor profile is prepared."
+    label: "Vehicle photos",
+    detail: "Shows the learner-facing car condition, plates, mirrors, signage, and profile images before the vehicle goes live."
+  },
+  {
+    type: "safeguarding_code",
+    label: "Safeguarding and LDA code acknowledgement",
+    detail: "Confirms the instructor has accepted LDA learner-safety, data-protection, cancellations, and conduct standards."
   }
 ];
 
