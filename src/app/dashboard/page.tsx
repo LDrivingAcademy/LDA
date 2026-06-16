@@ -260,11 +260,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         </article>
         {isInstructor ? (
           <article className="flex flex-col rounded border border-zinc-200 bg-white p-5 text-black shadow-sm">
-            <FileCheck2 className="text-brand" />
-            <h2 className="mt-4 text-xl font-black">Verification status</h2>
-            <p className="mt-2 text-zinc-600">
-              Current status: <span className="font-black">{verificationStatus.label}</span>
-            </p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <FileCheck2 className="text-brand" />
+                <h2 className="mt-4 text-2xl font-black">Current status</h2>
+                <p className="mt-2 text-base font-semibold leading-7 text-zinc-600">
+                  {displayName} is currently marked as <span className="font-black text-black">{verificationStatus.label}</span>.
+                </p>
+              </div>
+              <span className={`shrink-0 rounded-full border px-4 py-2 text-xs font-black uppercase ${verificationStatus.toneClass}`}>
+                {verificationStatus.label}
+              </span>
+            </div>
             <Link href="/instructor-verification?from=dashboard" className="lda-pill lda-pill-sm mt-auto self-start">
               View <ArrowRight size={16} />
             </Link>
