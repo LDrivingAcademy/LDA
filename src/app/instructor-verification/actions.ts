@@ -9,6 +9,15 @@ type VerificationDocumentType =
   | "driving_licence"
   | "proof_of_id"
   | "insurance"
+  | "tuition_insurance"
+  | "mot_certificate"
+  | "vehicle_tax_status"
+  | "vehicle_registration"
+  | "vehicle_safety_declaration"
+  | "public_liability_insurance"
+  | "standards_check"
+  | "safeguarding_code"
+  | "right_to_work"
   | "dbs_check"
   | "vehicle_photo"
   | "other";
@@ -23,6 +32,15 @@ const allowedDocumentTypes = new Set<VerificationDocumentType>([
   "driving_licence",
   "proof_of_id",
   "insurance",
+  "tuition_insurance",
+  "mot_certificate",
+  "vehicle_tax_status",
+  "vehicle_registration",
+  "vehicle_safety_declaration",
+  "public_liability_insurance",
+  "standards_check",
+  "safeguarding_code",
+  "right_to_work",
   "dbs_check",
   "vehicle_photo",
   "other"
