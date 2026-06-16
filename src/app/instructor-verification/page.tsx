@@ -40,81 +40,131 @@ type DocumentRow = {
   created_at: string;
 };
 
-const requiredDocuments: Array<{ type: DocumentType; label: string; detail: string }> = [
+type VerificationDocument = {
+  type: DocumentType;
+  label: string;
+  detail: string;
+  requirement: "required" | "recommended";
+};
+
+const verificationDocumentSections: Array<{
+  title: string;
+  description: string;
+  documents: VerificationDocument[];
+}> = [
   {
-    type: "adi_pdi_badge",
-    label: "ADI/PDI badge, certificate, or trainee licence",
-    detail: "Confirms the DVSA registration route needed before an instructor can charge for lessons through LDA."
+    title: "Instructor authority",
+    description: "Proof that the instructor is legally able to teach, charge for lessons, and remain in good standing with DVSA expectations.",
+    documents: [
+      {
+        type: "adi_pdi_badge",
+        label: "ADI/PDI badge, certificate, or trainee licence",
+        detail: "Confirms the DVSA registration route needed before an instructor can charge for lessons through LDA.",
+        requirement: "required"
+      },
+      {
+        type: "driving_licence",
+        label: "Full UK driving licence",
+        detail: "Confirms the instructor holds the driving entitlement attached to their teaching vehicle and transmission.",
+        requirement: "required"
+      },
+      {
+        type: "dbs_check",
+        label: "Current DBS / ADI criminal record check evidence",
+        detail: "Supports DVSA fit-and-proper checks and the 4-year ADI renewal cycle before learner-facing availability is approved.",
+        requirement: "required"
+      },
+      {
+        type: "standards_check",
+        label: "Latest ADI standards check or PDI training progress",
+        detail: "Supports teaching quality assurance, review history, and ongoing instructor development.",
+        requirement: "recommended"
+      }
+    ]
   },
   {
-    type: "driving_licence",
-    label: "Full driving licence",
-    detail: "Confirms the instructor holds the driving entitlement attached to their teaching vehicle and transmission."
+    title: "Identity and contracting",
+    description: "Evidence used to protect learners, verify the person behind the account, and keep LDA's contractor record clean.",
+    documents: [
+      {
+        type: "proof_of_id",
+        label: "Proof of ID and address",
+        detail: "Supports identity checks where the driving licence or DBS evidence is not enough on its own.",
+        requirement: "recommended"
+      },
+      {
+        type: "right_to_work",
+        label: "Right to work or UK contractor eligibility evidence",
+        detail: "Useful where LDA needs extra onboarding assurance before contracting with the instructor.",
+        requirement: "recommended"
+      },
+      {
+        type: "safeguarding_code",
+        label: "Safeguarding and LDA code acknowledgement",
+        detail: "Confirms the instructor has accepted LDA learner-safety, data-protection, cancellation, and conduct standards.",
+        requirement: "recommended"
+      }
+    ]
   },
   {
-    type: "dbs_check",
-    label: "Current DBS / ADI criminal record check evidence",
-    detail: "Supports DVSA fit-and-proper checks and the 4-year ADI renewal cycle before learner-facing availability is approved."
+    title: "Vehicle compliance",
+    description: "The vehicle evidence LDA needs before it can confidently list a learner-facing lesson car on the platform.",
+    documents: [
+      {
+        type: "mot_certificate",
+        label: "Current MOT certificate or exemption evidence",
+        detail: "Required for vehicles over 3 years old and used to evidence roadworthiness before lessons are offered.",
+        requirement: "required"
+      },
+      {
+        type: "vehicle_tax_status",
+        label: "Vehicle tax status confirmation",
+        detail: "Confirms the lesson vehicle is taxed before being used for learner lessons or test-day support.",
+        requirement: "required"
+      },
+      {
+        type: "vehicle_registration",
+        label: "V5C, lease agreement, or keeper permission",
+        detail: "Confirms the vehicle identity, registration, and authority to use it for LDA learner bookings.",
+        requirement: "required"
+      },
+      {
+        type: "vehicle_safety_declaration",
+        label: "Lesson vehicle safety declaration",
+        detail: "Confirms L-plates, mirrors, tyres, lights, brakes, roadworthiness, and any dual-control or test-suitability checks.",
+        requirement: "required"
+      },
+      {
+        type: "vehicle_photo",
+        label: "Vehicle photos",
+        detail: "Shows the learner-facing car condition, plates, mirrors, signage, and profile images before the vehicle goes live.",
+        requirement: "recommended"
+      }
+    ]
   },
   {
-    type: "tuition_insurance",
-    label: "Paid driving tuition motor insurance",
-    detail: "Must show the vehicle is insured for paid driving instruction or business tuition use, not ordinary private cover only."
-  },
-  {
-    type: "mot_certificate",
-    label: "Current MOT certificate or exemption evidence",
-    detail: "Required for vehicles over 3 years old and used to evidence roadworthiness before lessons are offered."
-  },
-  {
-    type: "vehicle_tax_status",
-    label: "Vehicle tax status confirmation",
-    detail: "Confirms the lesson vehicle is taxed before being used for learner lessons or test-day support."
-  },
-  {
-    type: "vehicle_registration",
-    label: "V5C, lease agreement, or keeper permission",
-    detail: "Confirms the vehicle identity, registration, and authority to use it for LDA learner bookings."
-  },
-  {
-    type: "vehicle_safety_declaration",
-    label: "Lesson vehicle safety declaration",
-    detail: "Confirms L-plates, mirrors, tyres, lights, brakes, roadworthiness, and any dual-control or test-suitability checks."
+    title: "Insurance and professional cover",
+    description: "Insurance evidence that protects learners, instructors, and LDA before lessons or platform bookings are accepted.",
+    documents: [
+      {
+        type: "tuition_insurance",
+        label: "Paid driving tuition motor insurance",
+        detail: "Must show the vehicle is insured for paid driving instruction or business tuition use, not ordinary private cover only.",
+        requirement: "required"
+      },
+      {
+        type: "public_liability_insurance",
+        label: "Public liability or professional indemnity cover",
+        detail: "Useful platform protection evidence for claims, disputes, and professional services.",
+        requirement: "recommended"
+      }
+    ]
   }
 ];
 
-const supportingDocuments: Array<{ type: DocumentType; label: string; detail: string }> = [
-  {
-    type: "proof_of_id",
-    label: "Proof of ID and address",
-    detail: "Supports identity checks where the driving licence or DBS evidence is not enough on its own."
-  },
-  {
-    type: "right_to_work",
-    label: "Right to work or UK contractor eligibility evidence",
-    detail: "Useful where LDA needs extra onboarding assurance before contracting with the instructor."
-  },
-  {
-    type: "public_liability_insurance",
-    label: "Public liability or professional indemnity cover",
-    detail: "Not a DVSA badge requirement, but useful platform protection evidence for claims, disputes, and professional services."
-  },
-  {
-    type: "standards_check",
-    label: "Latest ADI standards check or training progress",
-    detail: "Supports quality assurance, teaching standards, and review of ADI/PDI status over time."
-  },
-  {
-    type: "vehicle_photo",
-    label: "Vehicle photos",
-    detail: "Shows the learner-facing car condition, plates, mirrors, signage, and profile images before the vehicle goes live."
-  },
-  {
-    type: "safeguarding_code",
-    label: "Safeguarding and LDA code acknowledgement",
-    detail: "Confirms the instructor has accepted LDA learner-safety, data-protection, cancellations, and conduct standards."
-  }
-];
+const requiredDocuments = verificationDocumentSections.flatMap((section) =>
+  section.documents.filter((document) => document.requirement === "required")
+);
 
 function formatDate(value?: string | null) {
   if (!value) {
@@ -262,47 +312,42 @@ export default async function InstructorVerificationPage({ searchParams }: Instr
           </article>
 
           <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-            <h2 className="text-2xl font-black">Required documents</h2>
+            <h2 className="text-2xl font-black">Instructor onboarding documents</h2>
             <p className="mt-2 text-sm font-semibold leading-6 text-zinc-600">
-              {requiredUploadedCount} of {requiredDocuments.length} required verification documents are currently uploaded.
+              {requiredUploadedCount} of {requiredDocuments.length} required compliance documents are currently uploaded.
             </p>
-            <div className="mt-5 grid gap-3">
-              {requiredDocuments.map((document) => {
-                const uploaded = getLatestDocument(uploadedDocuments, document.type);
+            <div className="mt-5 grid gap-5">
+              {verificationDocumentSections.map((section) => (
+                <section key={section.title} className="rounded border border-zinc-200 bg-zinc-50 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-black">{section.title}</h3>
+                      <p className="mt-1 max-w-3xl text-sm font-semibold leading-6 text-zinc-600">{section.description}</p>
+                    </div>
+                    <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-black uppercase text-zinc-700">
+                      {section.documents.length} checks
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-3">
+                    {section.documents.map((document) => {
+                      const uploaded = getLatestDocument(uploadedDocuments, document.type);
 
-                return (
-                  <DocumentStatusRow
-                    key={document.type}
-                    documentType={document.type}
-                    label={document.label}
-                    detail={document.detail}
-                    document={uploaded}
-                    signedUrl={uploaded ? documentLinks.get(uploaded.id) ?? null : null}
-                    uploadedRecently={uploadedDocumentType === document.type}
-                  />
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
-            <h2 className="text-2xl font-black">Supporting evidence</h2>
-            <div className="mt-5 grid gap-3">
-              {supportingDocuments.map((document) => {
-                const uploaded = getLatestDocument(uploadedDocuments, document.type);
-
-                return (
-                  <DocumentStatusRow
-                    key={document.type}
-                    documentType={document.type}
-                    label={document.label}
-                    detail={document.detail}
-                    document={uploaded}
-                    signedUrl={uploaded ? documentLinks.get(uploaded.id) ?? null : null}
-                    uploadedRecently={uploadedDocumentType === document.type}
-                  />
-                );
-              })}
+                      return (
+                        <DocumentStatusRow
+                          key={document.type}
+                          documentType={document.type}
+                          label={document.label}
+                          detail={document.detail}
+                          requirement={document.requirement}
+                          document={uploaded}
+                          signedUrl={uploaded ? documentLinks.get(uploaded.id) ?? null : null}
+                          uploadedRecently={uploadedDocumentType === document.type}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
             </div>
           </section>
         </div>
@@ -352,6 +397,7 @@ function DetailRow({ label, value }: { label: string; value?: string | number | 
 function DocumentStatusRow({
   label,
   detail,
+  requirement,
   documentType,
   document,
   signedUrl,
@@ -359,6 +405,7 @@ function DocumentStatusRow({
 }: {
   label: string;
   detail: string;
+  requirement: VerificationDocument["requirement"];
   documentType: DocumentType;
   document: DocumentRow | null;
   signedUrl?: string | null;
@@ -371,9 +418,18 @@ function DocumentStatusRow({
     <article className="rounded border border-zinc-200 bg-white p-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {isUploaded ? <CheckCircle2 className="shrink-0 text-emerald-600" size={18} /> : <FileWarning className="shrink-0 text-amber-600" size={18} />}
             <h3 className="font-black">{label}</h3>
+            <span
+              className={`rounded-full border px-2 py-1 text-[11px] font-black uppercase ${
+                requirement === "required"
+                  ? "border-red-200 bg-red-50 text-red-800"
+                  : "border-zinc-200 bg-zinc-50 text-zinc-700"
+              }`}
+            >
+              {requirement === "required" ? "Required" : "Recommended"}
+            </span>
           </div>
           <p className="mt-2 text-sm font-semibold leading-6 text-zinc-600">{detail}</p>
           {document ? (
