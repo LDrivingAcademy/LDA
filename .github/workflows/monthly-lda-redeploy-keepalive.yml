@@ -21,22 +21,50 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           test -n "$VERCEL_TOKEN"
-          npx --yes vercel@54.13.0 redeploy ldrivingacademy.co.uk \
-            --target production \
-            --scope team_tKtLsQdt8Omu58bqTcpTCt8r \
-            --non-interactive \
-            > /tmp/lda-deployment-url.txt
-          tail -n 1 /tmp/lda-deployment-url.txt | tr -d '\r\n' > /tmp/lda-deployment-url-clean.txt
-          echo "DEPLOYMENT_URL=$(cat /tmp/lda-deployment-url-clean.txt)" >> "$GITHUB_ENV"
+          TEAM_ID="team_tKtLsQdt8Omu58bqTcpTCt8r"
+          SOURCE_DEPLOYMENT_ID="$(curl --fail --silent --show-error \
+            --header "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v13/deployments/ldrivingacademy.co.uk?teamId=$TEAM_ID" \
+            | jq --raw-output '.id')"
+          test -n "$SOURCE_DEPLOYMENT_ID"
+          test "$SOURCE_DEPLOYMENT_ID" != "null"
+
+          REDEPLOYMENT="$(curl --fail --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer $VERCEL_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data '{"target":"production"}' \
+            "https://api.vercel.com/v13/deployments/$SOURCE_DEPLOYMENT_ID/rebuild?teamId=$TEAM_ID")"
+          DEPLOYMENT_ID="$(printf '%s' "$REDEPLOYMENT" | jq --raw-output '.id')"
+          DEPLOYMENT_URL="$(printf '%s' "$REDEPLOYMENT" | jq --raw-output '.url')"
+          test -n "$DEPLOYMENT_ID"
+          test "$DEPLOYMENT_ID" != "null"
+          test -n "$DEPLOYMENT_URL"
+          test "$DEPLOYMENT_URL" != "null"
+          echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> "$GITHUB_ENV"
+          echo "DEPLOYMENT_URL=https://$DEPLOYMENT_URL" >> "$GITHUB_ENV"
 
       - name: Confirm Vercel deployment is ready
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          test -n "$DEPLOYMENT_URL"
-          npx --yes vercel@54.13.0 inspect "$DEPLOYMENT_URL" \
-            --scope team_tKtLsQdt8Omu58bqTcpTCt8r \
-            --non-interactive
+          TEAM_ID="team_tKtLsQdt8Omu58bqTcpTCt8r"
+          for attempt in $(seq 1 60); do
+            STATE="$(curl --fail --silent --show-error \
+              --header "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v13/deployments/$DEPLOYMENT_ID?teamId=$TEAM_ID" \
+              | jq --raw-output '.readyState')"
+            if [ "$STATE" = "READY" ]; then
+              exit 0
+            fi
+            if [ "$STATE" = "ERROR" ] || [ "$STATE" = "CANCELED" ]; then
+              echo "Vercel deployment ended in state: $STATE" >&2
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "Timed out waiting for Vercel deployment to become ready." >&2
+          exit 1
 
       - name: Verify live website
         run: |
