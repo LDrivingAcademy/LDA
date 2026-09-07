@@ -5,6 +5,10 @@ on:
     - cron: "0 3 1-7 * 1"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write
+
 concurrency:
   group: monthly-lda-production-redeploy
   cancel-in-progress: false
@@ -76,3 +80,29 @@ jobs:
           curl --fail --silent --show-error --location \
             https://ldrivingacademy.co.uk/robots.txt \
             --output /tmp/lda-robots.txt
+
+      - name: Alert LDA when Vercel authentication or redeployment fails
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          TITLE="LDA cloud redeploy needs authentication or attention"
+          EXISTING_NUMBER="$(gh issue list \
+            --repo "$REPOSITORY" \
+            --state open \
+            --search "$TITLE in:title" \
+            --json number,title \
+            --jq "map(select(.title == \"$TITLE\"))[0].number // empty")"
+          MESSAGE="@LDrivingAcademy The monthly LDA production redeploy failed. Vercel may require token renewal or account re-authentication. Review the failed run, replace the encrypted VERCEL_TOKEN secret if needed, rerun the workflow, and confirm the live website before closing this alert. Run: $RUN_URL"
+
+          if [ -n "$EXISTING_NUMBER" ]; then
+            gh issue comment "$EXISTING_NUMBER" --repo "$REPOSITORY" --body "$MESSAGE"
+          else
+            gh issue create \
+              --repo "$REPOSITORY" \
+              --assignee "LDrivingAcademy" \
+              --title "$TITLE" \
+              --body "$MESSAGE"
+          fi
