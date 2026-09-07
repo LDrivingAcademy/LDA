@@ -5,79 +5,38 @@ on:
     - cron: "0 3 1-7 * 1"
   workflow_dispatch:
 
-permissions:
-  contents: write
-  checks: read
-
 concurrency:
   group: monthly-lda-production-redeploy
   cancel-in-progress: false
 
 jobs:
   redeploy:
-    name: Check, trigger Vercel, and verify production
+    name: Redeploy and verify current production release
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
-      - name: Checkout production branch
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run safety checks
-        run: |
-          npx tsc --noEmit
-          npm run build
-
-      - name: Create monthly keepalive heartbeat
-        run: |
-          mkdir -p .github/keepalive
-          {
-            echo "Last successful monthly production redeploy trigger:"
-            date -u +"%Y-%m-%dT%H:%M:%SZ"
-          } > .github/keepalive/last-monthly-redeploy.txt
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/keepalive/last-monthly-redeploy.txt
-          git commit -m "chore: monthly production redeploy keepalive"
-          git push origin HEAD:main
-          echo "KEEPALIVE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-
-      - name: Wait for Vercel production deployment
+      - name: Redeploy current production release
         env:
-          GH_TOKEN: ${{ github.token }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          for attempt in {1..60}; do
-            result="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${KEEPALIVE_SHA}/status" \
-              --jq '[.statuses[] | select(.context | ascii_downcase | contains("vercel"))] | sort_by(.created_at) | last | [.state, .target_url] | @tsv' 2>/dev/null || true)"
-            state="${result%%$'\t'*}"
+          test -n "$VERCEL_TOKEN"
+          npx --yes vercel@54.13.0 redeploy ldrivingacademy.co.uk \
+            --target production \
+            --scope team_tKtLsQdt8Omu58bqTcpTCt8r \
+            --non-interactive \
+            > /tmp/lda-deployment-url.txt
+          tail -n 1 /tmp/lda-deployment-url.txt | tr -d '\r\n' > /tmp/lda-deployment-url-clean.txt
+          echo "DEPLOYMENT_URL=$(cat /tmp/lda-deployment-url-clean.txt)" >> "$GITHUB_ENV"
 
-            if [ "$state" = "success" ]; then
-              echo "Vercel deployment completed successfully."
-              exit 0
-            fi
-
-            if [ "$state" = "failure" ] || [ "$state" = "error" ]; then
-              echo "Vercel deployment completed with: $state"
-              exit 1
-            fi
-
-            sleep 10
-          done
-
-          echo "Timed out waiting for the Vercel deployment check."
-          exit 1
+      - name: Confirm Vercel deployment is ready
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          test -n "$DEPLOYMENT_URL"
+          npx --yes vercel@54.13.0 inspect "$DEPLOYMENT_URL" \
+            --scope team_tKtLsQdt8Omu58bqTcpTCt8r \
+            --non-interactive
 
       - name: Verify live website
         run: |
