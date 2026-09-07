@@ -59,18 +59,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           for attempt in {1..60}; do
-            result="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${KEEPALIVE_SHA}/check-runs" \
-              --jq '[.check_runs[] | select((.app.slug == "vercel") or (.name | ascii_downcase | contains("vercel")))] | sort_by(.started_at) | last | [.status, (.conclusion // "")] | @tsv' 2>/dev/null || true)"
-            status="${result%%$'\t'*}"
-            conclusion="${result#*$'\t'}"
+            result="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${KEEPALIVE_SHA}/status" \
+              --jq '[.statuses[] | select(.context | ascii_downcase | contains("vercel"))] | sort_by(.created_at) | last | [.state, .target_url] | @tsv' 2>/dev/null || true)"
+            state="${result%%$'\t'*}"
 
-            if [ "$status" = "completed" ] && [ "$conclusion" = "success" ]; then
+            if [ "$state" = "success" ]; then
               echo "Vercel deployment completed successfully."
               exit 0
             fi
 
-            if [ "$status" = "completed" ] && [ -n "$conclusion" ]; then
-              echo "Vercel deployment completed with: $conclusion"
+            if [ "$state" = "failure" ] || [ "$state" = "error" ]; then
+              echo "Vercel deployment completed with: $state"
               exit 1
             fi
 
