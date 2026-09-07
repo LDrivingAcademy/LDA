@@ -1,0 +1,93 @@
+name: Monthly LDA Production Redeploy Keepalive
+
+on:
+  schedule:
+    - cron: "0 3 1-7 * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  checks: read
+
+concurrency:
+  group: monthly-lda-production-redeploy
+  cancel-in-progress: false
+
+jobs:
+  redeploy:
+    name: Check, trigger Vercel, and verify production
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout production branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run safety checks
+        run: |
+          npm run lint
+          npm run build
+
+      - name: Create monthly keepalive heartbeat
+        run: |
+          mkdir -p .github/keepalive
+          {
+            echo "Last successful monthly production redeploy trigger:"
+            date -u +"%Y-%m-%dT%H:%M:%SZ"
+          } > .github/keepalive/last-monthly-redeploy.txt
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/keepalive/last-monthly-redeploy.txt
+          git commit -m "chore: monthly production redeploy keepalive"
+          git push origin HEAD:main
+          echo "KEEPALIVE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Wait for Vercel production deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in {1..60}; do
+            result="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${KEEPALIVE_SHA}/check-runs" \
+              --jq '[.check_runs[] | select((.app.slug == "vercel") or (.name | ascii_downcase | contains("vercel")))] | sort_by(.started_at) | last | [.status, (.conclusion // "")] | @tsv' 2>/dev/null || true)"
+            status="${result%%$'\t'*}"
+            conclusion="${result#*$'\t'}"
+
+            if [ "$status" = "completed" ] && [ "$conclusion" = "success" ]; then
+              echo "Vercel deployment completed successfully."
+              exit 0
+            fi
+
+            if [ "$status" = "completed" ] && [ -n "$conclusion" ]; then
+              echo "Vercel deployment completed with: $conclusion"
+              exit 1
+            fi
+
+            sleep 10
+          done
+
+          echo "Timed out waiting for the Vercel deployment check."
+          exit 1
+
+      - name: Verify live website
+        run: |
+          curl --fail --silent --show-error --location \
+            --retry 12 --retry-delay 10 --retry-all-errors \
+            --output /tmp/lda-homepage.html \
+            https://ldrivingacademy.co.uk/
+          grep -q "Book Driving Lessons Near You | LDA" /tmp/lda-homepage.html
+          curl --fail --silent --show-error --location \
+            https://ldrivingacademy.co.uk/robots.txt \
+            --output /tmp/lda-robots.txt
