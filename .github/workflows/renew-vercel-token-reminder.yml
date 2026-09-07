@@ -3,6 +3,8 @@ name: Renew LDA Vercel Token Reminder
 on:
   schedule:
     - cron: "0 9 1 8 *"
+    - cron: "0 9 1 9 *"
+    - cron: "0 9 7 9 *"
   workflow_dispatch:
 
 permissions:
@@ -27,12 +29,16 @@ jobs:
             --json title \
             --jq "map(select(.title == \"$TITLE\")) | length")"
 
+          MESSAGE="@LDrivingAcademy The Vercel credential used by the Monthly LDA Production Redeploy Keepalive workflow is due for its annual rotation. Sign in to the L Driving Academy Vercel account, create a replacement token scoped only to the lda project, replace the encrypted VERCEL_TOKEN repository secret, manually run the redeploy workflow, verify https://ldrivingacademy.co.uk, and revoke the superseded token only after the test passes."
+
           if [ "$EXISTING" -gt 0 ]; then
-            echo "An open renewal reminder already exists."
+            NUMBER="$(gh issue list --repo "$REPOSITORY" --state open --search "$TITLE in:title" --json number,title --jq "map(select(.title == \"$TITLE\"))[0].number")"
+            gh issue comment "$NUMBER" --repo "$REPOSITORY" --body "$MESSAGE"
             exit 0
           fi
 
           gh issue create \
             --repo "$REPOSITORY" \
+            --assignee "LDrivingAcademy" \
             --title "$TITLE" \
-            --body "The Vercel credential used by the Monthly LDA Production Redeploy Keepalive workflow is due for its annual rotation. Create a replacement token scoped only to the lda project, replace the encrypted VERCEL_TOKEN repository secret, manually run the redeploy workflow, verify https://ldrivingacademy.co.uk, and revoke the superseded token only after the test passes. The current token was created on 7 September 2026 with a one-year expiry."
+            --body "$MESSAGE The current token was created on 7 September 2026 with a one-year expiry."
