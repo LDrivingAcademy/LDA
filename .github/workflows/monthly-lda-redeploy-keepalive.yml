@@ -33,8 +33,8 @@ jobs:
             --request POST \
             --header "Authorization: Bearer $VERCEL_TOKEN" \
             --header "Content-Type: application/json" \
-            --data '{"target":"production"}' \
-            "https://api.vercel.com/v13/deployments/$SOURCE_DEPLOYMENT_ID/rebuild?teamId=$TEAM_ID")"
+            --data "{\"deploymentId\":\"$SOURCE_DEPLOYMENT_ID\",\"meta\":{\"action\":\"redeploy\"},\"name\":\"lda\",\"target\":\"production\"}" \
+            "https://api.vercel.com/v13/deployments?forceNew=1&teamId=$TEAM_ID")"
           DEPLOYMENT_ID="$(printf '%s' "$REDEPLOYMENT" | jq --raw-output '.id')"
           DEPLOYMENT_URL="$(printf '%s' "$REDEPLOYMENT" | jq --raw-output '.url')"
           test -n "$DEPLOYMENT_ID"
