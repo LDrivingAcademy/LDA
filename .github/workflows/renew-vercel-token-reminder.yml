@@ -1,0 +1,38 @@
+name: Renew LDA Vercel Token Reminder
+
+on:
+  schedule:
+    - cron: "0 9 1 8 *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  remind:
+    name: Open token-renewal reminder
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create the annual renewal reminder
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          TITLE="Renew the LDA Vercel cloud redeploy token"
+          EXISTING="$(gh issue list \
+            --repo "$REPOSITORY" \
+            --state open \
+            --search "$TITLE in:title" \
+            --json title \
+            --jq "map(select(.title == \"$TITLE\")) | length")"
+
+          if [ "$EXISTING" -gt 0 ]; then
+            echo "An open renewal reminder already exists."
+            exit 0
+          fi
+
+          gh issue create \
+            --repo "$REPOSITORY" \
+            --title "$TITLE" \
+            --body "The Vercel credential used by the Monthly LDA Production Redeploy Keepalive workflow is due for its annual rotation. Create a replacement token scoped only to the lda project, replace the encrypted VERCEL_TOKEN repository secret, manually run the redeploy workflow, verify https://ldrivingacademy.co.uk, and revoke the superseded token only after the test passes. The current token was created on 7 September 2026 with a one-year expiry."
