@@ -36,7 +36,7 @@ jobs:
 
       - name: Run safety checks
         run: |
-          npm run lint
+          npx tsc --noEmit
           npm run build
 
       - name: Create monthly keepalive heartbeat
