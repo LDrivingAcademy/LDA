@@ -20,29 +20,29 @@ concurrency:
 jobs:
   redeploy:
     if: github.repository == 'LDrivingAcademy/LDA' && github.ref == 'refs/heads/main'
-    name: Redeploy and verify current production release
+    name: Deploy and verify the main checkpoint
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
-      - name: Redeploy current production release
+      - name: Deploy the exact main commit for this run
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          SOURCE_SHA: ${{ github.sha }}
         run: |
+          set -euo pipefail
           test -n "$VERCEL_TOKEN"
           TEAM_ID="team_tKtLsQdt8Omu58bqTcpTCt8r"
-          SOURCE_DEPLOYMENT_ID="$(curl --fail --silent --show-error \
-            --header "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v13/deployments/ldrivingacademy.co.uk?teamId=$TEAM_ID" \
-            | jq --raw-output '.id')"
-          test -n "$SOURCE_DEPLOYMENT_ID"
-          test "$SOURCE_DEPLOYMENT_ID" != "null"
+          # Deploy a pinned GitHub checkpoint, never whichever older release
+          # happens to own the domain while a newer Git deployment is building.
+          REQUEST="$(jq -n --arg sha "$SOURCE_SHA" \
+            '{name: "lda", project: "prj_VN5AuDmkx5m2VRsEH7VADIfUtJI1", target: "production", gitSource: {type: "github", repoId: "1230152216", ref: "main", sha: $sha}}')"
 
           REDEPLOYMENT="$(curl --fail --silent --show-error \
             --request POST \
             --header "Authorization: Bearer $VERCEL_TOKEN" \
             --header "Content-Type: application/json" \
-            --data "{\"deploymentId\":\"$SOURCE_DEPLOYMENT_ID\",\"meta\":{\"action\":\"redeploy\"},\"name\":\"lda\",\"target\":\"production\"}" \
+            --data "$REQUEST" \
             "https://api.vercel.com/v13/deployments?forceNew=1&teamId=$TEAM_ID")"
           DEPLOYMENT_ID="$(printf '%s' "$REDEPLOYMENT" | jq --raw-output '.id')"
           DEPLOYMENT_URL="$(printf '%s' "$REDEPLOYMENT" | jq --raw-output '.url')"
