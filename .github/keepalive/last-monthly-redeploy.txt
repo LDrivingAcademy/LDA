@@ -1,2 +1,4 @@
-Last successful monthly production redeploy trigger:
-2026-09-07T16:13:37Z
+Monthly LDA maintenance check (UTC): 2026-10-10T00:40:15Z
+Source commit: 0f7d3b6c76dbe7d5d0eed71ad0f85a3161c0accd
+Redeploy and website check: failure
+Run: https://github.com/LDrivingAcademy/LDA/actions/runs/38009979088
