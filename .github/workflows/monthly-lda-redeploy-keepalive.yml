@@ -20,23 +20,31 @@ concurrency:
 jobs:
   redeploy:
     if: github.repository == 'LDrivingAcademy/LDA' && github.ref == 'refs/heads/main'
-    name: Deploy and verify the main checkpoint
+    name: Redeploy and verify the current production release
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      source_deployment: ${{ steps.deploy.outputs.source_deployment }}
+      deployment: ${{ steps.deploy.outputs.deployment }}
 
     steps:
-      - name: Deploy the exact main commit for this run
+      - name: Redeploy the currently published production release
+        id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          SOURCE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           test -n "$VERCEL_TOKEN"
           TEAM_ID="team_tKtLsQdt8Omu58bqTcpTCt8r"
-          # Deploy a pinned GitHub checkpoint, never whichever older release
-          # happens to own the domain while a newer Git deployment is building.
-          REQUEST="$(jq -n --arg sha "$SOURCE_SHA" \
-            '{name: "lda", project: "prj_VN5AuDmkx5m2VRsEH7VADIfUtJI1", target: "production", gitSource: {type: "github", repoId: "1230152216", ref: "main", sha: $sha}}')"
+          # Production contains changes not yet reconciled into GitHub. Preserve
+          # the published artifact rather than substituting the main source tree.
+          SOURCE_DEPLOYMENT_ID="$(curl --fail --silent --show-error \
+            --header "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v13/deployments/ldrivingacademy.co.uk?teamId=$TEAM_ID" \
+            | jq --exit-status --raw-output '.id')"
+          echo "source_deployment=$SOURCE_DEPLOYMENT_ID" >> "$GITHUB_OUTPUT"
+          REQUEST="$(jq -n --arg deployment "$SOURCE_DEPLOYMENT_ID" \
+            '{name: "lda", project: "prj_VN5AuDmkx5m2VRsEH7VADIfUtJI1", target: "production", deploymentId: $deployment, meta: {action: "redeploy"}}')"
 
           REDEPLOYMENT="$(curl --fail --silent --show-error \
             --request POST \
@@ -52,6 +60,7 @@ jobs:
           test "$DEPLOYMENT_URL" != "null"
           echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> "$GITHUB_ENV"
           echo "DEPLOYMENT_URL=https://$DEPLOYMENT_URL" >> "$GITHUB_ENV"
+          echo "deployment=$DEPLOYMENT_ID" >> "$GITHUB_OUTPUT"
 
       - name: Confirm Vercel deployment is ready
         env:
@@ -128,15 +137,20 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SOURCE_SHA: ${{ github.sha }}
           REDEPLOY_RESULT: ${{ needs.redeploy.result }}
+          SOURCE_DEPLOYMENT: ${{ needs.redeploy.outputs.source_deployment }}
+          DEPLOYMENT: ${{ needs.redeploy.outputs.deployment }}
         run: |
           set -euo pipefail
           FILE_PATH=".github/keepalive/last-monthly-redeploy.txt"
-          FILE_SHA="$(gh api "repos/$REPOSITORY/contents/$FILE_PATH?ref=main" --jq '.sha')"
-          CONTENT="$(printf 'Monthly LDA maintenance check (UTC): %s\nSource commit: %s\nRedeploy and website check: %s\nRun: %s\n' \
-            "$(date -u +%FT%TZ)" "$SOURCE_SHA" "$REDEPLOY_RESULT" "$RUN_URL" | base64 -w 0)"
+          RECORD_BRANCH="codex/lda-maintenance-checkpoints"
+          FILE_SHA="$(gh api "repos/$REPOSITORY/contents/$FILE_PATH?ref=$RECORD_BRANCH" --jq '.sha')"
+          CONTENT="$(printf 'Monthly LDA maintenance check (UTC): %s\nWorkflow commit: %s\nProduction source: %s\nDeployment: %s\nRedeploy and website check: %s\nRun: %s\n' \
+            "$(date -u +%FT%TZ)" "$SOURCE_SHA" "$SOURCE_DEPLOYMENT" "$DEPLOYMENT" "$REDEPLOY_RESULT" "$RUN_URL" | base64 -w 0)"
           # A real maintenance record creates repository activity even when Vercel
           # needs attention. The per-run GitHub token requires no stored PAT.
           # The expected file SHA prevents overwriting a concurrent file edit.
-          jq -n --arg content "$CONTENT" --arg sha "$FILE_SHA" \
-            '{message: "Record monthly LDA maintenance check [skip ci]", content: $content, sha: $sha, branch: "main"}' \
+          # Keep activity off main: a receipt must never trigger a production
+          # deployment or replace the separately published working release.
+          jq -n --arg content "$CONTENT" --arg sha "$FILE_SHA" --arg branch "$RECORD_BRANCH" \
+            '{message: "Record monthly LDA maintenance check [skip ci]", content: $content, sha: $sha, branch: $branch}' \
             | gh api --method PUT "repos/$REPOSITORY/contents/$FILE_PATH" --input - --silent
