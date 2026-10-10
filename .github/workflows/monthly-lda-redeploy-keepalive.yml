@@ -1,8 +1,12 @@
 name: Monthly LDA Production Redeploy Keepalive
 
 on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/monthly-lda-redeploy-keepalive.yml']
   schedule:
-    - cron: "0 3 1-7 * 1"
+    # Once a month, away from the busy start of the hour (UTC).
+    - cron: "17 3 1 * *"
   workflow_dispatch:
 
 permissions:
@@ -15,6 +19,7 @@ concurrency:
 
 jobs:
   redeploy:
+    if: github.repository == 'LDrivingAcademy/LDA' && github.ref == 'refs/heads/main'
     name: Redeploy and verify current production release
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -106,3 +111,32 @@ jobs:
               --title "$TITLE" \
               --body "$MESSAGE"
           fi
+
+  checkpoint:
+    name: Record monthly maintenance activity
+    needs: redeploy
+    if: always() && github.repository == 'LDrivingAcademy/LDA' && github.ref == 'refs/heads/main' && needs.redeploy.result != 'skipped'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Save maintenance result without changing application code
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SOURCE_SHA: ${{ github.sha }}
+          REDEPLOY_RESULT: ${{ needs.redeploy.result }}
+        run: |
+          set -euo pipefail
+          FILE_PATH=".github/keepalive/last-monthly-redeploy.txt"
+          FILE_SHA="$(gh api "repos/$REPOSITORY/contents/$FILE_PATH?ref=main" --jq '.sha')"
+          CONTENT="$(printf 'Monthly LDA maintenance check (UTC): %s\nSource commit: %s\nRedeploy and website check: %s\nRun: %s\n' \
+            "$(date -u +%FT%TZ)" "$SOURCE_SHA" "$REDEPLOY_RESULT" "$RUN_URL" | base64 -w 0)"
+          # A real maintenance record creates repository activity even when Vercel
+          # needs attention. The per-run GitHub token requires no stored PAT.
+          # The expected file SHA prevents overwriting a concurrent file edit.
+          jq -n --arg content "$CONTENT" --arg sha "$FILE_SHA" \
+            '{message: "Record monthly LDA maintenance check [skip ci]", content: $content, sha: $sha, branch: "main"}' \
+            | gh api --method PUT "repos/$REPOSITORY/contents/$FILE_PATH" --input - --silent
