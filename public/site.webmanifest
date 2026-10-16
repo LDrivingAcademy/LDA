@@ -1,0 +1,47 @@
+{
+  "name": "L Driving Academy",
+  "short_name": "LDA",
+  "description": "L Driving Academy helps learners find verified driving instructors, book planned or on-demand lessons, manage secure payments, and track lesson progress in one place.",
+  "icons": [
+    {
+      "src": "/favicon-48x48.png?v=lda-20261010-sized",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.png?v=lda-20261010-sized",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-icon.png?v=lda-20261010-sized",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/lda-official-icon-32.png?v=lda-20261010-sized",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/lda-official-icon-192.png?v=lda-20261010-sized",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/lda-official-icon-512.png?v=lda-20261010-sized",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "display": "standalone",
+  "start_url": "/"
+}

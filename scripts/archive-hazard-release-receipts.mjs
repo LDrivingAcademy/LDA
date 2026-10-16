@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const root='C:/Users/Joshu/LDA Hazard Perception Production';
+const archive=root+'/archives/website-release-20260912-v1';
+const live=JSON.parse(fs.readFileSync(root+'/qc-reports/web-library-v1-live-release.json'));
+assert(live.passed&&live.deployment==='dpl_CtBjwG5AfykhoF3Lhoc94v1fxp3K');
+const response=await fetch('https://lda-8azx5rkb1-ldrivingacademys-projects.vercel.app/qa-cleanup.json');assert(response.ok);
+const cleanup=await response.json();assert(cleanup.deleted&&cleanup.temporary_user==='54afdfeb-b33c-434d-8dce-95cb5edcbc1f');
+fs.writeFileSync(root+'/qc-reports/web-library-v1-qa-cleanup.json',JSON.stringify(cleanup,null,2));
+for(const file of ['web-library-v1-live-release.json','web-library-v1-live-menu.png','web-library-v1-final-component-source-diff.json','web-library-v1-qa-cleanup.json'])fs.copyFileSync(root+'/qc-reports/'+file,archive+'/qc-reports/'+file);
+fs.copyFileSync('docs/lda-hazard-release-verification.md',archive+'/docs/lda-hazard-release-verification.md');
+fs.copyFileSync('.gitignore',archive+'/.gitignore');
+const summary=JSON.parse(fs.readFileSync(archive+'/release-summary.json'));summary.published=true;summary.live_url=live.url;summary.live_verified_at=live.checked_at;summary.temporary_qa_removed=true;
+fs.writeFileSync(archive+'/release-summary.json',JSON.stringify(summary,null,2));
+console.log(JSON.stringify({published:summary.live_url,temporary_attempts_removed:cleanup.temporary_attempts_removed,archive_saved:true}));

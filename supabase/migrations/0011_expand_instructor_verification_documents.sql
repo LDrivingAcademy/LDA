@@ -1,0 +1,9 @@
+alter type public.document_type add value if not exists 'tuition_insurance';
+alter type public.document_type add value if not exists 'mot_certificate';
+alter type public.document_type add value if not exists 'vehicle_tax_status';
+alter type public.document_type add value if not exists 'vehicle_registration';
+alter type public.document_type add value if not exists 'vehicle_safety_declaration';
+alter type public.document_type add value if not exists 'public_liability_insurance';
+alter type public.document_type add value if not exists 'standards_check';
+alter type public.document_type add value if not exists 'safeguarding_code';
+alter type public.document_type add value if not exists 'right_to_work';

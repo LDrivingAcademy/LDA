@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+const out='.tmp/lda-hazard-qa-bridge-v1',source='.tmp/lda-hazard-upload-bridge-v1';
+if(fs.existsSync(out))throw Error('Bridge already exists');
+fs.mkdirSync(out,{recursive:true});
+for(const dir of ['app','.vercel'])fs.cpSync(source+'/'+dir,out+'/'+dir,{recursive:true});
+for(const file of ['vercel.json','upload-public.pem'])fs.copyFileSync(source+'/'+file,out+'/'+(file==='upload-public.pem'?'qa-public.pem':file));
+const pkg=JSON.parse(fs.readFileSync(source+'/package.json'));
+pkg.dependencies['@supabase/supabase-js']=JSON.parse(fs.readFileSync('node_modules/@supabase/supabase-js/package.json')).version;
+pkg.scripts.build='node create-qa.mjs && next build';
+fs.writeFileSync(out+'/package.json',JSON.stringify(pkg,null,2));
+fs.copyFileSync('scripts/create-hazard-qa-cloud.mjs',out+'/create-qa.mjs');
+console.log('Prepared isolated QA account setup; no credentials in uploaded source.');

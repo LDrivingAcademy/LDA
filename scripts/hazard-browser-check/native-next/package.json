@@ -1,0 +1,6 @@
+{
+  "name": "lda-native-component-verification",
+  "private": true,
+  "type": "module",
+  "description": "Isolated native Next.js UI verification; uses parent workspace dependencies, not a deployable LDA release."
+}

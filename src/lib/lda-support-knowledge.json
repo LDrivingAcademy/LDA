@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "intents": [
+    {
+      "id": "greeting",
+      "category": "general",
+      "goal": "The learner is greeting the assistant, not asking for a task yet.",
+      "examples": ["hi", "hello", "hey", "hiya", "good morning", "good afternoon"],
+      "responseTemplates": ["How can I help you?"],
+      "routeIds": [],
+      "requiredDetails": []
+    },
+    {
+      "id": "vague_help",
+      "category": "general",
+      "goal": "The learner needs help but has not said what with yet.",
+      "examples": ["I'm stuck", "I need help", "help", "I'm lost", "not sure what to do", "I'm confused"],
+      "responseTemplates": ["I can help. What are you stuck with?"],
+      "routeIds": [],
+      "requiredDetails": []
+    },
+    {
+      "id": "new_lesson_booking",
+      "category": "booking",
+      "goal": "The learner wants to make a new driving lesson booking.",
+      "examples": [
+        "Where do I book lessons?",
+        "How do I book a lesson?",
+        "Can I arrange another driving lesson?",
+        "I want to book my next lesson",
+        "Where is the booking page?",
+        "Can you take me to the lesson booking area?",
+        "I need to book driving lessons",
+        "I want a new lesson",
+        "Where can I make a booking?",
+        "Can I arrange my next driving lesson?",
+        "I want to set up another lesson"
+      ],
+      "responseTemplates": [
+        "You can book a lesson from the booking area in your learner dashboard. Use the button below and I will take you there.",
+        "To book another lesson, open the booking area in your learner dashboard and choose an instructor or available slot."
+      ],
+      "visitorResponseTemplates": [
+        "You can start booking from LDA, but you will need a learner account before checkout. Sign in or create a learner account, then continue into lesson booking."
+      ],
+      "routeIds": ["book_lesson_dashboard"],
+      "visitorRouteIds": ["signup", "login"],
+      "requiredDetails": []
+    },
+    {
+      "id": "book_on_demand",
+      "category": "booking",
+      "goal": "The learner wants a lesson as soon as possible.",
+      "examples": ["Can I book now?", "I need a lesson today", "Book on demand", "I want a lesson right now", "Need an instructor ASAP"],
+      "responseTemplates": ["Use Book On Demand when you want a lesson as soon as an instructor is available. I can take you straight to that booking flow."],
+      "routeIds": ["lesson_now"],
+      "requiredDetails": []
+    },
+    {
+      "id": "schedule_lesson",
+      "category": "booking",
+      "goal": "The learner wants to arrange a future lesson or choose a time slot.",
+      "examples": ["Can I schedule a lesson?", "I want to pick a future date", "Can I arrange a lesson for later?", "Where do I choose a time slot?", "Book a lesson next week"],
+      "responseTemplates": ["You can schedule a lesson from the booking area in your learner dashboard. Choose an instructor, pick a slot, then continue through the normal booking steps."],
+      "visitorResponseTemplates": ["You can choose a future lesson time from Schedule Lessons. If you are not signed in, LDA will ask you to sign in or create a learner account before checkout."],
+      "routeIds": ["book_lesson_dashboard", "planned_lessons"],
+      "visitorRouteIds": ["planned_lessons"],
+      "requiredDetails": []
+    },
+    {
+      "id": "find_instructor",
+      "category": "booking",
+      "goal": "The learner wants to find an instructor and book a lesson.",
+      "examples": ["How can I find an instructor and book?", "Find me a driving instructor", "I need an instructor", "Can Smart Match find someone?", "Search for a tutor"],
+      "responseTemplates": ["You can find an instructor from the booking area in your learner dashboard, then choose a lesson time and continue to checkout."],
+      "visitorResponseTemplates": ["To find and book an instructor, create or sign in to a learner account first. Then LDA can take you through instructor search and booking."],
+      "routeIds": ["book_lesson_dashboard"],
+      "visitorRouteIds": ["signup"],
+      "requiredDetails": []
+    },
+    {
+      "id": "booking_problem",
+      "category": "booking",
+      "goal": "The learner is asking about an existing booking or lesson record problem.",
+      "examples": ["My booking is missing", "My lesson is not showing", "I cannot see my booking", "The booking reference does not work", "My lesson disappeared from my dashboard"],
+      "responseTemplates": ["Open your learner calendar or booking history first to check the lesson status. If it is still missing, I will need the booking reference if you have one."],
+      "visitorResponseTemplates": ["Sign in to your learner account first so LDA can show your booking history and calendar. If the lesson is still missing after signing in, keep the booking reference ready if you have one."],
+      "routeIds": ["learner_calendar", "booking_history"],
+      "visitorRouteIds": ["login", "signup"],
+      "requiredDetails": ["booking reference, if one exists"]
+    },
+    {
+      "id": "refund_request",
+      "category": "payment",
+      "goal": "The learner wants to understand or start a refund for a lesson payment.",
+      "examples": ["How do I get a refund?", "Can I get my money back?", "I need a refund for a lesson", "Refund a cancelled lesson", "I paid and need a refund", "How does the refund process work?", "Where do I request a refund?"],
+      "responseTemplates": ["Refunds are handled through Payment Help. Open the lesson payment record, choose the refund option, and LDA will show whether it can be processed automatically or needs review."],
+      "routeIds": ["learner_payment_help"],
+      "requiredDetails": []
+    }
+  ],
+  "articles": [
+    {
+      "slug": "guest-account-setup",
+      "title": "Getting started before signing in",
+      "category": "account",
+      "summary": "Guests can create a learner account, log in, preview Smart Match, or contact guest support.",
+      "body": "Guests can use public pages for Smart Match previews, learner sign-up, instructor application information, policies, and public support. Guests cannot view learner bookings, instructor calendars, payment receipts, or account-specific data until signed in.",
+      "audience": ["visitor"],
+      "routeHref": "/auth/sign-up?from=chat",
+      "actionLabel": "Create an account"
+    },
+    {
+      "slug": "learner-new-booking",
+      "title": "Book a new lesson",
+      "category": "booking",
+      "summary": "Learners book new lessons from the booking area in the learner dashboard.",
+      "body": "For a new booking, open the booking area in the learner dashboard. The learner can find an instructor, choose a lesson or slot, and continue through secure checkout. Do not ask for a booking reference unless the learner is asking about an existing booking problem.",
+      "audience": ["learner"],
+      "routeHref": "/learner-dashboard?section=driving-lessons&from=chat#driving-lessons-booking",
+      "actionLabel": "Book a lesson"
+    },
+    {
+      "slug": "learner-booking-calendar",
+      "title": "Manage learner bookings",
+      "category": "booking",
+      "summary": "Learners use the calendar and booking history to view existing lessons.",
+      "body": "Open the learner calendar or booking history when a learner needs to view, check, reschedule, or troubleshoot an existing lesson. If a booking is missing, ask for the booking reference only if one exists.",
+      "audience": ["learner"],
+      "routeHref": "/learner-calendar?from=chat",
+      "actionLabel": "View my bookings"
+    },
+    {
+      "slug": "payment-help",
+      "title": "Payment and refund help",
+      "category": "payment",
+      "summary": "Payment Help handles confirmations, failed payments, duplicate charges, refunds and receipts.",
+      "body": "Use Payment Help for payment confirmation, failed card payment, duplicate charge, refund, receipt or invoice. Do not ask for full card details.",
+      "audience": ["learner"],
+      "routeHref": "/support/learner/payment-help",
+      "actionLabel": "Open payment help"
+    },
+    {
+      "slug": "smart-match-learner-support",
+      "title": "Smart Match learner guidance",
+      "category": "booking",
+      "summary": "Smart Match helps learners find verified instructors based on preferences, availability, area and fit.",
+      "body": "Smart Match should ask about how the learner learns best, schedule timing, transmission, location and preferences rather than diagnoses.",
+      "audience": ["visitor", "learner"],
+      "routeHref": "/smart-match?from=chat",
+      "actionLabel": "Open Smart Match"
+    },
+    {
+      "slug": "off-platform-payment",
+      "title": "Off-platform payment requests",
+      "category": "off_platform",
+      "summary": "Off-platform payment requests must be refused and escalated with context.",
+      "body": "If a learner says an instructor asked for cash, bank transfer, WhatsApp payment or a private booking outside LDA, tell them not to pay outside LDA. Platform protection only applies to bookings and payments completed through LDA.",
+      "audience": ["learner"],
+      "routeHref": "/support/learner/off-platform-report",
+      "actionLabel": "Report off-platform request"
+    },
+    {
+      "slug": "technical-page-error",
+      "title": "Website issue support",
+      "category": "technical",
+      "summary": "Website issues should capture page, device and exact error before sending to LDA support.",
+      "body": "For broken pages, blank screens, slow loading, menu issues or application errors, ask which page they were on, what they clicked, device/browser and the exact error shown. Suggest refreshing once, then create a support ticket if it continues.",
+      "audience": ["visitor", "learner", "instructor", "in_progress"],
+      "routeHref": "/feedback?from=chat",
+      "actionLabel": "Send feedback"
+    }
+  ]
+}

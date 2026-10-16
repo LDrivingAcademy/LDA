@@ -1,0 +1,405 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "id": "learner_dashboard",
+      "label": "Learner dashboard",
+      "href": "/learner-dashboard?from=chat",
+      "description": "Open your learner workspace for bookings, learning tools, progress, and account actions.",
+      "keywords": ["learner dashboard", "learner home", "learner account", "learner tools"],
+      "matchText": "learner dashboard learner home learner account learner tools",
+      "priority": 6,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "instructor_dashboard",
+      "label": "Instructor dashboard",
+      "href": "/instructor-dashboard?from=chat",
+      "description": "Open your instructor workspace for bookings, learner pings, availability, and daily operations.",
+      "keywords": ["instructor dashboard", "instructor home", "instructor account", "instructor tools"],
+      "matchText": "instructor dashboard instructor home instructor account instructor tools",
+      "priority": 6,
+      "allowedRoles": ["instructor"]
+    },
+    {
+      "id": "book_lesson_dashboard",
+      "label": "Book a lesson",
+      "href": "/learner-dashboard?section=driving-lessons&from=chat#driving-lessons-booking",
+      "description": "Find approved instructors, compare lesson availability, and continue to secure checkout.",
+      "keywords": ["book", "booking", "lesson", "driving lesson", "instructor", "slot", "availability", "checkout"],
+      "matchText": "book booking lesson driving lesson instructor slot availability checkout",
+      "priority": 4,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "book_lesson_dashboard_legacy",
+      "label": "Book a lesson",
+      "href": "/learner-dashboard?section=driving-lessons&from=dashboard#driving-lessons-booking",
+      "description": "Find approved instructors, compare lesson availability, and continue to secure checkout.",
+      "keywords": ["book", "booking", "lesson", "driving lesson", "instructor", "slot", "availability", "checkout"],
+      "matchText": "book booking lesson driving lesson instructor slot availability checkout",
+      "priority": 3,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "lesson_now",
+      "label": "Book a lesson",
+      "href": "/lesson-now",
+      "description": "Open short-window lesson booking for available instructors.",
+      "keywords": ["lesson now", "on demand", "book now", "urgent lesson", "today"],
+      "matchText": "lesson now on demand book now urgent lesson today",
+      "priority": 3,
+      "allowedRoles": ["visitor", "learner"]
+    },
+    {
+      "id": "planned_lessons",
+      "label": "Schedule lessons",
+      "href": "/planned-lessons?from=chat",
+      "description": "Choose future lesson dates and continue into instructor search.",
+      "keywords": ["schedule", "scheduled", "planned", "future", "date", "slot", "calendar"],
+      "matchText": "schedule scheduled planned future date slot calendar",
+      "priority": 3,
+      "allowedRoles": ["visitor", "learner"]
+    },
+    {
+      "id": "learner_calendar",
+      "label": "Learner calendar",
+      "href": "/learner-calendar?from=chat",
+      "description": "Review booked, pending, completed, and cancelled lessons by date.",
+      "keywords": ["calendar", "diary", "timetable", "pending", "completed", "cancelled", "day planner"],
+      "matchText": "calendar diary timetable pending completed cancelled day planner",
+      "priority": 4,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "learner_calendar_dashboard",
+      "label": "Learner calendar",
+      "href": "/learner-calendar?from=dashboard",
+      "description": "Review booked, pending, completed, and cancelled lessons by date.",
+      "keywords": ["calendar", "diary", "timetable", "pending", "completed", "cancelled", "day planner"],
+      "matchText": "calendar diary timetable pending completed cancelled day planner",
+      "priority": 3,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "booking_history",
+      "label": "Booking history",
+      "href": "/booking-history?from=dashboard",
+      "description": "Open lesson records, booking references, cancellation options, and completed lesson details.",
+      "keywords": ["history", "past lesson", "completed lesson", "reference", "booking reference", "cancel lesson", "cancellation"],
+      "matchText": "history past lesson completed lesson reference booking reference cancel lesson cancellation",
+      "priority": 3,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "track_lesson",
+      "label": "Track lesson",
+      "href": "/tracking?from=learner-dashboard",
+      "description": "Open live lesson tracking and instructor arrival information.",
+      "keywords": ["track", "tracking", "eta", "arrival", "late", "on the way", "route"],
+      "matchText": "track tracking eta arrival late on the way route where is my instructor",
+      "priority": 3,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "theory_test",
+      "label": "Theory test",
+      "href": "/theory-test?from=dashboard",
+      "description": "Practise mock theory questions and hazard perception.",
+      "keywords": ["theory", "hazard", "hazard perception", "mock", "revision", "dvsa", "highway code"],
+      "matchText": "theory hazard hazard perception mock revision dvsa highway code question bank",
+      "priority": 2,
+      "allowedRoles": ["visitor", "learner"]
+    },
+    {
+      "id": "account_centre",
+      "label": "Account centre",
+      "href": "/account",
+      "description": "Manage personal information, password, licence, phone number, and login activity.",
+      "keywords": ["account", "profile", "password", "login", "sign in", "licence", "license", "provisional", "phone", "recovery"],
+      "matchText": "account profile password login sign in licence license provisional phone recovery",
+      "priority": 2,
+      "allowedRoles": ["learner", "instructor", "in_progress"]
+    },
+    {
+      "id": "instructor_transfer",
+      "label": "Request instructor account transfer",
+      "href": "/account/instructor-transfer?from=chat",
+      "description": "Request review for an eligible learner account to become an instructor account.",
+      "keywords": ["become instructor", "qualified adi", "transfer account", "instructor transfer"],
+      "matchText": "become instructor qualified adi transfer account instructor transfer",
+      "priority": 2,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "learner_packages",
+      "label": "Learner packages",
+      "href": "/learner-plus",
+      "description": "Review learner package options and subscription support.",
+      "keywords": ["payment", "pay", "stripe", "card", "refund", "subscription", "upgrade", "package", "tier", "learner plus"],
+      "matchText": "payment pay stripe card refund subscription upgrade package tier learner plus",
+      "priority": 2,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "smart_match",
+      "label": "Smart Match",
+      "href": "/smart-match",
+      "description": "Match with instructors by learning style, support needs, vehicle preference, and availability.",
+      "keywords": ["smart match", "smartmatch", "match", "best instructor", "learning style", "support needs"],
+      "matchText": "smart match smartmatch match best instructor learning style support needs",
+      "priority": 3,
+      "allowedRoles": ["visitor", "learner"]
+    },
+    {
+      "id": "smart_match_chat",
+      "label": "Smart Match",
+      "href": "/smart-match?from=chat",
+      "description": "Match with instructors by learning style, support needs, vehicle preference, and availability.",
+      "keywords": ["smart match", "smartmatch", "match", "best instructor", "learning style", "support needs"],
+      "matchText": "smart match smartmatch match best instructor learning style support needs",
+      "priority": 3,
+      "allowedRoles": ["visitor", "learner"]
+    },
+    {
+      "id": "instructor_calendar",
+      "label": "Instructor calendar",
+      "href": "/instructor-calendar?from=chat",
+      "description": "Open instructor bookings, diary availability, and lesson records.",
+      "keywords": ["instructor calendar", "instructor diary", "availability", "learner booked", "booking not showing", "pupil", "pupils"],
+      "matchText": "instructor calendar instructor diary availability learner booked booking not showing pupil pupils",
+      "priority": 5,
+      "allowedRoles": ["instructor"]
+    },
+    {
+      "id": "instructor_calendar_dashboard",
+      "label": "Instructor calendar",
+      "href": "/instructor-calendar?from=dashboard",
+      "description": "Open instructor bookings, diary availability, and lesson records.",
+      "keywords": ["instructor calendar", "instructor diary", "availability", "learner booked", "booking not showing", "pupil", "pupils"],
+      "matchText": "instructor calendar instructor diary availability learner booked booking not showing pupil pupils",
+      "priority": 4,
+      "allowedRoles": ["instructor"]
+    },
+    {
+      "id": "instructor_verification",
+      "label": "Instructor verification",
+      "href": "/instructor-verification?from=chat",
+      "description": "Check instructor onboarding documents and approval progress.",
+      "keywords": ["instructor verification", "adi", "documents", "badge", "become instructor", "approval"],
+      "matchText": "instructor verification adi documents badge become instructor approval status",
+      "priority": 4,
+      "allowedRoles": ["in_progress"]
+    },
+    {
+      "id": "notification_hub_chat",
+      "label": "Notification hub",
+      "href": "/notification-hub?from=chat",
+      "description": "Review booking alerts, account updates, lesson changes, and platform messages.",
+      "keywords": ["notification", "notifications", "hub", "alert", "email", "message", "confirmation"],
+      "matchText": "notification notifications hub alert email message confirmation",
+      "priority": 3,
+      "allowedRoles": ["learner", "instructor", "in_progress"]
+    },
+    {
+      "id": "notification_hub_dashboard",
+      "label": "Notification hub",
+      "href": "/notification-hub?from=dashboard",
+      "description": "Review booking alerts, account updates, lesson changes, and platform messages.",
+      "keywords": ["notification", "notifications", "hub", "alert", "email", "message", "confirmation"],
+      "matchText": "notification notifications hub alert email message confirmation",
+      "priority": 2,
+      "allowedRoles": ["learner", "instructor", "in_progress"]
+    },
+    {
+      "id": "after_lesson_revision",
+      "label": "After-lesson revision",
+      "href": "/after-lesson-revision?from=chat",
+      "description": "View instructor after-lesson notes, progress details, and recommended revision.",
+      "keywords": ["after lesson", "review", "progress notes", "instructor notes", "revision", "lesson notes"],
+      "matchText": "after lesson review progress notes instructor notes revision lesson notes",
+      "priority": 4,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "progress_tracker",
+      "label": "Progress tracker",
+      "href": "/progress-tracker?from=dashboard",
+      "description": "Review learner progress and lesson targets.",
+      "keywords": ["progress", "progress tracker", "test ready", "lesson targets", "skills"],
+      "matchText": "progress progress tracker test ready lesson targets skills",
+      "priority": 2,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "first_car_guidance",
+      "label": "First-car guidance",
+      "href": "/first-car-guidance",
+      "description": "Review first-car checks and preparation guidance.",
+      "keywords": ["first car", "buy car", "car listing", "mileage", "seller", "vehicle history"],
+      "matchText": "first car buy car car listing mileage seller vehicle history",
+      "priority": 2,
+      "allowedRoles": ["visitor", "learner"]
+    },
+    {
+      "id": "insurance_support",
+      "label": "Insurance support",
+      "href": "/insurance-support",
+      "description": "Prepare learner insurance quote information.",
+      "keywords": ["insurance", "quote", "premium", "telematics", "black box"],
+      "matchText": "insurance quote premium telematics black box",
+      "priority": 2,
+      "allowedRoles": ["visitor", "learner"]
+    },
+    {
+      "id": "roadworthy",
+      "label": "Roadworthy guide",
+      "href": "/roadworthy",
+      "description": "Review roadworthy vehicle safety guidance.",
+      "keywords": ["roadworthy", "vehicle safety", "tyres", "brakes", "lights"],
+      "matchText": "roadworthy vehicle safety tyres brakes lights",
+      "priority": 2,
+      "allowedRoles": ["visitor", "learner", "instructor"]
+    },
+    {
+      "id": "instructor_vehicle_compliance",
+      "label": "Vehicle compliance",
+      "href": "/instructor-vehicle-compliance?from=dashboard",
+      "description": "Review instructor vehicle compliance and document status.",
+      "keywords": ["mot", "tax", "insurance", "service", "compliance", "maintenance", "document"],
+      "matchText": "mot tax insurance service compliance maintenance document instructor vehicle",
+      "priority": 3,
+      "allowedRoles": ["instructor"]
+    },
+    {
+      "id": "instructor_performance",
+      "label": "Performance metrics",
+      "href": "/instructor-performance?from=dashboard",
+      "description": "Review instructor performance, reviews, cancellations, and lesson metrics.",
+      "keywords": ["performance", "metrics", "pass rate", "reviews", "rating", "retention", "cancellation rate"],
+      "matchText": "performance metrics pass rate reviews rating retention cancellation rate",
+      "priority": 3,
+      "allowedRoles": ["instructor"]
+    },
+    {
+      "id": "instructor_packages",
+      "label": "Instructor packages",
+      "href": "/instructor-plus",
+      "description": "Review instructor package options.",
+      "keywords": ["instructor package", "instructor subscription", "instructor plus", "package"],
+      "matchText": "instructor package instructor subscription instructor plus package",
+      "priority": 2,
+      "allowedRoles": ["instructor"]
+    },
+    {
+      "id": "instructor_finance",
+      "label": "Instructor finance",
+      "href": "/instructor-finance",
+      "description": "Review instructor earnings, payout status, statements, and finance settings.",
+      "keywords": ["payout", "payout status", "earnings", "instructor finance", "stripe connect", "statement"],
+      "matchText": "payout payout status earnings instructor finance stripe connect statement",
+      "priority": 4,
+      "allowedRoles": ["instructor"]
+    },
+    {
+      "id": "cancellation_policy",
+      "label": "Cancellation policy",
+      "href": "/cancellation-policy",
+      "description": "Read LDA cancellation and refund rules before changing a booking.",
+      "keywords": ["cancellation policy", "refund rule", "24 hours", "cancelled refund", "rules"],
+      "matchText": "cancellation policy refund rule 24 hours cancelled refund rules",
+      "priority": 4,
+      "allowedRoles": ["visitor", "learner", "instructor", "in_progress"]
+    },
+    {
+      "id": "feedback",
+      "label": "Feedback",
+      "href": "/feedback?from=chat",
+      "description": "Send LDA a clear note about anything broken, confusing, slow, missing, or worth improving.",
+      "keywords": ["feedback", "improve", "broken", "confusing", "slow", "missing"],
+      "matchText": "feedback improve broken confusing slow missing",
+      "priority": 3,
+      "allowedRoles": ["visitor", "learner", "instructor", "in_progress"]
+    },
+    {
+      "id": "instructor_support",
+      "label": "Instructor support",
+      "href": "/support/instructor",
+      "description": "Use instructor support for verification, bookings, compliance, payout, and operational issues.",
+      "keywords": ["help", "support", "contact", "complaint", "problem", "issue", "stuck", "not working"],
+      "matchText": "instructor help support contact complaint problem issue stuck not working payout compliance",
+      "priority": 2,
+      "allowedRoles": ["instructor", "in_progress"]
+    },
+    {
+      "id": "learner_support",
+      "label": "Learner support",
+      "href": "/support/learner",
+      "description": "Use learner support for booking, payment, cancellation, and urgent lesson issues.",
+      "keywords": ["help", "support", "contact", "complaint", "problem", "issue", "stuck", "not working"],
+      "matchText": "learner help support contact complaint problem issue stuck not working booking payment",
+      "priority": 2,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "learner_payment_help",
+      "label": "Payment help",
+      "href": "/support/learner/payment-help",
+      "description": "Open learner payment help for confirmations, failed payments, duplicate charges, refunds, receipts, and invoices.",
+      "keywords": ["payment help", "payment", "receipt", "invoice", "refund", "duplicate charge", "failed payment", "card charged"],
+      "matchText": "payment help payment receipt invoice refund duplicate charge failed payment card charged",
+      "priority": 5,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "learner_off_platform_report",
+      "label": "Report off-platform request",
+      "href": "/support/learner/off-platform-report",
+      "description": "Report cash, bank transfer, WhatsApp, private booking, or other off-platform payment requests.",
+      "keywords": ["off platform", "cash", "bank transfer", "whatsapp payment", "private booking", "report instructor"],
+      "matchText": "off platform cash bank transfer whatsapp payment private booking report instructor",
+      "priority": 5,
+      "allowedRoles": ["learner"]
+    },
+    {
+      "id": "guest_support",
+      "label": "Guest support",
+      "href": "/support/guest",
+      "description": "Use guest support for public questions, sign-in help, bookings, and website issues.",
+      "keywords": ["guest support", "help before sign in", "public support", "contact support"],
+      "matchText": "guest support help before sign in public support contact support",
+      "priority": 2,
+      "allowedRoles": ["visitor"]
+    },
+    {
+      "id": "technical_support_dashboard",
+      "label": "Technical support",
+      "href": "/technical-support",
+      "description": "Open the technical support workspace for queue, incidents, site health, and support monitoring.",
+      "keywords": ["technical support", "support dashboard", "support queue", "site health", "incidents"],
+      "matchText": "technical support support dashboard support queue site health incidents",
+      "priority": 4,
+      "allowedRoles": ["admin"]
+    },
+    {
+      "id": "login",
+      "label": "Log in",
+      "href": "/auth/login?from=chat",
+      "description": "Sign in to your LDA account.",
+      "keywords": ["login", "log in", "sign in"],
+      "matchText": "login log in sign in",
+      "priority": 1,
+      "allowedRoles": ["visitor"]
+    },
+    {
+      "id": "signup",
+      "label": "Create an account",
+      "href": "/auth/sign-up?from=chat",
+      "description": "Create an LDA account.",
+      "keywords": ["sign up", "signup", "create account", "register"],
+      "matchText": "sign up signup create account register",
+      "priority": 1,
+      "allowedRoles": ["visitor"]
+    }
+  ]
+}

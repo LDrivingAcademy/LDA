@@ -1,0 +1,126 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { BadgePoundSterling, CheckCircle2, FileText, ShieldCheck, Sparkles } from "lucide-react";
+
+const insurerRows = [
+  { provider: "Telematics starter pathway", type: "Comprehensive", estimate: "£1,150-£1,650", confidence: 93, strengths: ["Black-box discount", "Low mileage friendly", "Driving score coaching"], fit: "Best for careful new drivers" },
+  { provider: "Mainstream comprehensive pathway", type: "Comprehensive", estimate: "£1,450-£2,100", confidence: 86, strengths: ["Windscreen options", "Courtesy car options", "No black box"], fit: "Best for flexible daily use" },
+  { provider: "Third-party fire and theft pathway", type: "TPFT", estimate: "£1,300-£1,950", confidence: 74, strengths: ["Lower cover level", "May suit lower-value cars", "Check excess carefully"], fit: "Sometimes cheaper, not always" },
+  { provider: "Named-driver family pathway", type: "Comprehensive", estimate: "£1,250-£1,900", confidence: 81, strengths: ["Parent as named driver", "Shared vehicle option", "Ownership rules matter"], fit: "Best where family car use is genuine" }
+];
+
+const quoteFactors = ["Car insurance group", "Annual mileage", "Parking overnight location", "Occupation or student status", "Voluntary excess", "Named drivers", "Telematics willingness", "No-claims history"];
+const quoteChecklist = ["Use the same car details on every quote", "Compare total annual cost, not monthly headline only", "Check compulsory and voluntary excess", "Confirm whether commuting is included", "Read black-box curfew and driving-score rules"];
+
+export function InsuranceSupport() {
+  const [coverType, setCoverType] = useState("all");
+  const [mileage, setMileage] = useState(6000);
+  const [telematics, setTelematics] = useState(true);
+
+  const filteredRows = useMemo(() => {
+    return insurerRows.filter((row) => {
+      if (coverType !== "all" && row.type !== coverType) return false;
+      if (!telematics && row.provider.toLowerCase().includes("telematics")) return false;
+      return true;
+    });
+  }, [coverType, telematics]);
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+        <aside className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+          <Sparkles className="text-brand" />
+          <h2 className="mt-4 text-2xl font-black">Quote profile</h2>
+          <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm font-black leading-6 text-red-950">
+            LDA quote guidance is active. Live insurer pricing will be added once broker or comparison partner access is approved.
+          </div>
+          <label className="mt-5 grid gap-2 text-sm font-black text-zinc-700">
+            Cover type
+            <select value={coverType} onChange={(event) => setCoverType(event.target.value)} className="rounded border border-zinc-300 px-3 py-3 text-black">
+              <option value="all">Show all suitable cover</option>
+              <option value="Comprehensive">Comprehensive</option>
+              <option value="TPFT">Third-party fire and theft</option>
+            </select>
+          </label>
+          <label className="mt-4 grid gap-2 text-sm font-black text-zinc-700">
+            Annual mileage: {mileage.toLocaleString("en-GB")} miles
+            <input type="range" min="1000" max="18000" step="500" value={mileage} onChange={(event) => setMileage(Number(event.target.value))} className="accent-red-600" />
+          </label>
+          <label className="mt-4 flex items-center justify-between gap-3 rounded border border-zinc-200 bg-zinc-50 p-4 text-sm font-black">
+            Consider telematics
+            <input type="checkbox" checked={telematics} onChange={(event) => setTelematics(event.target.checked)} className="accent-red-600" />
+          </label>
+          <p className="mt-5 text-sm font-semibold leading-6 text-zinc-600">
+            These are planning ranges, not live quotes. They help learners understand which policy route to compare before entering personal data on insurer websites.
+          </p>
+          <div className="mt-5 grid gap-2">
+            {quoteChecklist.map((check) => (
+              <div key={check} className="flex items-start gap-2 text-sm font-bold leading-6 text-zinc-700">
+                <CheckCircle2 className="mt-1 shrink-0 text-brand" size={16} />
+                {check}
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        <div className="grid gap-5">
+          <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center gap-3">
+              <BadgePoundSterling className="text-brand" />
+              <h2 className="text-2xl font-black">Insurance quote support</h2>
+            </div>
+            <div className="mt-5 rounded border border-zinc-200">
+              <div className="hidden grid-cols-[1.1fr_0.7fr_0.8fr_0.7fr_1.2fr] bg-black px-4 py-3 text-xs font-black uppercase text-white md:grid">
+                <span>Provider path</span>
+                <span>Cover</span>
+                <span>Estimate</span>
+                <span>Fit score</span>
+                <span>Best fit</span>
+              </div>
+              {filteredRows.map((row) => (
+                <div key={row.provider} className="grid gap-3 border-t border-zinc-200 px-4 py-4 text-sm font-bold text-zinc-700 md:grid-cols-[1.1fr_0.7fr_0.8fr_0.7fr_1.2fr]">
+                  <div>
+                    <div className="font-black text-black">{row.provider}</div>
+                    <div className="mt-2 grid gap-1">
+                      {row.strengths.map((strength) => <span key={strength} className="text-xs text-zinc-600">{strength}</span>)}
+                    </div>
+                  </div>
+                  <span><span className="mr-2 font-black text-zinc-500 md:hidden">Cover:</span>{row.type}</span>
+                  <span className="font-black text-brand"><span className="mr-2 text-zinc-500 md:hidden">Estimate:</span>{row.estimate}</span>
+                  <span className="font-black text-black"><span className="mr-2 text-zinc-500 md:hidden">Fit score:</span>{row.confidence}%</span>
+                  <span><span className="mr-2 font-black text-zinc-500 md:hidden">Best fit:</span>{row.fit}</span>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="rounded border border-zinc-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center gap-3">
+              <FileText className="text-brand" />
+              <h2 className="text-2xl font-black">Quote readiness pack</h2>
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {quoteFactors.map((factor) => (
+                <div key={factor} className="flex items-start gap-2 rounded border border-zinc-200 bg-zinc-50 p-3 text-sm font-bold text-zinc-700">
+                  <CheckCircle2 className="mt-0.5 shrink-0 text-brand" size={16} />
+                  {factor}
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="rounded border border-red-200 bg-red-50 p-5 shadow-sm">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="text-brand" />
+              <h2 className="text-2xl font-black">LDA quote intelligence</h2>
+            </div>
+            <p className="mt-3 text-sm font-semibold leading-6 text-red-950">
+              Future live mode can combine car shortlist data, lesson progress, postcode, mileage, and partner insurer APIs to pre-fill quote forms and flag policies that do not suit new drivers.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}

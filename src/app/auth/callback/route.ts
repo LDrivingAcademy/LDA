@@ -1,0 +1,209 @@
+import { type EmailOtpType } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
+import { isDirectorAdminEmail } from "@/lib/admin-access";
+import { issueLdaAuthSession } from "@/lib/auth-sessions";
+import { hasCompletedLearnerEligibility } from "@/lib/learner-eligibility";
+import { recordLoginActivity } from "@/lib/login-activity";
+import { getAppOrigin } from "@/lib/security";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config";
+
+export const dynamic = "force-dynamic";
+
+function safeRole(value: string | null) {
+  if (value === "admin") return "admin";
+  return value === "instructor" ? "instructor" : "learner";
+}
+
+function safeNextPath(value: string | null, role: string) {
+  const fallback = role === "admin" ? "/admin-access" : `/auth/verify?role=${role}`;
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return fallback;
+  }
+
+  return value;
+}
+
+function loginRedirect(request: NextRequest, role: string, message: string) {
+  const url = new URL(`/auth/login?role=${role}`, getAppOrigin(request));
+  url.searchParams.set("message", message);
+  return NextResponse.redirect(url);
+}
+
+function adminPortalRedirect(request: NextRequest) {
+  const url = new URL("/admin-access", getAppOrigin(request));
+  url.searchParams.set("message", "This account must use the secure LDA admin access portal.");
+  return NextResponse.redirect(url);
+}
+
+function isMarketplaceRole(role: string): role is "learner" | "instructor" {
+  return role === "learner" || role === "instructor";
+}
+
+async function issueMarketplaceSessionIfAccountIsReady({
+  userId,
+  role,
+  request
+}: {
+  userId: string;
+  role: "learner" | "instructor";
+  request: NextRequest;
+}) {
+  const adminClient = createAdminClient();
+
+  if (!adminClient) {
+    return;
+  }
+
+  const { data: roleRow } = await adminClient
+    .from("account_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", role)
+    .maybeSingle();
+
+  if (!roleRow) {
+    return;
+  }
+
+  if (role === "learner") {
+    const { data: learnerProfile } = await adminClient
+      .from("learner_profiles")
+      .select("date_of_birth,provisional_licence_confirmed_at,terms_accepted_at")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!hasCompletedLearnerEligibility(learnerProfile)) {
+      return;
+    }
+  }
+
+  if (role === "instructor") {
+    const { data: instructorProfile } = await adminClient
+      .from("instructor_profiles")
+      .select("user_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!instructorProfile) {
+      return;
+    }
+  }
+
+  await issueLdaAuthSession({
+    adminClient,
+    cookieStore: await cookies(),
+    headers: request.headers,
+    userId,
+    role,
+    rememberMe: false
+  });
+}
+
+function createSupabaseCallbackClient(request: NextRequest, response: NextResponse) {
+  if (!supabaseUrl || !supabasePublishableKey) {
+    return null;
+  }
+
+  return createServerClient(supabaseUrl, supabasePublishableKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
+      }
+    }
+  });
+}
+
+function redirectWithAuthCookies(target: URL, response: NextResponse) {
+  const redirectResponse = NextResponse.redirect(target);
+  response.cookies.getAll().forEach((cookie) => {
+    redirectResponse.cookies.set(cookie);
+  });
+  return redirectResponse;
+}
+
+export async function GET(request: NextRequest) {
+  const role = safeRole(request.nextUrl.searchParams.get("role"));
+  const nextPath = safeNextPath(request.nextUrl.searchParams.get("next"), role);
+  const code = request.nextUrl.searchParams.get("code");
+  const tokenHash = request.nextUrl.searchParams.get("token_hash");
+  const otpType = request.nextUrl.searchParams.get("type");
+  const errorDescription = request.nextUrl.searchParams.get("error_description") || request.nextUrl.searchParams.get("error");
+  const resetEmail = request.nextUrl.searchParams.get("email");
+
+  if (errorDescription) {
+    return loginRedirect(request, role, errorDescription.replace(/\+/g, " "));
+  }
+
+  const response = NextResponse.next({
+    request
+  });
+  const supabase = createSupabaseCallbackClient(request, response);
+
+  if (!supabase) {
+    return loginRedirect(request, role, "Secure account access is temporarily unavailable. Please try again later.");
+  }
+
+  let verifiedEmail = resetEmail;
+
+  if (code) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      const message = error.message.includes("code verifier")
+        ? nextPath === "/auth/update-password"
+          ? "This reset link was generated by the older same-device flow. Request a fresh password reset email and it will open the new-password page."
+          : "This email link was generated by the older same-device login flow. Request a fresh LDA email link and it can be opened on any device."
+        : error.message;
+      return loginRedirect(request, role, message);
+    }
+    verifiedEmail = data.user?.email ?? data.session?.user.email ?? verifiedEmail;
+  } else if (tokenHash && otpType) {
+    const { data, error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: otpType as EmailOtpType
+    });
+
+    if (error) {
+      return loginRedirect(request, role, error.message);
+    }
+    verifiedEmail = data.user?.email ?? data.session?.user.email ?? verifiedEmail;
+  } else {
+    return loginRedirect(request, role, "The email link is invalid or has expired. Request a fresh secure link.");
+  }
+
+  if (role !== "admin" && isDirectorAdminEmail(verifiedEmail)) {
+    return adminPortalRedirect(request);
+  }
+
+  if (isMarketplaceRole(role) && nextPath !== "/auth/update-password") {
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      await recordLoginActivity({
+        supabase,
+        userId: user.id,
+        role,
+        headers: request.headers
+      });
+      await issueMarketplaceSessionIfAccountIsReady({ userId: user.id, role, request });
+    }
+  }
+
+  const target = new URL(nextPath, getAppOrigin(request));
+  target.searchParams.set("role", role);
+  if (nextPath === "/auth/update-password" && verifiedEmail) {
+    target.searchParams.set("email", verifiedEmail);
+  }
+
+  return redirectWithAuthCookies(target, response);
+}

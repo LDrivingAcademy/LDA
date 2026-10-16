@@ -1,0 +1,23 @@
+{
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/site-health",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/account-deletions",
+      "schedule": "30 8 * * *"
+    },
+    {
+      "path": "/api/cron/instructor-compliance",
+      "schedule": "0 7 * * *"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "codex/lda-maintenance-checkpoints": false
+    }
+  }
+}

@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const master='C:/Users/Joshu/LDA Hazard Perception Production';
+const out=master+'/archives/website-mobile-loading-20260912-v1';
+assert(!fs.existsSync(out),'Preserve any existing archive');
+assert(JSON.parse(fs.readFileSync(master+'/qc-reports/mobile-loading-verification.json')).passed);
+assert(JSON.parse(fs.readFileSync(master+'/qc-reports/mobile-loading-live.json')).passed);
+fs.mkdirSync(out,{recursive:true});
+for(const folder of ['src','public'])fs.cpSync('.tmp/lda-hazard-full-site-v1/'+folder,out+'/'+folder,{recursive:true});
+for(const file of ['package.json','package-lock.json','next.config.ts','next-env.d.ts','tsconfig.json','vercel.json','postcss.config.mjs','.gitignore'])fs.copyFileSync(file,out+'/'+file);
+fs.mkdirSync(out+'/docs');
+for(const file of ['lda-hazard-scoring.md','lda-hazard-mobile-loading.md'])fs.copyFileSync('docs/'+file,out+'/docs/'+file);
+fs.mkdirSync(out+'/scripts/hazard-browser-check',{recursive:true});
+for(const file of ['test-lda-hazard-loading.ts','test-lda-hazard-mode-ui.mjs','verify-hazard-mobile-source.mjs','verify-mobile-release-http.mjs','hazard-browser-check/mobile-loading-server.mjs','hazard-browser-check/check-mobile-loading.mjs'])fs.copyFileSync('scripts/'+file,out+'/scripts/'+file);
+fs.mkdirSync(out+'/qc-reports');
+for(const name of fs.readdirSync(master+'/qc-reports').filter(n=>n.startsWith('mobile-loading-')))fs.copyFileSync(master+'/qc-reports/'+name,out+'/qc-reports/'+name);
+fs.writeFileSync(out+'/release-summary.json',JSON.stringify({live:true,deployment:'dpl_6PbhzEz8azh9vcfCrZZ25RZ9wcHA',rollback:'dpl_CtBjwG5AfykhoF3Lhoc94v1fxp3K',manual_play:true,media_and_scoring_unchanged:true,actual_iphone_check_pending:true,private_archive:true},null,2));
+console.log(JSON.stringify({archive:out,saved:true}));

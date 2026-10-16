@@ -1,0 +1,903 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --muted: #52525b;
+  --border: #e4e4e7;
+  --card: #ffffff;
+  --brand: #e30613;
+  --brand-strong: #b8000f;
+  --ink: #000000;
+  --lda-topbar-height: 84px;
+  --lda-logo-width: 153px;
+  --lda-logo-height: 54px;
+  --lda-space-2xs: 0.25rem;
+  --lda-space-xs: 0.5rem;
+  --lda-space-sm: 0.75rem;
+  --lda-space-md: 1rem;
+  --lda-space-lg: 1.5rem;
+  --lda-space-xl: 2rem;
+  --lda-space-2xl: 3rem;
+  --lda-text-xs: 0.75rem;
+  --lda-text-sm: 0.875rem;
+  --lda-text-md: 1rem;
+  --lda-text-lg: 1.125rem;
+  --lda-text-xl: 1.25rem;
+  --lda-line-tight: 1.15;
+  --lda-line-body: 1.5;
+  --lda-line-comfortable: 1.65;
+  --lda-text-measure: 68ch;
+  --lda-control-min-block: 2.75rem;
+  --lda-control-max-inline: 100%;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-ink: var(--ink);
+  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+html {
+  min-width: 320px;
+  max-width: 100%;
+  overflow-x: clip;
+  background: var(--background);
+  color: var(--foreground);
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+  max-width: 100%;
+  overflow-x: hidden;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  cursor: default;
+  caret-color: transparent;
+}
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; min-width: 0; }
+img, video, canvas, iframe { max-width: 100%; }
+
+body > *,
+:where(main, section, article, aside, header, footer, nav, div, form, fieldset, label, ul, ol, li) {
+  min-width: 0;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, li, a, button, label, span, strong, em, td, th) {
+  overflow-wrap: anywhere;
+}
+
+:where(button, a, input, select, textarea) {
+  max-width: 100%;
+}
+
+.lda-i18n-wrap {
+  hyphens: auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.lda-i18n-measure {
+  max-inline-size: var(--lda-text-measure);
+}
+
+.lda-i18n-control {
+  max-inline-size: var(--lda-control-max-inline);
+  min-block-size: var(--lda-control-min-block);
+  min-inline-size: 0;
+  white-space: normal;
+}
+
+html[dir="rtl"] body {
+  direction: rtl;
+  text-align: start;
+}
+
+html[dir="rtl"] .lda-universal-topbar,
+html[dir="rtl"] .lda-universal-topbar-inner,
+html[dir="rtl"] .notranslate {
+  direction: ltr;
+}
+
+html[data-i18n-qa="on"] [data-i18n-overflow="true"] {
+  outline: 2px solid #e30613 !important;
+  outline-offset: 2px;
+}
+
+.lda-universal-topbar {
+  height: var(--lda-topbar-height);
+  min-height: var(--lda-topbar-height);
+  max-width: 100%;
+  overflow: visible;
+  position: relative;
+  z-index: 40;
+}
+
+.lda-universal-topbar-inner {
+  height: var(--lda-topbar-height);
+  min-height: var(--lda-topbar-height);
+  min-width: 0;
+}
+
+.lda-universal-logo {
+  width: var(--lda-logo-width);
+  height: var(--lda-logo-height);
+  max-width: 38vw;
+}
+
+[data-lda-menu-row="true"] {
+  appearance: none !important;
+  border-radius: 0;
+  font-family: var(--font-sans) !important;
+  font-size: 1rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.25 !important;
+  text-align: left !important;
+}
+
+button[data-lda-menu-row="true"] {
+  background: transparent !important;
+  border: 0 !important;
+  color: #ffffff !important;
+  cursor: pointer;
+  margin: 0 !important;
+}
+
+.lda-main-menu-lines {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  width: 24px;
+}
+
+.lda-main-menu-lines span {
+  background: #ffffff;
+  border-radius: 9999px;
+  display: block;
+  flex: 0 0 auto;
+  height: 2px;
+  width: 24px;
+}
+
+#lda-browser-compatibility-fallback {
+  display: none;
+}
+
+html.lda-legacy-browser body {
+  overflow: hidden;
+}
+
+html.lda-legacy-browser #lda-browser-compatibility-fallback {
+  background: #ffffff;
+  color: #000000;
+  display: block;
+  font-family: Arial, Helvetica, sans-serif;
+  inset: 0;
+  overflow-y: auto;
+  padding: 24px;
+  position: fixed;
+  z-index: 2147483647;
+}
+
+.lda-browser-compatibility-card {
+  border: 1px solid #d4d4d8;
+  margin: 48px auto;
+  max-width: 680px;
+  padding: 24px;
+}
+
+.lda-browser-compatibility-brand {
+  background: #000000;
+  color: #ffffff;
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+}
+
+.lda-browser-compatibility-card h1 {
+  color: #000000;
+  font-size: 2rem;
+  line-height: 1.1;
+  margin: 0 0 12px;
+}
+
+.lda-browser-compatibility-card p {
+  color: #3f3f46;
+  font-size: 1rem;
+  line-height: 1.55;
+  margin: 0 0 16px;
+}
+
+.lda-browser-compatibility-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.lda-browser-compatibility-actions a {
+  border: 1px solid #000000;
+  color: #000000;
+  display: inline-block;
+  font-weight: 800;
+  padding: 12px 16px;
+  text-decoration: none;
+}
+
+.lda-browser-compatibility-actions a:first-child {
+  background: #e30613;
+  border-color: #e30613;
+  color: #ffffff;
+}
+
+:is(main, section, article, aside, div, p, span, h1, h2, h3, h4, h5, h6, li, strong, em) {
+  cursor: default;
+}
+
+:is(input, textarea, [contenteditable="true"]) {
+  cursor: text;
+  caret-color: auto;
+}
+
+.lda-polished-map {
+  isolation: isolate;
+}
+
+.lda-polished-map .gm-style img {
+  max-width: none;
+}
+
+a[href],
+button:not(:disabled),
+select:not(:disabled),
+summary,
+label[for],
+input[type="button"]:not(:disabled),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="reset"]:not(:disabled),
+input[type="submit"]:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+[data-clickable="true"],
+.lda-pill {
+  cursor: pointer;
+}
+
+button[aria-label="Remove skill"] {
+  display: none !important;
+}
+
+a[href] :is(main, section, article, aside, div, p, span, h1, h2, h3, h4, h5, h6, li, strong, em, svg),
+button:not(:disabled) :is(div, p, span, h1, h2, h3, h4, h5, h6, li, strong, em, svg),
+[role="button"]:not([aria-disabled="true"]) :is(div, p, span, h1, h2, h3, h4, h5, h6, li, strong, em, svg),
+[data-clickable="true"] :is(div, p, span, h1, h2, h3, h4, h5, h6, li, strong, em, svg),
+.lda-pill :is(span, svg) {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled,
+input:disabled,
+textarea:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :where(a[href], button:not(:disabled), summary, label[for], input[type="button"]:not(:disabled), input[type="checkbox"]:not(:disabled), input[type="radio"]:not(:disabled), input[type="reset"]:not(:disabled), input[type="submit"]:not(:disabled), [role="button"]:not([aria-disabled="true"]), [data-clickable="true"], .cursor-pointer, .lda-pill):hover,
+  :where(a[href], button:not(:disabled), summary, label[for], input[type="button"]:not(:disabled), input[type="checkbox"]:not(:disabled), input[type="radio"]:not(:disabled), input[type="reset"]:not(:disabled), input[type="submit"]:not(:disabled), [role="button"]:not([aria-disabled="true"]), [data-clickable="true"], .cursor-pointer, .lda-pill):hover * {
+    cursor: pointer !important;
+  }
+
+  :where(button:disabled, select:disabled, input:disabled, textarea:disabled, [aria-disabled="true"], .cursor-not-allowed):hover,
+  :where(button:disabled, select:disabled, input:disabled, textarea:disabled, [aria-disabled="true"], .cursor-not-allowed):hover * {
+    cursor: not-allowed !important;
+  }
+}
+
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+.goog-te-menu-frame,
+.goog-te-ftab-frame,
+.goog-tooltip,
+.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+.VIpgJd-ZVi9od-xl07Ob-OEVmcd,
+.VIpgJd-yAWNEb-L7lbkb,
+iframe.skiptranslate {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+#google_translate_element {
+  position: fixed !important;
+  top: 0 !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+body {
+  top: 0 !important;
+}
+.goog-text-highlight {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.focus-ring { outline: 2px solid transparent; outline-offset: 2px; }
+.focus-ring:focus-visible { outline-color: var(--brand); }
+
+[data-logo-slot="lda-brand"] {
+  aspect-ratio: 3061 / 1320;
+  flex: 0 0 auto;
+  line-height: 0;
+  transform: translateZ(0);
+}
+
+[data-logo-slot="lda-brand"] [data-logo-image="lda-brand"] {
+  display: block;
+  height: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+  width: 100%;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.bg-ink, .bg-black, .bg-zinc-950, .bg-zinc-900, .bg-card, .bg-background) {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.bg-zinc-900\/70, .bg-zinc-950\/70, .bg-black\/70, .bg-black\/80) {
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #000000 !important;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.text-white, .text-foreground, .text-zinc-100, .text-zinc-200) {
+  color: #000000 !important;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.text-zinc-300, .text-zinc-400, .text-zinc-500, .text-muted) {
+  color: #52525b !important;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.text-red-100, .text-red-200) {
+  color: #e30613 !important;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.border-zinc-700, .border-zinc-800, .border-zinc-900, .border-border) {
+  border-color: #e4e4e7 !important;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(input, select, textarea) {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #d4d4d8 !important;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(input, select, textarea)::placeholder {
+  color: #71717a !important;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(.lda-pill, button.lda-pill, a.lda-pill) {
+  color: #ffffff !important;
+}
+
+.smart-match-chip-selected {
+  background: var(--brand) !important;
+  border-color: var(--brand) !important;
+  color: #ffffff !important;
+}
+
+.smart-match-chip-selected svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+:is(main.bg-ink, main.bg-black, main.bg-background) :is(header, footer, nav) {
+  color: inherit;
+}
+
+.lda-admin-topbar,
+.lda-admin-topbar > div {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.lda-admin-topbar {
+  border-color: #18181b !important;
+  left: 0 !important;
+  margin-inline: 0 !important;
+  max-width: none !important;
+  right: 0 !important;
+  width: 100% !important;
+  width: 100vw !important;
+}
+
+.lda-admin-topbar > .lda-universal-topbar-inner {
+  margin-inline: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+
+.lda-admin-topbar [data-logo-slot="lda-brand"],
+.lda-admin-topbar :is(.bg-black, .bg-zinc-950, .bg-zinc-900) {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.lda-admin-topbar :is(a, button, div, span, svg) {
+  color: #ffffff !important;
+  stroke: currentColor;
+}
+
+.lda-admin-topbar :is(.text-white, .text-zinc-100, .text-zinc-200) {
+  color: #ffffff !important;
+}
+
+.lda-admin-topbar :is(.text-zinc-300, .text-zinc-400) {
+  color: #d4d4d8 !important;
+}
+
+.lda-admin-topbar .lda-admin-signout {
+  background: #e30613 !important;
+  border-color: #ff4b55 !important;
+  color: #ffffff !important;
+}
+
+.lda-admin-topbar .lda-admin-signout,
+.lda-admin-topbar .lda-admin-signout * {
+  color: #ffffff !important;
+}
+
+.lda-admin-topbar .lda-admin-menu-button {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  border-color: #3f3f46 !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.lda-admin-topbar .lda-admin-menu-button svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.lda-admin-topbar .lda-admin-menu-lines {
+  align-items: center;
+  display: flex !important;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  width: 24px;
+}
+
+.lda-admin-topbar .lda-admin-menu-lines span {
+  display: block;
+  flex: 0 0 auto;
+  height: 2px;
+  width: 24px;
+  border-radius: 9999px;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.lda-technical-support-topbar,
+.lda-technical-support-topbar > div {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.lda-technical-support-topbar {
+  border-color: #18181b !important;
+  margin-inline: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+
+.lda-technical-support-topbar > .lda-universal-topbar-inner {
+  width: 100% !important;
+}
+
+.lda-technical-support-topbar [data-logo-slot="lda-brand"],
+.lda-technical-support-topbar :is(.bg-black, .bg-zinc-950, .bg-zinc-900) {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.lda-technical-support-topbar :is(a, button, div, span, svg) {
+  color: #ffffff !important;
+  stroke: currentColor;
+}
+
+.lda-technical-support-topbar :is(.text-zinc-200, .text-zinc-300, .text-zinc-400) {
+  color: #e4e4e7 !important;
+}
+
+.lda-technical-support-nav-link {
+  border-color: rgb(255 255 255 / 0.25) !important;
+  white-space: nowrap !important;
+}
+
+.lda-technical-support-nav-label {
+  display: inline !important;
+  max-width: none !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  visibility: visible !important;
+  white-space: nowrap !important;
+}
+
+.lda-technical-support-nav-link:hover,
+.lda-technical-support-nav-link:focus-visible {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgb(239 68 68 / 0.35);
+}
+
+.lda-technical-support-signout {
+  background: #e30613 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.lda-technical-support-signout:hover,
+.lda-technical-support-signout:focus-visible {
+  background: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgb(239 68 68 / 0.35);
+}
+
+.lda-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid #ff4b55;
+  background: linear-gradient(180deg, #e30613, #b8000f);
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 14px 28px rgba(184, 0, 15, 0.22);
+  font-weight: 900;
+  line-height: 1;
+  min-height: 3.5rem;
+  max-width: 100%;
+  padding: 1rem 2rem;
+  text-align: center;
+  white-space: normal;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+.lda-pill:hover {
+  border-color: #ff7a81;
+  background: linear-gradient(180deg, #ff1f2f, #c90012);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.lda-pill:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+.lda-red-pill {
+  background: #e30613 !important;
+  border-color: #ff4b55 !important;
+  color: #ffffff !important;
+}
+.lda-red-pill:hover {
+  background: #c90012 !important;
+  color: #ffffff !important;
+}
+.lda-home-primary-cta,
+.lda-home-primary-cta * {
+  color: #ffffff !important;
+}
+.lda-home-primary-cta svg {
+  stroke: #ffffff !important;
+}
+.lda-pill-sm {
+  min-height: 2.75rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+}
+.lda-pill-wide {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .lda-instructor-calendar-page main > section:nth-of-type(2) > aside {
+    align-self: stretch;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 100%;
+  }
+
+  .lda-instructor-calendar-page main > section:nth-of-type(2) > aside > section:first-child > div:nth-child(2) {
+    max-height: 178px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+  }
+
+  .lda-instructor-calendar-page main > section:nth-of-type(2) > aside > section:nth-child(2) {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .lda-instructor-calendar-page main > section:nth-of-type(2) > aside > section:nth-child(2) > div:last-child {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --lda-topbar-height: 68px;
+    --lda-logo-width: 102px;
+    --lda-logo-height: 37px;
+  }
+
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
+
+  header > div.flex {
+    min-width: 0;
+    gap: 0.75rem !important;
+  }
+
+  .lda-universal-topbar-inner {
+    padding-inline: 0.75rem !important;
+  }
+
+  main h1 {
+    font-size: clamp(2rem, 9vw, 3.1rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  main h2 {
+    font-size: clamp(1.5rem, 7vw, 2.25rem) !important;
+    line-height: 1.1 !important;
+  }
+
+  main h3 {
+    line-height: 1.15 !important;
+  }
+
+  main p,
+  main li {
+    line-height: 1.6 !important;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+  }
+
+  .lda-pill {
+    min-height: 3rem;
+    max-width: 100%;
+    padding: 0.85rem 1rem;
+    white-space: normal;
+    line-height: 1.15;
+  }
+
+  .lda-pill-sm {
+    min-height: 2.5rem;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .lda-responsive-map {
+    min-height: 320px;
+    height: min(68dvh, 420px) !important;
+  }
+
+  .fixed.bottom-5.right-5,
+  .fixed.bottom-6.right-6 {
+    bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
+    right: 0.75rem !important;
+  }
+
+  .fixed.bottom-5.left-4 {
+    bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
+    left: 0.75rem !important;
+  }
+
+  .lda-mobile-scroll {
+    margin-inline: -1rem;
+    overflow-x: auto;
+    padding-inline: 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lda-mobile-scroll > * {
+    min-width: 640px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lda-admin-signout,
+  .lda-technical-support-signout {
+    min-height: 2.5rem !important;
+    padding-inline: 0.75rem !important;
+  }
+
+  .lda-admin-director-label {
+    max-width: 34vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lda-admin-role-label {
+    max-width: 34vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 389px) {
+  [data-lda-account-compact="true"],
+  .lda-admin-identity,
+  .lda-technical-support-topbar .lda-technical-support-nav-link {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1920px) {
+  .lda-responsive-map {
+    height: min(62dvh, 720px) !important;
+  }
+}
+
+main .lda-admin-topbar,
+main.bg-black .lda-admin-topbar,
+main.bg-ink .lda-admin-topbar,
+main.bg-background .lda-admin-topbar,
+main .lda-admin-topbar > .lda-universal-topbar-inner {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+main .lda-admin-topbar .lda-admin-identity,
+main .lda-admin-topbar .lda-admin-director-label,
+main .lda-admin-topbar .lda-admin-role-label {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+main .lda-admin-topbar .lda-admin-role-label {
+  display: block !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+}
+
+main .lda-admin-topbar button.lda-admin-menu-button,
+main .lda-admin-topbar .lda-admin-menu-button {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: #000000 !important;
+  background-color: #000000 !important;
+  border: 1px solid #52525b !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+main .lda-admin-topbar .lda-admin-menu-lines {
+  align-items: center !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  justify-content: center !important;
+  width: 24px !important;
+}
+
+main .lda-admin-topbar .lda-admin-menu-lines > span {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 0 !important;
+  border-radius: 9999px !important;
+  display: block !important;
+  flex: 0 0 auto !important;
+  height: 2px !important;
+  opacity: 1 !important;
+  padding: 0 !important;
+  width: 24px !important;
+}
+
+.lda-admin-topbar .lda-admin-menu-panel,
+main .lda-admin-topbar .lda-admin-menu-panel {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  border-color: #27272a !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.lda-admin-topbar .lda-admin-menu-heading,
+main .lda-admin-topbar .lda-admin-menu-heading {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  border-color: #27272a !important;
+  color: #ffffff !important;
+}
+
+.lda-admin-topbar .lda-admin-menu-link,
+main .lda-admin-topbar .lda-admin-menu-link {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.lda-admin-topbar .lda-admin-menu-link:hover,
+.lda-admin-topbar .lda-admin-menu-link:focus-visible,
+main .lda-admin-topbar .lda-admin-menu-link:hover,
+main .lda-admin-topbar .lda-admin-menu-link:focus-visible {
+  background: #e30613 !important;
+  background-color: #e30613 !important;
+  color: #ffffff !important;
+  outline: 2px solid rgba(255, 255, 255, 0.78);
+  outline-offset: -2px;
+  -webkit-text-fill-color: #ffffff !important;
+}

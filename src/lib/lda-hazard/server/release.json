@@ -1,0 +1,903 @@
+{
+  "status": "verified-playable",
+  "release_id": "lda-web-20260912-v1",
+  "review_policy": "owner-authorised-provisional",
+  "owner_authorised": true,
+  "instructional_review": "pending",
+  "owner_authorisation_note": "User explicitly authorised implementation before an instructor review on 2026-09-12.",
+  "catalog": [
+    {
+      "clip_id": "lda-rural-001",
+      "public_id": "c1dc50f775ad80ec142b2f9e",
+      "duration_seconds": 60,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-rural-001-h1",
+          "start": 17.5,
+          "end": 22,
+          "description": "Tractor emerges beside blind bend",
+          "explanation": "Reduce speed to match the restricted view and wait for adequate space.",
+          "label": "Tractor emerges beside blind bend",
+          "category": "Country roads",
+          "teaching_note": "Reduce speed to match the restricted view and wait for adequate space.",
+          "score_bands": [
+            {
+              "start": 17.5,
+              "end": 18.4,
+              "score": 5
+            },
+            {
+              "start": 18.4,
+              "end": 19.3,
+              "score": 4
+            },
+            {
+              "start": 19.3,
+              "end": 20.2,
+              "score": 3
+            },
+            {
+              "start": 20.2,
+              "end": 21.1,
+              "score": 2
+            },
+            {
+              "start": 21.1,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Reduce speed to match the restricted view and wait for adequate space.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "03048007841e66fbd8adf4ca3d71ee2408939c23acf291c291b392b2f3180fbd",
+      "video_sha256": "e820e3e9f973054be713e031fe446b2c42b2cdeb359ef5ef5800b983e65427e8",
+      "storage_object": "lda-web-20260912-v1/c1dc50f775ad80ec142b2f9e.mp4",
+      "title": "Tractor emerges beside blind bend",
+      "category": "Country roads"
+    },
+    {
+      "clip_id": "lda-double-001",
+      "public_id": "9a8460fbc8f9f29131155dd9",
+      "duration_seconds": 60,
+      "max_score": 10,
+      "hazards": [
+        {
+          "id": "lda-double-001-h1",
+          "start": 16,
+          "end": 20,
+          "description": "A parked car starts moving out into your lane",
+          "explanation": "Reduce speed and leave space for the first developing hazard.",
+          "label": "A parked car starts moving out into your lane",
+          "category": "Vehicles moving off",
+          "teaching_note": "Reduce speed and leave space for the first developing hazard.",
+          "score_bands": [
+            {
+              "start": 16,
+              "end": 16.8,
+              "score": 5
+            },
+            {
+              "start": 16.8,
+              "end": 17.6,
+              "score": 4
+            },
+            {
+              "start": 17.6,
+              "end": 18.4,
+              "score": 3
+            },
+            {
+              "start": 18.4,
+              "end": 19.2,
+              "score": 2
+            },
+            {
+              "start": 19.2,
+              "end": 20,
+              "score": 1
+            }
+          ]
+        },
+        {
+          "id": "lda-double-001-h2",
+          "start": 39,
+          "end": 43,
+          "description": "Further along the road, a pedestrian steps off the pavement",
+          "explanation": "Respond to the second independent developing hazard after the first has cleared.",
+          "label": "Further along the road, a pedestrian steps off the pavement",
+          "category": "Pedestrians",
+          "teaching_note": "Respond to the second independent developing hazard after the first has cleared.",
+          "score_bands": [
+            {
+              "start": 39,
+              "end": 39.8,
+              "score": 5
+            },
+            {
+              "start": 39.8,
+              "end": 40.6,
+              "score": 4
+            },
+            {
+              "start": 40.6,
+              "end": 41.4,
+              "score": 3
+            },
+            {
+              "start": 41.4,
+              "end": 42.2,
+              "score": 2
+            },
+            {
+              "start": 42.2,
+              "end": 43,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Continue scanning after the first hazard clears. Respond independently to the second developing hazard.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "8483589fe66b75b958dfdbab4bd0f40b4ca964d69e901d219293810c9dc4a599",
+      "video_sha256": "b0753d23d060ce2b5516df9c5d052c24a388ccb851c01efe8a7141d05950fc2a",
+      "storage_object": "lda-web-20260912-v1/9a8460fbc8f9f29131155dd9.mp4",
+      "title": "Residential pull-out followed by pedestrian",
+      "category": "Vehicles moving off"
+    },
+    {
+      "clip_id": "lda-side-road-001",
+      "public_id": "7dba80c38269f848aa525211",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-side-road-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "Hedged T junction emergence",
+          "explanation": "Reduce speed and preserve space for the emerging vehicle.",
+          "label": "Hedged T junction emergence",
+          "category": "Junctions",
+          "teaching_note": "Reduce speed and preserve space for the emerging vehicle.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Reduce speed and preserve space for the emerging vehicle.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "9024cba498a89b8cce6a4fdf83d34e5df33a5980696ec15a9d85fbbc34f9cffa",
+      "video_sha256": "0928907951e21714b2485be980bd0e734087a4208d664e668007de9a90895e5f",
+      "storage_object": "lda-web-20260912-v1/7dba80c38269f848aa525211.mp4",
+      "title": "Hedged T junction emergence",
+      "category": "Junctions"
+    },
+    {
+      "clip_id": "lda-merge-001",
+      "public_id": "24729cea1dbe0e7e59dd887d",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-merge-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "Lorry changes into following lane",
+          "explanation": "Ease off to create space and check mirrors before any position change.",
+          "label": "Lorry changes into following lane",
+          "category": "Lane changes",
+          "teaching_note": "Ease off to create space and check mirrors before any position change.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Ease off to create space and check mirrors before any position change.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "15e13a180bdc9e53b4413272a4d7fcb59e177026fb78519e4eacc895e5e63b5d",
+      "video_sha256": "4a1538d80131f0457292cb04c48b733bd162233ba14f8c2918e80092c0af1964",
+      "storage_object": "lda-web-20260912-v1/24729cea1dbe0e7e59dd887d.mp4",
+      "title": "Lorry changes into following lane",
+      "category": "Lane changes"
+    },
+    {
+      "clip_id": "lda-child-001",
+      "public_id": "e4a542dfebf8fac9d7e0d420",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-child-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "School gate between parked cars",
+          "explanation": "Ease off at the obscured view and stop with space for the child.",
+          "label": "School gate between parked cars",
+          "category": "Pedestrians",
+          "teaching_note": "Ease off at the obscured view and stop with space for the child.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Ease off at the obscured view and stop with space for the child.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "c2255ed06eb00e49ac8ff69feb9cfc6e21fc17f81ad2285b0aa05dd8996a0159",
+      "video_sha256": "9bc29e811032a9a3f5ab98623fa7b6ff7de5f567b91236cc78b7efd3acd2a3a9",
+      "storage_object": "lda-web-20260912-v1/e4a542dfebf8fac9d7e0d420.mp4",
+      "title": "School gate between parked cars",
+      "category": "Pedestrians"
+    },
+    {
+      "clip_id": "lda-bus-001",
+      "public_id": "6b0fce1ee17b5882c8a5e4e8",
+      "duration_seconds": 60,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-bus-001-h1",
+          "start": 33,
+          "end": 37,
+          "description": "Town bus indicates away from stop",
+          "explanation": "Allow room for the bus to move when safe and watch the pavement.",
+          "label": "Town bus indicates away from stop",
+          "category": "Large vehicles",
+          "teaching_note": "Allow room for the bus to move when safe and watch the pavement.",
+          "score_bands": [
+            {
+              "start": 33,
+              "end": 33.8,
+              "score": 5
+            },
+            {
+              "start": 33.8,
+              "end": 34.6,
+              "score": 4
+            },
+            {
+              "start": 34.6,
+              "end": 35.4,
+              "score": 3
+            },
+            {
+              "start": 35.4,
+              "end": 36.2,
+              "score": 2
+            },
+            {
+              "start": 36.2,
+              "end": 37,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Allow room for the bus to move when safe and watch the pavement.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "26cf7a5090dc062acdfb5cca13749e4d41c2127159dc92f0dce6e4c0cbba3df3",
+      "video_sha256": "33e91a6b5c4e6b70d979859a850d00e4bbf1df872f6ae971262bbb55fea7ea4a",
+      "storage_object": "lda-web-20260912-v1/6b0fce1ee17b5882c8a5e4e8.mp4",
+      "title": "Town bus indicates away from stop",
+      "category": "Large vehicles"
+    },
+    {
+      "clip_id": "lda-braking-001",
+      "public_id": "600c3206e62174fcb604333e",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-braking-001-h1",
+          "start": 30,
+          "end": 34,
+          "description": "The car ahead starts braking on the approach to the roundabout.",
+          "explanation": "Brake progressively and retain a safe following gap.",
+          "label": "The car ahead starts braking on the approach to the roundabout.",
+          "category": "Braking and following distance",
+          "teaching_note": "Brake progressively and retain a safe following gap.",
+          "score_bands": [
+            {
+              "start": 30,
+              "end": 30.8,
+              "score": 5
+            },
+            {
+              "start": 30.8,
+              "end": 31.6,
+              "score": 4
+            },
+            {
+              "start": 31.6,
+              "end": 32.4,
+              "score": 3
+            },
+            {
+              "start": 32.4,
+              "end": 33.2,
+              "score": 2
+            },
+            {
+              "start": 33.2,
+              "end": 34,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Brake progressively and retain a safe following gap.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "e6113dc32e237d3a74722c0b44326679b6aff2f6551e627b724e91ec96bb611e",
+      "video_sha256": "3f5cb30460c3052ca59f9d9a39c27ca215e419cfcba5bf010c51bc2f383d0aaa",
+      "storage_object": "lda-web-20260912-v1/600c3206e62174fcb604333e.mp4",
+      "title": "Lead car brakes approaching a roundabout",
+      "category": "Braking and following distance"
+    },
+    {
+      "clip_id": "lda-works-001",
+      "public_id": "523832e494d1e6c6494f1d50",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-works-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "Works van reverses into open lane",
+          "explanation": "Reduce speed and stop short of the obstruction if necessary.",
+          "label": "Works van reverses into open lane",
+          "category": "Roadworks",
+          "teaching_note": "Reduce speed and stop short of the obstruction if necessary.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Reduce speed and stop short of the obstruction if necessary.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "6890857b696acf5bcde4fa173876e5b8d45d2597843be128fbacd11ba126ac6f",
+      "video_sha256": "492cde38a5379163672889f06c7184c8e0baa14e442a8e06b488db3ebfcd27b7",
+      "storage_object": "lda-web-20260912-v1/523832e494d1e6c6494f1d50.mp4",
+      "title": "Works van reverses into open lane",
+      "category": "Roadworks"
+    },
+    {
+      "clip_id": "lda-door-001",
+      "public_id": "31c2b394d76d05c1d3c7a068",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-door-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "Driver door beside oncoming traffic",
+          "explanation": "Slow or stop; do not swerve into oncoming traffic.",
+          "label": "Driver door beside oncoming traffic",
+          "category": "Parked vehicles",
+          "teaching_note": "Slow or stop; do not swerve into oncoming traffic.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Slow or stop; do not swerve into oncoming traffic.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "28476bc8b7884b145e6c2bf80b0aaeb8d341cf31deadd1f8f8927190d51ef0e3",
+      "video_sha256": "2566c010f82fdcfaf2e8bfaabc9c86febb241db5e912544b38259741b940b790",
+      "storage_object": "lda-web-20260912-v1/31c2b394d76d05c1d3c7a068.mp4",
+      "title": "Driver door beside oncoming traffic",
+      "category": "Parked vehicles"
+    },
+    {
+      "clip_id": "lda-pedestrian-001",
+      "public_id": "74d0465050f262d060bdd0a8",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-pedestrian-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "A shopper emerges from behind a parked delivery van and continues into the learner vehicle's path.",
+          "explanation": "Reduce speed and stop with a safe gap when the pedestrian moves out from the van into your path. Wait until they are clear before proceeding.",
+          "label": "A shopper emerges from behind a parked delivery van and continues into the learner vehicle's path.",
+          "category": "Pedestrians",
+          "teaching_note": "Reduce speed and stop with a safe gap when the pedestrian moves out from the van into your path. Wait until they are clear before proceeding.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "The pedestrian moving beyond the van into your lane becomes a developing hazard. Slow down and stop with a safe gap, remaining stopped until the pedestrian is clear before moving away.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "63d65dbe8dad379e12787e0e4f29413aedfc8999cc58b816182778c2223d66f7",
+      "video_sha256": "dd438db4139128a55a0d0d36d325f63b100084faad6add55110346ecbb5eb9f5",
+      "storage_object": "lda-web-20260912-v1/74d0465050f262d060bdd0a8.mp4",
+      "title": "Delivery van obscures shopper",
+      "category": "Pedestrians"
+    },
+    {
+      "clip_id": "lda-crossing-001",
+      "public_id": "15397c03534dd189ceb94e9d",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-crossing-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "A pedestrian approaches from the left pavement and starts to cross the zebra crossing ahead.",
+          "explanation": "Slow down and be ready to give way as the pedestrian approaches. Stop before the crossing and allow them time to cross without edging forward.",
+          "label": "A pedestrian approaches from the left pavement and starts to cross the zebra crossing ahead.",
+          "category": "Pedestrian crossings",
+          "teaching_note": "Slow down and be ready to give way as the pedestrian approaches. Stop before the crossing and allow them time to cross without edging forward.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Slow down and be ready to give way as the pedestrian approaches. Stop before the crossing and allow them time to cross without edging forward.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "8f2edc599fafe3b3fb498b19d5ec5ebd6c1e883bbabc146be39a2cf0df52b9f1",
+      "video_sha256": "317cbc5bf4ba5d1b22f2924bdd5549b77b3e417f69592cffc431fcbffe5da26e",
+      "storage_object": "lda-web-20260912-v1/15397c03534dd189ceb94e9d.mp4",
+      "title": "Shopper approaches zebra crossing",
+      "category": "Pedestrian crossings"
+    },
+    {
+      "clip_id": "lda-cyclist-001",
+      "public_id": "c4aa2ab5a846f43cf82a44bc",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-cyclist-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "The cyclist ahead moves away from the kerb to pass a drain, into the learner vehicle's line of travel.",
+          "explanation": "Ease off and leave the cyclist room to move out. Follow at a safe distance and wait rather than squeezing past.",
+          "label": "The cyclist ahead moves away from the kerb to pass a drain, into the learner vehicle's line of travel.",
+          "category": "Cyclists",
+          "teaching_note": "Ease off and leave the cyclist room to move out. Follow at a safe distance and wait rather than squeezing past.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Ease off and leave the cyclist room to move out. Follow at a safe distance and wait rather than squeezing past.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "18aaeeeeae311e604ceac4d70671236b6a46d88a101556eac1776f6f387d30ab",
+      "video_sha256": "c24065eefa39edd25a6b9679ecc72eca5a032453ddb5bc0007d644f7505ecb38",
+      "storage_object": "lda-web-20260912-v1/c4aa2ab5a846f43cf82a44bc.mp4",
+      "title": "Cyclist moves out around a drain",
+      "category": "Cyclists"
+    },
+    {
+      "clip_id": "lda-motorcycle-001",
+      "public_id": "8749cfce9bb7397d95273136",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-motorcycle-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "An oncoming motorcyclist moves past a stationary queue and crosses the centre line towards the learner vehicle.",
+          "explanation": "Slow down, keep a predictable position and leave the rider room to pass. Do not accelerate towards the narrowing gap.",
+          "label": "An oncoming motorcyclist moves past a stationary queue and crosses the centre line towards the learner vehicle.",
+          "category": "Motorcyclists",
+          "teaching_note": "Slow down, keep a predictable position and leave the rider room to pass. Do not accelerate towards the narrowing gap.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Slow down, keep a predictable position and leave the rider room to pass. Do not accelerate towards the narrowing gap.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "1a24b6b65c7905fa7fc1e6d681610a23e6fe7cc3e92e498314d84ed2e6ff1812",
+      "video_sha256": "9f7376349dcf9841826ea642bc42a0e771910f6d474534892848a831843189db",
+      "storage_object": "lda-web-20260912-v1/8749cfce9bb7397d95273136.mp4",
+      "title": "Oncoming rider filters into your lane",
+      "category": "Motorcyclists"
+    },
+    {
+      "clip_id": "lda-emergency-001",
+      "public_id": "b8569d9726b84d02faf97172",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-emergency-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "Ambulance overtakes obstruction ahead",
+          "explanation": "Make space calmly when safe without breaching signals or mounting the pavement.",
+          "label": "Ambulance overtakes obstruction ahead",
+          "category": "Emergency vehicles",
+          "teaching_note": "Make space calmly when safe without breaching signals or mounting the pavement.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Make space calmly when safe without breaching signals or mounting the pavement.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "6737a1ee001059147407492449c7f8fdb44a55b8316bc453b07fba414d0ee3d5",
+      "video_sha256": "2a04075de44ee44959a2eeffcc4f8388616c5de4547ae7ca9bcf722a5138a1f9",
+      "storage_object": "lda-web-20260912-v1/b8569d9726b84d02faf97172.mp4",
+      "title": "Ambulance overtakes obstruction ahead",
+      "category": "Emergency vehicles"
+    },
+    {
+      "clip_id": "lda-night-001",
+      "public_id": "b1ba8445a7d88ef1714d274f",
+      "duration_seconds": 45,
+      "max_score": 5,
+      "hazards": [
+        {
+          "id": "lda-night-001-h1",
+          "start": 18,
+          "end": 22,
+          "description": "Unlit cyclist under broken street lamp",
+          "explanation": "Drive within the visible stopping distance and slow for the emerging obstruction.",
+          "label": "Unlit cyclist under broken street lamp",
+          "category": "Night visibility",
+          "teaching_note": "Drive within the visible stopping distance and slow for the emerging obstruction.",
+          "score_bands": [
+            {
+              "start": 18,
+              "end": 18.8,
+              "score": 5
+            },
+            {
+              "start": 18.8,
+              "end": 19.6,
+              "score": 4
+            },
+            {
+              "start": 19.6,
+              "end": 20.4,
+              "score": 3
+            },
+            {
+              "start": 20.4,
+              "end": 21.2,
+              "score": 2
+            },
+            {
+              "start": 21.2,
+              "end": 22,
+              "score": 1
+            }
+          ]
+        }
+      ],
+      "explanation": "Drive within the visible stopping distance and slow for the emerging obstruction.",
+      "status": "verified-media",
+      "visual_review": "approved",
+      "scoring_review": "provisional",
+      "source_sha256": "acb5a455d61a941b79c97f9fc0e6b011bafa1ce1fb4c25f6d2ba8f76295d5651",
+      "video_sha256": "ffa13142f8f95faaeaff209a9760382f2a6c68108c2d2ebf089d80ff747ccd5b",
+      "storage_object": "lda-web-20260912-v1/b1ba8445a7d88ef1714d274f.mp4",
+      "title": "Unlit cyclist under broken street lamp",
+      "category": "Night visibility"
+    }
+  ],
+  "manifests": [
+    {
+      "set_id": "set-1",
+      "status": "verified-playable",
+      "clip_ids": [
+        "lda-rural-001",
+        "lda-double-001",
+        "lda-side-road-001",
+        "lda-merge-001",
+        "lda-child-001",
+        "lda-bus-001",
+        "lda-braking-001",
+        "lda-works-001",
+        "lda-door-001",
+        "lda-pedestrian-001",
+        "lda-crossing-001",
+        "lda-cyclist-001",
+        "lda-motorcycle-001",
+        "lda-emergency-001"
+      ],
+      "max_score": 75,
+      "practice_pass_mark": 44
+    },
+    {
+      "set_id": "set-2",
+      "status": "verified-playable",
+      "clip_ids": [
+        "lda-double-001",
+        "lda-side-road-001",
+        "lda-merge-001",
+        "lda-child-001",
+        "lda-bus-001",
+        "lda-braking-001",
+        "lda-works-001",
+        "lda-door-001",
+        "lda-pedestrian-001",
+        "lda-crossing-001",
+        "lda-cyclist-001",
+        "lda-motorcycle-001",
+        "lda-emergency-001",
+        "lda-night-001"
+      ],
+      "max_score": 75,
+      "practice_pass_mark": 44
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const out='.tmp/lda-hazard-qa-cleanup-v1',source='.tmp/lda-hazard-qa-bridge-v1';
+if(fs.existsSync(out))throw Error('Cleanup folder already exists');
+fs.mkdirSync(out,{recursive:true});
+for(const dir of ['app','.vercel'])fs.cpSync(source+'/'+dir,out+'/'+dir,{recursive:true});
+fs.copyFileSync(source+'/vercel.json',out+'/vercel.json');
+const pkg=JSON.parse(fs.readFileSync(source+'/package.json'));pkg.scripts.build='node cleanup.mjs && next build';
+fs.writeFileSync(out+'/package.json',JSON.stringify(pkg,null,2));
+fs.copyFileSync('scripts/cleanup-hazard-qa-cloud.mjs',out+'/cleanup.mjs');
+console.log('Prepared scoped cleanup; no account changed yet.');

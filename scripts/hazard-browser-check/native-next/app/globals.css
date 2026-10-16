@@ -1,0 +1,3 @@
+@import "../../../../src/app/globals.css";
+/* Include the real source classes: the fixture project is outside src/. */
+@source "../../../../src";

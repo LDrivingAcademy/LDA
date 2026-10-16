@@ -1,0 +1,41 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
+const cli='C:/Users/Joshu/AppData/Local/npm-cache/_npx/6de2aa2fded2970c/node_modules/agent-browser/bin/agent-browser-win32-x64.exe';
+const raw=(args,input)=>execFileSync(cli,['--session','lda-mobile-loading',...args],{input,encoding:'utf8',timeout:20000,windowsHide:true,maxBuffer:4e6}).trim();
+const evaluate=code=>JSON.parse(raw(['eval','--stdin'],code));
+function button(label,prefix=false){const snap=raw(['snapshot','-i']);const line=snap.split('\n').find(l=>l.includes(`button "${label}${prefix?'':'"'}`)&&!l.includes('[disabled'));assert(line,`Missing ${label}: ${snap}`);raw(['click','@'+line.match(/\[ref=(e\d+)\]/)[1]]);}
+async function until(expression,maxSeconds=100){const end=Date.now()+maxSeconds*1000;while(Date.now()<end){if(evaluate(`new Promise(resolve=>{const end=performance.now()+5000;const check=()=>{if(${expression})return resolve(true);if(performance.now()>=end)return resolve(false);setTimeout(check,40);};check();})`))return;}throw Error('Wait failed '+expression);}
+const ready=`Array.from(document.querySelectorAll('button')).some(b=>b.textContent.trim()==='Play clip'&&!b.disabled)`;
+const network=mbps=>evaluate(`fetch('/__fixture/network',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({mbps:${mbps}})}).then(r=>r.json())`);
+const stats=()=>evaluate(`fetch('/__fixture/stats').then(r=>r.json())`);
+const player=()=>evaluate(`(()=>{const v=document.querySelector('video');return {paused:v.paused,time:v.currentTime,width:v.videoWidth,height:v.videoHeight,rate:v.playbackRate,source:v.currentSrc,buffered:v.buffered.length?v.buffered.end(v.buffered.length-1):0};})()`);
+const report={test:'local real component + approved 1080p60 MP4, throttled transport, canonical in-memory scoring',actual_iPhone:false,viewport:'390x844',checked_at:new Date().toISOString(),passed:false};
+assert.equal(evaluate('location.origin'),'http://127.0.0.1:4390');
+button('Practice Mode');await network(12);let start=Date.now();button('Practice clip 1',true);await until(ready,50);
+report.progressive_ready_ms=Date.now()-start;report.before_manual_play=player();report.progressive_transport=stats();
+assert.equal(report.before_manual_play.paused,true);assert.equal(report.before_manual_play.time,0);assert(!report.before_manual_play.source.startsWith('blob:'));
+assert.equal(report.before_manual_play.width,1920);assert.equal(report.before_manual_play.height,1080);
+assert(report.progressive_transport.requests.reduce((s,r)=>s+r.bytes,0)<report.progressive_transport.video_bytes);
+raw(['screenshot','C:/Users/Joshu/LDA Hazard Perception Production/qc-reports/mobile-loading-ready.png']);
+console.log(JSON.stringify({progressive_ready_ms:report.progressive_ready_ms,manual_play_required:true}));
+button('Play clip');await until(`document.querySelector('video')?.currentTime>=3`,15);report.playing=player();assert(!report.playing.paused);assert.equal(report.playing.rate,1);
+const release=JSON.parse(fs.readFileSync('src/lib/lda-hazard/server/release.json'));
+const target=release.catalog[0].hazards[0].start+0.35;
+await until(`document.querySelector('video')?.currentTime>=${target}`,30);button('Record a developing hazard');
+await until(`document.body.textContent.includes('Individual clip result')`,65);
+report.result=evaluate(`document.querySelector('h3')?.textContent`);assert.equal(report.result,'5/5');console.log('Progressive playback completed at normal speed, valid click scored 5/5.');
+button('Choose another test');await until(`document.body.textContent.includes('Practice clip 1')`);
+await network(12);start=Date.now();button('Practice clip 1',true);button('Unreliable connection? Download fully first');await until(ready,60);
+report.full_download_ready_ms=Date.now()-start;report.full_download=player();assert(report.full_download.source.startsWith('blob:'));assert(report.full_download.paused);assert.equal(report.full_download.time,0);
+assert(report.progressive_ready_ms<report.full_download_ready_ms*0.6);button('End this practice');await until(`document.body.textContent.includes('Practice clip 1')`);
+console.log(JSON.stringify({full_download_ready_ms:report.full_download_ready_ms}));
+// Reload resets the learner's optional full-download preference for this test.
+raw(['open','http://127.0.0.1:4390']);button('Practice Mode');await network(3);button('Practice clip 1',true);
+await until(`document.body.textContent.includes('Still preparing.')`,15);assert.equal(evaluate(ready),false);report.slow_connection_waits=true;
+raw(['screenshot','C:/Users/Joshu/LDA Hazard Perception Production/qc-reports/mobile-loading-slow.png']);button('End this practice');await until(`document.body.textContent.includes('Practice clip 1')`);
+await network(12);button('Practice clip 1',true);await until(ready,40);button('Play clip');await until(`document.querySelector('video')?.currentTime>=1`,10);await network(0);
+await until(`document.body.textContent.includes('Playback buffered after the clip started')`,45);report.stall_invalidates=true;
+assert(!evaluate(`document.body.textContent.includes('Individual clip result')`));
+await network(12);button('End unfinished attempt');await until(`document.body.textContent.includes('Practice clip 1')`);
+report.passed=true;fs.writeFileSync('C:/Users/Joshu/LDA Hazard Perception Production/qc-reports/mobile-loading-verification.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));
